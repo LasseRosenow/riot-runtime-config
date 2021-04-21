@@ -234,7 +234,7 @@ typedef struct {
      *
      * @param[in] argc Number of elements in @p argv
      * @param[in] argv Parsed string representing the configuration parameter.
-     * @param[out] val Buffer containing the string of the new value
+     * @param[out] val Buffer containing the string of the new value //TODO Is this really [out]?
      * @param[in] context Context of the handler
      * @return 0 on success, non-zero on failure
      *
