@@ -160,7 +160,7 @@ typedef struct {
  */
 typedef struct registry_store_itf {
     /**
-     * @brief Loads all stored parameres and calls the @p cb callback function.
+     * @brief Loads all stored parameters and calls the @p cb callback function.
      *
      * @param[in] store Storage facility descriptor
      * @param[in] cb Callback function to call for every stored parameter
