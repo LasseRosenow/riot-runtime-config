@@ -34,6 +34,41 @@ USEMODULE += xtimer
 
 USEMODULE += periph_uart
 
+
+
+
+
+
+
+
+
+# External modules
+USEMODULE += registry
+EXTERNAL_MODULE_DIRS += $(CURDIR)/registry
+USEMODULE += registry_coap
+EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_coap
+USEMODULE += registry_lwm2m
+EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_lwm2m
+# Specific the server URI  address (NOTE: Domain names not supported yet)
+SERVER_URI ?= '"coap://[fe80::a8bb:ccff:fedd:eeff]:5683"'
+# Uncomment to enable Wakaama debug log
+CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1
+ifndef CONFIG_LWM2M_SERVER_URI
+  CFLAGS += -DCONFIG_LWM2M_SERVER_URI=$(SERVER_URI)
+endif
+
+
+
+
+
+
+
+
+
+
+
+
+
 USEPKG += tinycbor
 USEPKG += minmea
 

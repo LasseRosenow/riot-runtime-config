@@ -22,13 +22,15 @@
 #include "lwm2m_client_objects.h"
 #include "lwm2m_platform.h"
 
+#include "registry_lwm2m.h"
+
 #define OBJ_COUNT (3)
 
 uint8_t connected = 0;
 lwm2m_object_t *obj_list[OBJ_COUNT];
 lwm2m_client_data_t client_data;
 
-void lwm2m_cli_init(void)
+void registry_lwm2m_cli_init(void)
 {
     /* this call is needed before creating any objects */
     lwm2m_client_init(&client_data);
@@ -43,7 +45,7 @@ void lwm2m_cli_init(void)
     }
 }
 
-int lwm2m_cli_cmd(int argc, char **argv)
+int registry_lwm2m_cli_cmd(int argc, char **argv)
 {
     if (argc == 1) {
         goto help_error;
@@ -62,7 +64,7 @@ int lwm2m_cli_cmd(int argc, char **argv)
         return 0;
     }
 
-help_error:
+    help_error:
     if (IS_ACTIVE(DEVELHELP)) {
         printf("usage: %s <start|mem>\n", argv[0]);
     }

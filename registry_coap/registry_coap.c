@@ -9,6 +9,7 @@
 #include <saul_reg.h>
 
 #include "cbor_util.h"
+#include "registry_coap.h"
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -29,20 +30,20 @@ uint8_t test;
 
 /* CoAP resources. Must be sorted by path (ASCII order). */
 static const coap_resource_t _resources[] = {
-    { "/cli/stats", COAP_GET | COAP_PUT, _stats_handler,      NULL },
-    { "/riot/board", COAP_GET,           _riot_board_handler, NULL },
-    { "/sens/temp", COAP_GET , _temp_handler, NULL}
+        { "/cli/stats", COAP_GET | COAP_PUT, _stats_handler,      NULL },
+        { "/riot/board", COAP_GET,           _riot_board_handler, NULL },
+        { "/sens/temp", COAP_GET , _temp_handler, NULL}
 };
 
 static const char *_link_params[] = {
-    ";ct=0;rt=\"count\";obs",
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+        ";ct=0;rt=\"count\";obs",
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL
 };
 
 static gcoap_listener_t _listener = {
@@ -76,7 +77,7 @@ static ssize_t _encode_link(const coap_resource_t *resource, char *buf,
             return res + strlen(_link_params[context->link_pos]);
         }
     }
-    
+
     return res;
 }
 
@@ -95,16 +96,16 @@ static ssize_t _temp_handler(coap_pkt_t* pdu, uint8_t *buf, size_t len, void *ct
         //puts("No Temperature Sensor devices present");
         return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
     }
-    
+
     gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
     coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
     size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
 
-     //Read temperature sensor here and write buffer with sensor value 
-    
+    //Read temperature sensor here and write buffer with sensor value
+
     saul_reg_read(dev, &res);
     resp_len += fmt_u16_dec((char *)pdu->payload, res.val[0]);
-    return resp_len;   
+    return resp_len;
 }
 
 /*
@@ -130,19 +131,19 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t* pdu,
     }
 
     char *class_str = (coap_get_code_class(pdu) == COAP_CLASS_SUCCESS)
-                            ? "Success" : "Error";
+                      ? "Success" : "Error";
     printf("gcoap: response %s, code %1u.%02u", class_str,
-                                                coap_get_code_class(pdu),
-                                                coap_get_code_detail(pdu));
+           coap_get_code_class(pdu),
+           coap_get_code_detail(pdu));
     if (pdu->payload_len) {
         unsigned content_type = coap_get_content_type(pdu);
         if (content_type == COAP_FORMAT_TEXT
-                || content_type == COAP_FORMAT_LINK
-                || coap_get_code_class(pdu) == COAP_CLASS_CLIENT_FAILURE
-                || coap_get_code_class(pdu) == COAP_CLASS_SERVER_FAILURE) {
+            || content_type == COAP_FORMAT_LINK
+            || coap_get_code_class(pdu) == COAP_CLASS_CLIENT_FAILURE
+            || coap_get_code_class(pdu) == COAP_CLASS_SERVER_FAILURE) {
             /* Expecting diagnostic payload in failure cases */
             printf(", %u bytes\n%.*s\n", pdu->payload_len, pdu->payload_len,
-                                                          (char *)pdu->payload);
+                   (char *)pdu->payload);
         }
         else {
             printf(", %u bytes\n", pdu->payload_len);
@@ -320,7 +321,7 @@ static size_t _send(uint8_t *buf, size_t len, char *addr_str, char *port_str)
     return bytes_sent;
 }
 
-int coap_cli_cmd(int argc, char **argv)
+int registry_coap_cli_cmd(int argc, char **argv)
 {
     /* Ordered like the RFC method code numbers, but off by 1. GET is code 0. */
     char *method_codes[] = {"ping", "get", "post", "put"};
@@ -451,20 +452,20 @@ int coap_cli_cmd(int argc, char **argv)
         else {
             /* send Observe notification for /cli/stats */
             switch (gcoap_obs_init(&pdu, &buf[0], CONFIG_GCOAP_PDU_BUF_SIZE,
-                    &_resources[0])) {
-            case GCOAP_OBS_INIT_OK:
-                DEBUG("gcoap_cli: creating /cli/stats notification\n");
-                coap_opt_add_format(&pdu, COAP_FORMAT_TEXT);
-                len = coap_opt_finish(&pdu, COAP_OPT_FINISH_PAYLOAD);
-                len += fmt_u16_dec((char *)pdu.payload, _req_count);
-                gcoap_obs_send(&buf[0], len, &_resources[0]);
-                break;
-            case GCOAP_OBS_INIT_UNUSED:
-                DEBUG("gcoap_cli: no observer for /cli/stats\n");
-                break;
-            case GCOAP_OBS_INIT_ERR:
-                DEBUG("gcoap_cli: error initializing /cli/stats notification\n");
-                break;
+                                   &_resources[0])) {
+                case GCOAP_OBS_INIT_OK:
+                    DEBUG("gcoap_cli: creating /cli/stats notification\n");
+                    coap_opt_add_format(&pdu, COAP_FORMAT_TEXT);
+                    len = coap_opt_finish(&pdu, COAP_OPT_FINISH_PAYLOAD);
+                    len += fmt_u16_dec((char *)pdu.payload, _req_count);
+                    gcoap_obs_send(&buf[0], len, &_resources[0]);
+                    break;
+                case GCOAP_OBS_INIT_UNUSED:
+                    DEBUG("gcoap_cli: no observer for /cli/stats\n");
+                    break;
+                case GCOAP_OBS_INIT_ERR:
+                    DEBUG("gcoap_cli: error initializing /cli/stats notification\n");
+                    break;
             }
         }
         return 0;
@@ -483,7 +484,7 @@ int coap_cli_cmd(int argc, char **argv)
     return 1;
 }
 
-void coap_cli_init(void)
+void registry_coap_cli_init(void)
 {
     gcoap_register_listener(&_listener);
 }

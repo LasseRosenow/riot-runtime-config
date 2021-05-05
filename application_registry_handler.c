@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "registry/registry.h"
+#include "registry.h"
 
 #include "application_registry_handler.h"
 
