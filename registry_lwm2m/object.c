@@ -12,8 +12,10 @@ static bool reboot;
 
 /*Descriptor of a LwM2M registry object instance */
 typedef struct {
-    uint8_t *example;      /**< example */
+    char* example;      /**< example */
 } reg_data_t;
+
+char* sdf;
 
 static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
                                    lwm2m_data_t **data_arrayP,
@@ -68,6 +70,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
     int i;
     uint8_t result = COAP_404_NOT_FOUND;
     reg_data_t *data = (reg_data_t *)objectP->userData;
+    reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
 
     (void)data;
 
@@ -98,7 +101,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         switch ((*data_arrayP)[i].id) {
             /* Exec resources */
             case LWM2M_RES_EXAMPLE:
-            lwm2m_data_encode_string("HALLO WIE GHETS=??", *data_arrayP + i);
+                lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
                 result = COAP_205_CONTENT;
                 break;
             default:
@@ -116,19 +119,48 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                                 lwm2m_object_t *objectP)
 {
     reg_data_t *data = (reg_data_t *)objectP->userData;
+    reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
 
     (void)data;
     (void)instance_id;
     (void)num_data;
     (void)data_array;
 
+    uint8_t result = COAP_404_NOT_FOUND;
+
     if (data_array[0].id < LWM2M_REGISTRY_RESOURCES) {
-        /* for now not writing resources */
-        return COAP_405_METHOD_NOT_ALLOWED;
+        for (int i = 0; i < num_data; i++) {
+            /* No multiple instance resources */
+            if (data_array[i].type == LWM2M_TYPE_MULTIPLE_RESOURCE)
+            {
+                result = COAP_404_NOT_FOUND;
+                continue;
+            }
+
+            switch (data_array[i].id) {
+                /* Exec resources */
+                case LWM2M_RES_EXAMPLE:
+                    if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE)
+                    {
+                        targetP->example = (char *)malloc( data_array[i].value.asBuffer.length * sizeof(char) );
+                        strncpy(targetP->example, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
+                        result = COAP_204_CHANGED;
+                    }
+                    else
+                    {
+                        result = COAP_400_BAD_REQUEST;
+                    }
+                    break;
+                default:
+                    result = COAP_404_NOT_FOUND;
+            }
+        }
     }
     else {
-        return COAP_404_NOT_FOUND;
+        result = COAP_404_NOT_FOUND;
     }
+
+    return result;
 }
 
 static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
