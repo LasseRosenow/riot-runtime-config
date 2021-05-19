@@ -142,6 +142,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                 case LWM2M_RES_EXAMPLE:
                     if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE)
                     {
+                        free(targetP->example);
                         targetP->example = (char *)malloc( data_array[i].value.asBuffer.length * sizeof(char) );
                         strncpy(targetP->example, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
                         result = COAP_204_CHANGED;
