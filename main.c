@@ -4,6 +4,8 @@
 
 #include "registry_coap.h"
 #include "registry_lwm2m.h"
+#include "registry.h"
+#include "application_registry_handler.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -15,7 +17,13 @@ static const shell_command_t shell_commands[] = {
 };
 
 int main(void) {
-//    /* For the thread running the shell */
+    /* init registry */
+    registry_init();
+
+    /* add application registry handler */
+    registry_register(&my_handler);
+
+    /* for the thread running the shell */
     registry_coap_cli_init();
     registry_lwm2m_cli_init();
 

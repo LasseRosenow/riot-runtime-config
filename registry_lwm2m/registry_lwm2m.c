@@ -24,6 +24,7 @@
 #include "object.h"
 
 #include "registry_lwm2m.h"
+#include "registry.h"
 
 #define OBJ_COUNT (4)
 
@@ -41,11 +42,25 @@ void registry_lwm2m_cli_init(void)
     obj_list[1] = lwm2m_client_get_server_object(&client_data);
     obj_list[2] = lwm2m_client_get_device_object(&client_data);
 
-    obj_list[3] = lwm2m_get_object_registry();
-
-    if (!obj_list[0] || !obj_list[1] || !obj_list[2] || !obj_list[3]) {
+    if (!obj_list[0] || !obj_list[1] || !obj_list[2]) {
         puts("Could not create mandatory objects");
     }
+
+    // create the Riot Registry objects
+    obj_list[3] = lwm2m_get_object_registry();
+
+    clist_node_t *node = registry_handlers.next;
+
+    if (!node) {
+        puts("No registry handlers registered.");
+    }
+
+    do  {
+        node = node->next;
+        registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+        (void) hndlr;
+        puts(hndlr->name);
+    } while (node != registry_handlers.next);
 }
 
 int registry_lwm2m_cli_cmd(int argc, char **argv)
