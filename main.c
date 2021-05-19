@@ -11,8 +11,8 @@
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
 
 static const shell_command_t shell_commands[] = {
-        {"coap", "Registry CoAP cli", registry_coap_cli_cmd},
-        { "lwm2m", "Start registry LwM2M client", registry_lwm2m_cli_cmd },
+        {"registry_coap", "Registry CoAP cli", registry_coap_cli_cmd},
+        { "registry_lwm2m", "Start registry LwM2M client", registry_lwm2m_cli_cmd },
         {NULL, NULL, NULL}
 };
 
@@ -32,4 +32,3 @@ int main(void) {
     shell_run(shell_commands, line_buf, SHELL_DEFAULT_BUFSIZE);
     return 0;
 }
-

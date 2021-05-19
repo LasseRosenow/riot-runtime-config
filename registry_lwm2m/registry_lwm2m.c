@@ -26,10 +26,11 @@
 #include "registry_lwm2m.h"
 #include "registry.h"
 
-#define OBJ_COUNT (4)
+/* counts how many objects are stored in obj_list_counter, which is necessary no know its size for realocation */
+int obj_list_counter = 3;
 
 uint8_t connected = 0;
-lwm2m_object_t *obj_list[OBJ_COUNT];
+lwm2m_object_t **obj_list;
 lwm2m_client_data_t client_data;
 
 void registry_lwm2m_cli_init(void)
@@ -38,6 +39,7 @@ void registry_lwm2m_cli_init(void)
     lwm2m_client_init(&client_data);
 
     /* add objects that will be registered */
+    obj_list = malloc(obj_list_counter * sizeof(lwm2m_object_t*));
     obj_list[0] = lwm2m_client_get_security_object(&client_data);
     obj_list[1] = lwm2m_client_get_server_object(&client_data);
     obj_list[2] = lwm2m_client_get_device_object(&client_data);
@@ -46,8 +48,7 @@ void registry_lwm2m_cli_init(void)
         puts("Could not create mandatory objects");
     }
 
-    // create the Riot Registry objects
-    obj_list[3] = lwm2m_get_object_registry();
+    /* create the Riot Registry objects */
 
     clist_node_t *node = registry_handlers.next;
 
@@ -58,9 +59,15 @@ void registry_lwm2m_cli_init(void)
     do  {
         node = node->next;
         registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
-        (void) hndlr;
         puts(hndlr->name);
+
+        obj_list_counter++;
+        obj_list = realloc(obj_list, obj_list_counter * sizeof(*obj_list));
+        obj_list[obj_list_counter - 1] = lwm2m_get_object_registry();
     } while (node != registry_handlers.next);
+
+    /* start the lwm2m client */
+    lwm2m_client_run(&client_data, obj_list, obj_list_counter);
 }
 
 int registry_lwm2m_cli_cmd(int argc, char **argv)
@@ -69,26 +76,13 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
         goto help_error;
     }
 
-    if (!strcmp(argv[1], "start")) {
-        /* run the LwM2M client */
-        if (!connected && lwm2m_client_run(&client_data, obj_list, OBJ_COUNT)) {
-            connected = 1;
-        }
-        return 0;
-    }
-
-    if (IS_ACTIVE(DEVELHELP) && !strcmp(argv[1],"mem")) {
-        lwm2m_tlsf_status();
+    if (!strcmp(argv[1], "generate")) {
+        /* TODO generate lwm2m server models */
         return 0;
     }
 
     help_error:
-    if (IS_ACTIVE(DEVELHELP)) {
-        printf("usage: %s <start|mem>\n", argv[0]);
-    }
-    else {
-        printf("usage: %s <start>\n", argv[0]);
-    }
+    printf("usage: %s <generate>\n", argv[0]);
 
     return 1;
 }
