@@ -10,7 +10,7 @@
 /* Set to true if reboot requested. */
 static bool reboot;
 
-/*Descriptor of a LwM2M registry object instance */
+/* Descriptor of a LwM2M registry object instance */
 typedef struct {
     char* example;      /**< example */
 } reg_data_t;

@@ -26,7 +26,7 @@
 #include "registry_lwm2m.h"
 #include "registry.h"
 
-/* counts how many objects are stored in obj_list_counter, which is necessary no know its size for realocation */
+/* counts how many objects are stored in obj_list_counter, which is necessary no know its size for reallocation */
 int obj_list_counter = 3;
 
 uint8_t connected = 0;
@@ -59,7 +59,6 @@ void registry_lwm2m_cli_init(void)
     do  {
         node = node->next;
         registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
-        puts(hndlr->name);
 
         obj_list_counter++;
         obj_list = realloc(obj_list, obj_list_counter * sizeof(*obj_list));
