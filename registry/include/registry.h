@@ -278,7 +278,7 @@ typedef struct {
      * of the configuration group. E.g. If a parameter name is 'group/foo/var'
      * and the name of the group is 'group', argv will contain 'foo' and 'var'.
      */
-    int (*hndlr_export)(int (*export_func)(const char *name, char *val),
+    int (*hndlr_export)(int (*export_func)(const char *name, char *val, void *context),
                         int argc, char **argv, void *context);
 
     void *context; /**< Optional context used by the handlers */
@@ -442,7 +442,7 @@ int registry_save(void);
  * @param[in] val String representing the value of the configuration parameter
  * @return 0 on success, non-zero on failure
  */
-int registry_save_one(const char *name, char *val);
+int registry_save_one(const char *name, char *val, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
@@ -454,7 +454,7 @@ int registry_save_one(const char *name, char *val);
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const char *name, char *val),
+int registry_export(int (*export_func)(const char *name, char *val, void *context),
                     char *name);
 
 #ifdef __cplusplus

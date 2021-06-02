@@ -107,11 +107,10 @@ int my_commit_handler(void *context) {
    There can be different behaviors depending on the export function (e.g printing all configs
    to STDOUT, save them in a non-volatile storage device, etc)
 */
-int my_export_handler(int (*export_func)(const char *name, char *val), int argc, char **argv, void *context) {
+int my_export_handler(int (*export_func)(const char *name, char *val, void *context), int argc, char **argv, void *context) {
     /* argc  and argv can be used to export only one parameter */
     (void) argv;
     (void) argc;
-    (void) context;
     char buf[sizeof(is_enabled)];
 
     /* We export every parameter with the export function */
@@ -119,12 +118,12 @@ int my_export_handler(int (*export_func)(const char *name, char *val), int argc,
     /* Prepare `buf` to contain is_enabled in a string representation */
     memcpy(buf, &is_enabled, sizeof(is_enabled));
 
-    export_func("my_handler/is_enabled", buf);
+    export_func("my_handler/is_enabled", buf, context);
 
     /* Prepare `buf` to contain threshold in a string representation */
     memcpy(buf, &threshold, sizeof(threshold));
 
-    export_func("my_handler/threshold", buf);
+    export_func("my_handler/threshold", buf, context);
 
     return 0;
 }

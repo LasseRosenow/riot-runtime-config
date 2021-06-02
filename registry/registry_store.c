@@ -69,8 +69,9 @@ static void _registry_dup_check_cb(char *name, char *val, void *cb_arg)
     }
 }
 
-int registry_save_one(const char *name, char *value)
+int registry_save_one(const char *name, char *value, void *context)
 {
+    (void) context;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
     DEBUG("[registry_store] Saving: %s = %s\n",name, value);

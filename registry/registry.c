@@ -158,7 +158,7 @@ int registry_commit(char *name)
     }
 }
 
-int registry_export(int (*export_func)(const char *name, char *val), char *name)
+int registry_export(int (*export_func)(const char *name, char *val, void *context), char *name)
 {
     assert(export_func != NULL);
     int name_argc;
