@@ -87,7 +87,10 @@ int registry_set_value(char *name, char *val_str)
     char *name_argv[REGISTRY_MAX_DIR_DEPTH];
     registry_handler_t *hndlr;
 
-    hndlr = _handler_parse_and_lookup(name, &name_argc, name_argv);
+    char name_buf[REGISTRY_MAX_VAL_LEN]; // To prevent the _parse_name function from corrupting the original name pointer
+    strcpy(name_buf, name);
+
+    hndlr = _handler_parse_and_lookup(name_buf, &name_argc, name_argv);
 
     if (!hndlr) {
         return -EINVAL;
@@ -103,7 +106,10 @@ char *registry_get_value(char *name, char *buf, int buf_len)
     char *name_argv[REGISTRY_MAX_DIR_DEPTH];
     registry_handler_t *hndlr;
 
-    hndlr = _handler_parse_and_lookup(name, &name_argc, name_argv);
+    char name_buf[REGISTRY_MAX_VAL_LEN]; // To prevent the _parse_name function from corrupting the original name pointer
+    strcpy(name_buf, name);
+
+    hndlr = _handler_parse_and_lookup(name_buf, &name_argc, name_argv);
 
     if (!hndlr) {
         return NULL;
@@ -140,7 +146,10 @@ int registry_commit(char *name)
         registry_handler_t *hndlr;
         char *name_argv[REGISTRY_MAX_DIR_DEPTH];
 
-        hndlr = _handler_parse_and_lookup(name, &name_argc, name_argv);
+        char name_buf[REGISTRY_MAX_VAL_LEN]; // To prevent the _parse_name function from corrupting the original name pointer
+        strcpy(name_buf, name);
+
+        hndlr = _handler_parse_and_lookup(name_buf, &name_argc, name_argv);
         if (!hndlr) {
             return -EINVAL;
         }
@@ -167,7 +176,11 @@ int registry_export(int (*export_func)(const char *name, char *val, void *contex
 
     if (name) {
         DEBUG("[registry export] exporting %s\n", name);
-        hndlr = _handler_parse_and_lookup(name, &name_argc, name_argv);
+
+        char name_buf[REGISTRY_MAX_VAL_LEN]; // To prevent the _parse_name function from corrupting the original name pointer
+        strcpy(name_buf, name);
+
+        hndlr = _handler_parse_and_lookup(name_buf, &name_argc, name_argv);
         if (!hndlr) {
             return -EINVAL;
         }
