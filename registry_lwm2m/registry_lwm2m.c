@@ -94,7 +94,7 @@ void registry_lwm2m_cli_init(void)
     } while (node != registry_handlers.next);
 
     /* start the lwm2m client */
-    //lwm2m_client_run(&client_data, obj_list, obj_list_counter);
+    lwm2m_client_run(&client_data, obj_list, obj_list_counter);
 }
 
 int registry_lwm2m_cli_cmd(int argc, char **argv)

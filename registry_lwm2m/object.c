@@ -54,9 +54,8 @@ static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
                                    lwm2m_object_t *objectP)
 {
     uint8_t result;
-    int i;
+    reg_data_t *userData = (reg_data_t *)objectP->userData;
 
-    (void)objectP;
 
     if (instance_id != 0) {
         return COAP_404_NOT_FOUND;
@@ -66,29 +65,22 @@ static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
 
     if (*num_dataP == 0) {
         /* This list must contain all available resources */
-        uint16_t res[] = {
-            LWM2M_RES_EXAMPLE,
-        };
-        int len = ARRAY_SIZE(res);
+        int len = userData->res_list_size;
 
         *data_arrayP = lwm2m_data_new(len);
         if (*data_arrayP == NULL) {
             return COAP_500_INTERNAL_SERVER_ERROR;
         }
+
         *num_dataP = len;
-        for (i = 0; i < len; i++) {
-            (*data_arrayP)[i].id = res[i];
+        for (int i = 0; i < len; i++) {
+            (*data_arrayP)[i].id = i;
         }
     }
     else {
         /* Check if each given resource is present */
-        for (i = 0; i < *num_dataP && result == COAP_205_CONTENT; i++) {
-            switch ((*data_arrayP)[i].id) {
-                case LWM2M_RES_EXAMPLE:
-                    break;
-                default:
-                    result = COAP_404_NOT_FOUND;
-            }
+        if (userData->res_list_size > *num_dataP) {
+            result = COAP_404_NOT_FOUND;
         }
     }
 
@@ -99,51 +91,51 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
                                lwm2m_data_t **data_arrayP,
                                lwm2m_object_t *objectP)
 {
-    int i;
     uint8_t result = COAP_404_NOT_FOUND;
-    reg_data_t *data = (reg_data_t *)objectP->userData;
-    reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
-
-    (void)targetP;
-    (void)data;
+    reg_data_t *userData = (reg_data_t *)objectP->userData;
 
     /* Single instance object */
     if (instance_id != 0) {
-        goto out;
+        return COAP_404_NOT_FOUND;
     }
 
     /* Full object requested */
     if (*num_dataP == 0) {
-        /* This list must contain all readable resources */
-        uint16_t resList[] = {
-            LWM2M_RES_EXAMPLE,
-        };
-        int cnt = ARRAY_SIZE(resList);
-        *data_arrayP = lwm2m_data_new(cnt);
+        /* This list must contain all available resources */
+        int len = userData->res_list_size;
+
+        *data_arrayP = lwm2m_data_new(len);
         if (*data_arrayP == NULL) {
-            result = COAP_500_INTERNAL_SERVER_ERROR;
-            goto out;
+            return COAP_500_INTERNAL_SERVER_ERROR;
         }
-        *num_dataP = cnt;
-        for (i = 0; i < cnt; i++) {
-            (*data_arrayP)[i].id = resList[i];
+
+        *num_dataP = userData->res_list_size;
+        for (int i = 0; i < len; i++) {
+            (*data_arrayP)[i].id = i;
         }
     }
 
-    for (i = 0; i < *num_dataP; i++) {
-        switch ((*data_arrayP)[i].id) {
-            /* Exec resources */
+    
+
+    for (int i = 0; i < *num_dataP; i++) {
+        int index = (*data_arrayP)[i].id;
+        char buf[REGISTRY_MAX_VAL_LEN];
+        char* value = registry_get_value(userData->res_list[index], buf, REGISTRY_MAX_VAL_LEN);
+        lwm2m_data_encode_string(value, *data_arrayP + i);
+        result = COAP_205_CONTENT;
+
+        /* switch ((*data_arrayP)[i].id) {
+            // Exec resources
             case LWM2M_RES_EXAMPLE:
-                //lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
+                lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
                 result = COAP_205_CONTENT;
                 break;
             default:
                 result = COAP_404_NOT_FOUND;
                 goto out;
-        }
+        } */
     }
 
-out:
     return result;
 }
 

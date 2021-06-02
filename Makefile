@@ -50,7 +50,7 @@ EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_coap
 USEMODULE += registry_lwm2m
 EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_lwm2m
 # LwM2M logging
-CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1
+CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=0
 # Specific the server URI  address (NOTE: Domain names not supported yet)
 ifndef CONFIG_LWM2M_SERVER_URI
   CFLAGS += -DCONFIG_LWM2M_SERVER_URI='"coap://[fe80::a8bb:ccff:fedd:eeff]:5683"'

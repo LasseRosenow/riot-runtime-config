@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "registry.h"
 
@@ -28,7 +29,8 @@ registry_handler_t my_handler = {
 
 /* These are the state variables and parameters defined for this module */
 static int is_enabled = false;
-static int threshold = 0;
+static int threshold = 1;
+static char name[200] = {"Lasse"};
 
 /* ... */
 
@@ -39,15 +41,22 @@ char *my_get_handler(int argc, char **argv, char *val, int val_len_max, void *co
     (void) val_len_max;
     (void) context;
 
+    printf("Get: %s\n", argv[0]);
+
     if (argc) {
         if (!strcmp("is_enabled", argv[0])) {
             /* Copy the value of `is_enabled` to `val` so the user can read it */
-            memcpy(val, &is_enabled, sizeof(is_enabled));
+            registry_str_from_value(REGISTRY_TYPE_BOOL, &is_enabled, val, val_len_max);
 
             return val;
         } else if (!strcmp("threshold", argv[0])) {
             /* Copy the value of `threshold` to `val` so the user can read it */
-            memcpy(val, &threshold, sizeof(threshold));
+            registry_str_from_value(REGISTRY_TYPE_INT32, &threshold, val, val_len_max);
+
+            return val;
+        } else if (!strcmp("name", argv[0])) {
+            /* Copy the value of `threshold` to `val` so the user can read it */
+            registry_str_from_value(REGISTRY_TYPE_STRING, &name, val, val_len_max);
 
             return val;
         }
@@ -62,6 +71,8 @@ char *my_get_handler(int argc, char **argv, char *val, int val_len_max, void *co
 int my_set_handler(int argc, char **argv, char *val, void *context) {
     (void) context;
 
+    printf("Set: %s\n", argv[0]);
+
     if (argc) {
         if (!strcmp("is_enabled", argv[0])) {
             /* Set the value of `is_enabled` from `val` */
@@ -73,6 +84,9 @@ int my_set_handler(int argc, char **argv, char *val, void *context) {
 
             /* Set the value of `threshold` from `val` */
             memcpy(&threshold, val, sizeof(threshold));
+        } else if (!strcmp("name", argv[0])) {
+            /* Set the value of `threshold` from `val` */
+            strcpy(name, val);
         }
     }
 
@@ -124,6 +138,12 @@ int my_export_handler(int (*export_func)(const char *name, char *val, void *cont
     memcpy(buf, &threshold, sizeof(threshold));
 
     export_func("my_handler/threshold", buf, context);
+
+    /* Prepare `buf` to contain name in a string representation */
+    char name_buf[sizeof(name)];
+    strcpy(name_buf, name);
+
+    export_func("my_handler/name", name_buf, context);
 
     return 0;
 }
