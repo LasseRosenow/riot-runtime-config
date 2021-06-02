@@ -6,16 +6,48 @@
 #include "liblwm2m.h"
 #include "object.h"
 #include "lwm2m_client_config.h"
+#include "registry.h"
 
 /* Set to true if reboot requested. */
 static bool reboot;
 
 /* Descriptor of a LwM2M registry object instance */
 typedef struct {
-    char* example;      /**< example */
+    registry_handler_t *hndlr;
+    char **res_list;
+    int res_list_size;
 } reg_data_t;
 
-char* sdf;
+/* static void _get_reg_data_from_registry_handlers(uint16_t* reg_data) {
+    clist_node_t *node = registry_handlers.next;
+    int size = 0;
+
+    do  {
+        node = node->next;
+        registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+        size++;
+
+        reg_data = realloc(reg_data, size * sizeof(uint16_t));
+    } while (node != registry_handlers.next);
+} */
+
+static int _registry_export(const char *name, char *val, void *context) {
+    (void)val;
+    reg_data_t *userData = (reg_data_t *)context;
+
+    /* Free space for the string name of the exported property */
+    char* new_name = malloc(strlen(name)+1);
+    strcpy(new_name, name);
+
+    /* Increase the size of the list of property names to fit in the new exported property name */
+    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(char*));
+    userData->res_list[userData->res_list_size] = new_name;
+
+    /* Increase the size counter of the list */
+    userData->res_list_size += 1;
+
+    return 0;
+}
 
 static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
                                    lwm2m_data_t **data_arrayP,
@@ -72,6 +104,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
     reg_data_t *data = (reg_data_t *)objectP->userData;
     reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
 
+    (void)targetP;
     (void)data;
 
     /* Single instance object */
@@ -101,7 +134,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         switch ((*data_arrayP)[i].id) {
             /* Exec resources */
             case LWM2M_RES_EXAMPLE:
-                lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
+                //lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
                 result = COAP_205_CONTENT;
                 break;
             default:
@@ -121,6 +154,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
     reg_data_t *data = (reg_data_t *)objectP->userData;
     reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
 
+    (void)targetP;
     (void)data;
     (void)instance_id;
     (void)num_data;
@@ -142,9 +176,10 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                 case LWM2M_RES_EXAMPLE:
                     if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE)
                     {
-                        free(targetP->example);
+                        /* free(targetP->example);
                         targetP->example = (char *)malloc( data_array[i].value.asBuffer.length * sizeof(char) );
-                        strncpy(targetP->example, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
+                        strncpy(targetP->example, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length); */
+                        //targetP->hndlr->hndlr_set()
                         result = COAP_204_CHANGED;
                     }
                     else
@@ -206,7 +241,7 @@ bool lwm2m_registry_reboot_requested(void)
     return reboot;
 }
 
-lwm2m_object_t *lwm2m_get_object_registry(void)
+lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr)
 {
     lwm2m_object_t *obj;
 
@@ -233,13 +268,20 @@ lwm2m_object_t *lwm2m_get_object_registry(void)
     obj->discoverFunc = prv_registry_discover;
 
     /* Don't allocate memory for stuff that isn't used at the moment */
-    /* obj->userData = lwm2m_malloc(sizeof(reg_data_t)); */
     /* if (obj->userData == NULL) { */
     /*    goto free_ilist; */
     /* } */
     /*  */
     /* memset(obj->userData, 0, sizeof(reg_data_t)); */
-    /* INT USER DATA HERE */
+
+    /* init userData for riot registry integration */
+    obj->userData = lwm2m_malloc(sizeof(reg_data_t));
+    ((reg_data_t*)(obj->userData))->hndlr = hndlr;
+    ((reg_data_t*)(obj->userData))->res_list_size = 0;
+    ((reg_data_t*)(obj->userData))->res_list = malloc(0); // Initial malloc for realloc to work properly
+    /* call hndlr_export to init the res_list */
+    char* buf = "";
+    hndlr->hndlr_export(_registry_export, 0, &buf, obj->userData);
 
     return obj;
 
