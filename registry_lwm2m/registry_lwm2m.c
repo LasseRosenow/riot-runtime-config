@@ -33,34 +33,6 @@ uint8_t connected = 0;
 lwm2m_object_t **obj_list;
 lwm2m_client_data_t client_data;
 
-/* static int export_func(const char *name, char *val) {
-    (void)val;
-
-    printf("Export: %s\n", name);
-
-    return 0;
-}
-
-static void _get_reg_data_from_registry_handlers(uint16_t* reg_data) {
-    clist_node_t *node = registry_handlers.next;
-    uint16_t size = 0;
-
-    do  {
-        node = node->next;
-        registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
-        (void)hndlr;
-        size++;
-
-        char* buf = "";
-        hndlr->hndlr_export(export_func, 0, &buf, "");
-
-        printf("test\n");
-
-        reg_data = realloc(reg_data, size * sizeof(uint16_t));
-        reg_data[size - 1] = 5;
-    } while (node != registry_handlers.next);
-} */
-
 void registry_lwm2m_cli_init(void)
 {
     /* this call is needed before creating any objects */
@@ -97,6 +69,34 @@ void registry_lwm2m_cli_init(void)
     lwm2m_client_run(&client_data, obj_list, obj_list_counter);
 }
 
+static int _registry_generate_items(const char *name, char *val, void *context) {
+    (void)val;
+
+    /* Remove "handler name" from "name" */
+    while ((*name) != REGISTRY_NAME_SEPARATOR) {
+        name++;
+    }
+
+    name++;
+
+    /* Print the Item part of the lwm2m model */
+    printf("            <Item ID=\"%d\">\n", *((int*)context));
+	printf("                <Name>%s</Name>\n", name);
+	printf("                <Operations>RW</Operations>\n");
+	printf("                <MultipleInstances>Single</MultipleInstances>\n");
+	printf("                <Mandatory>Optional</Mandatory>\n");
+	printf("                <Type>String</Type>\n");
+	printf("                <RangeEnumeration></RangeEnumeration>\n");
+	printf("                <Units></Units>\n");
+	printf("                <Description></Description>\n");
+	printf("            </Item>\n");
+
+    /* Increment the id, so that the next call will have a higher id */
+    (*(int*)context)++;
+
+    return 0;
+}
+
 int registry_lwm2m_cli_cmd(int argc, char **argv)
 {
     if (argc == 1) {
@@ -105,6 +105,40 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
 
     if (!strcmp(argv[1], "generate")) {
         /* TODO generate lwm2m server models */
+        printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+        printf("<LWM2M xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://openmobilealliance.org/tech/profiles/LWM2M.xsd\">\n");
+
+        clist_node_t *node = registry_handlers.next;
+
+        int obj_id = 32769;
+        do  {
+            node = node->next;
+            registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+            
+            printf("    <Object ObjectType=\"MODefinition\">\n");
+            printf("        <Name>%s</Name>\n", hndlr->name);
+	        printf("        <Description1></Description1>\n");
+            printf("        <ObjectID>%d</ObjectID>\n", obj_id);
+            printf("        <ObjectURN>urn:oma:lwm2m:x:%d</ObjectURN>\n", obj_id);
+            printf("        <LWM2MVersion>1.0</LWM2MVersion>\n");
+            printf("        <ObjectVersion>1.0</ObjectVersion>\n");
+            printf("        <MultipleInstances>Single</MultipleInstances>\n");
+            printf("        <Mandatory>Optional</Mandatory>\n");
+            printf("        <Resources>\n");
+
+            int index = 0;
+            char* buf = "";
+            hndlr->hndlr_export(_registry_generate_items, 0, &buf, &index);
+            
+            printf("        </Resources>\n");
+            printf("        <Description2></Description2>\n");
+            printf("    </Object>\n");
+
+            obj_id++;
+        } while (node != registry_handlers.next);
+
+        printf("</LWM2M>\n");
+
         return 0;
     }
 
