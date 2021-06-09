@@ -71,22 +71,22 @@ char *my_get_handler(int argc, char **argv, char *val, int val_len_max, void *co
 int my_set_handler(int argc, char **argv, char *val, void *context) {
     (void) context;
 
-    printf("Set: %s\n", argv[0]);
+    printf("Set: %s to %s\n", argv[0], val);
 
     if (argc) {
         if (!strcmp("is_enabled", argv[0])) {
             /* Set the value of `is_enabled` from `val` */
-            memcpy(&is_enabled, val, sizeof(is_enabled));
+            registry_value_from_str(val, REGISTRY_TYPE_BOOL, &is_enabled, sizeof(is_enabled));
         } else if (!strcmp("threshold", argv[0])) {
             /* Validate threshold */
             if (atoi(val) > MAX_THRESHOLD)
                 return -EINVAL;
 
             /* Set the value of `threshold` from `val` */
-            memcpy(&threshold, val, sizeof(threshold));
+            registry_value_from_str(val, REGISTRY_TYPE_INT32, &threshold, sizeof(threshold));
         } else if (!strcmp("name", argv[0])) {
             /* Set the value of `threshold` from `val` */
-            strcpy(name, val);
+            registry_value_from_str(val, REGISTRY_TYPE_STRING, &name, sizeof(name));
         }
     }
 

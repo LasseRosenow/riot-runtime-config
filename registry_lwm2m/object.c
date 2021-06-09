@@ -115,25 +115,13 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         }
     }
 
-    
-
+    /* Get values and send them to lwm2m */
     for (int i = 0; i < *num_dataP; i++) {
         int index = (*data_arrayP)[i].id;
         char buf[REGISTRY_MAX_VAL_LEN];
         char* value = registry_get_value(userData->res_list[index], buf, REGISTRY_MAX_VAL_LEN);
         lwm2m_data_encode_string(value, *data_arrayP + i);
         result = COAP_205_CONTENT;
-
-        /* switch ((*data_arrayP)[i].id) {
-            // Exec resources
-            case LWM2M_RES_EXAMPLE:
-                lwm2m_data_encode_string(targetP->example, *data_arrayP + i);
-                result = COAP_205_CONTENT;
-                break;
-            default:
-                result = COAP_404_NOT_FOUND;
-                goto out;
-        } */
     }
 
     return result;
@@ -143,49 +131,31 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                                 lwm2m_data_t *data_array,
                                 lwm2m_object_t *objectP)
 {
-    reg_data_t *data = (reg_data_t *)objectP->userData;
-    reg_data_t *targetP = (reg_data_t *)lwm2m_list_find(objectP->instanceList, instance_id);
+    uint8_t result = COAP_404_NOT_FOUND;
+    reg_data_t *userData = (reg_data_t *)objectP->userData;
 
-    (void)targetP;
-    (void)data;
     (void)instance_id;
-    (void)num_data;
     (void)data_array;
 
-    uint8_t result = COAP_404_NOT_FOUND;
-
-    if (data_array[0].id < LWM2M_REGISTRY_RESOURCES) {
+    if (data_array[0].id < userData->res_list_size) {
         for (int i = 0; i < num_data; i++) {
             /* No multiple instance resources */
-            if (data_array[i].type == LWM2M_TYPE_MULTIPLE_RESOURCE)
-            {
+            if (data_array[i].type == LWM2M_TYPE_MULTIPLE_RESOURCE) {
                 result = COAP_404_NOT_FOUND;
                 continue;
             }
 
-            switch (data_array[i].id) {
-                /* Exec resources */
-                case LWM2M_RES_EXAMPLE:
-                    if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE)
-                    {
-                        /* free(targetP->example);
-                        targetP->example = (char *)malloc( data_array[i].value.asBuffer.length * sizeof(char) );
-                        strncpy(targetP->example, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length); */
-                        //targetP->hndlr->hndlr_set()
-                        result = COAP_204_CHANGED;
-                    }
-                    else
-                    {
-                        result = COAP_400_BAD_REQUEST;
-                    }
-                    break;
-                default:
-                    result = COAP_404_NOT_FOUND;
+            /* The registry only supports strings */
+            if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE) {
+                int index = data_array[i].id;
+                char buf[REGISTRY_MAX_VAL_LEN] = {0};
+                strncpy(buf, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
+                registry_set_value(userData->res_list[index], buf);
+                result = COAP_204_CHANGED;
+            } else {
+                result = COAP_400_BAD_REQUEST;
             }
         }
-    }
-    else {
-        result = COAP_404_NOT_FOUND;
     }
 
     return result;
@@ -216,7 +186,7 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
     }
 
     switch (resource_id) {
-        case LWM2M_RES_EXAMPLE:
+        //case LWM2M_RES_EXAMPLE:
         default:
             result = COAP_405_METHOD_NOT_ALLOWED;
     }

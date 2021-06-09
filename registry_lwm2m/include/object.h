@@ -36,14 +36,6 @@ extern "C" {
 #define LWM2M_REGISTRY_OBJECT_ID 32769
 
 /**
- * @brief Resources of the LwM2M registry object instance
- */
-enum lwm2m_registry_resources {
-    LWM2M_RES_EXAMPLE = 0, /**< Human readable manufacturer name */
-    LWM2M_REGISTRY_RESOURCES      /**< Number of resources */
-};
-
-/**
  * @brief Error codes for the
  * @ref lwm2m_registry_resources::LWM2M_RES_ERROR_CODE "Error" resource in the
  * registry object of LwM2M
