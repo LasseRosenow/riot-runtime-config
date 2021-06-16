@@ -43,12 +43,12 @@ USEMODULE += periph_uart
 
 
 # External modules
+EXTERNAL_MODULE_DIRS += modules/registry
+EXTERNAL_MODULE_DIRS += modules/registry_coap
+EXTERNAL_MODULE_DIRS += modules/registry_lwm2m
 USEMODULE += registry
-EXTERNAL_MODULE_DIRS += $(CURDIR)/registry
 USEMODULE += registry_coap
-EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_coap
 USEMODULE += registry_lwm2m
-EXTERNAL_MODULE_DIRS += $(CURDIR)/registry_lwm2m
 # LwM2M logging
 CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=0
 # Specific the server URI  address (NOTE: Domain names not supported yet)
