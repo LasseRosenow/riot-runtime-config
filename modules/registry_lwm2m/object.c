@@ -12,9 +12,19 @@
 static bool reboot;
 
 /* Descriptor of a LwM2M registry object instance */
+typedef enum {
+    REG_DATA_OPERATION_TYPE_READ_WRITE,
+    REG_DATA_OPERATION_TYPE_EXEC,
+} reg_data_operation_type_t;
+
+typedef struct {
+    reg_data_operation_type_t type;
+    char *value;
+} reg_data_res_t;
+
 typedef struct {
     registry_handler_t *hndlr;
-    char **res_list;
+    reg_data_res_t *res_list;
     int res_list_size;
 } reg_data_t;
 
@@ -40,8 +50,9 @@ static int _registry_export(const char *name, char *val, void *context) {
     strcpy(new_name, name);
 
     /* Increase the size of the list of property names to fit in the new exported property name */
-    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(char*));
-    userData->res_list[userData->res_list_size] = new_name;
+    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
+    userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_READ_WRITE;
+    userData->res_list[userData->res_list_size].value = new_name;
 
     /* Increase the size counter of the list */
     userData->res_list_size += 1;
@@ -119,10 +130,12 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
     for (int i = 0; i < *num_dataP; i++) {
         int index = (*data_arrayP)[i].id;
         if (index < userData->res_list_size) {
-            char buf[REGISTRY_MAX_VAL_LEN];
-            char* value = registry_get_value(userData->res_list[index], buf, REGISTRY_MAX_VAL_LEN);
-            lwm2m_data_encode_string(value, *data_arrayP + i);
-            result = COAP_205_CONTENT;
+            if (userData->res_list[index].type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
+                char buf[REGISTRY_MAX_VAL_LEN];
+                char* value = registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
+                lwm2m_data_encode_string(value, *data_arrayP + i);
+                result = COAP_205_CONTENT;
+            }
         } else {
             result = COAP_404_NOT_FOUND;
         }
@@ -139,7 +152,6 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
     reg_data_t *userData = (reg_data_t *)objectP->userData;
 
     (void)instance_id;
-    (void)data_array;
 
     if (data_array[0].id < userData->res_list_size) {
         for (int i = 0; i < num_data; i++) {
@@ -154,7 +166,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                 int index = data_array[i].id;
                 char buf[REGISTRY_MAX_VAL_LEN] = {0};
                 strncpy(buf, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
-                registry_set_value(userData->res_list[index], buf);
+                registry_set_value(userData->res_list[index].value, buf);
                 result = COAP_204_CHANGED;
             } else {
                 result = COAP_400_BAD_REQUEST;
@@ -242,12 +254,19 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
 
     /* init userData for riot registry integration */
     obj->userData = lwm2m_malloc(sizeof(reg_data_t));
-    ((reg_data_t*)(obj->userData))->hndlr = hndlr;
-    ((reg_data_t*)(obj->userData))->res_list_size = 0;
-    ((reg_data_t*)(obj->userData))->res_list = malloc(0); // Initial malloc for realloc to work properly
+    reg_data_t* userData = (reg_data_t*)(obj->userData);
+    userData->hndlr = hndlr;
+    userData->res_list_size = 0;
+    userData->res_list = malloc(0); // Initial malloc for realloc to work properly
+
+    /* init the commit executable item inside res_list */
+    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
+    userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_EXEC;
+    userData->res_list_size += 1;
+
     /* call hndlr_export to init the res_list */
     char* buf = "";
-    hndlr->hndlr_export(_registry_export, 0, &buf, obj->userData);
+    hndlr->hndlr_export(_registry_export, 0, &buf, userData);
 
     return obj;
 

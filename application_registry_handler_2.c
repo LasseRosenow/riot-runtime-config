@@ -33,9 +33,9 @@ registry_handler_t my_handler_2 = {
 };
 
 /* These are the state variables and parameters defined for this module */
-static int is_enabled = false;
-static int threshold = 1;
-static char name[200] = {"Lasse"};
+static int is_enabled = true;
+static int threshold = 42;
+static char name[200] = {"Testname"};
 
 /* ... */
 

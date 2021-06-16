@@ -132,7 +132,20 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("        <Mandatory>Optional</Mandatory>\n");
             printf("        <Resources>\n");
 
-            int index = 0;
+            /* Print the commit executable item */
+            printf("            <Item ID=\"0\">\n");
+            printf("                <Name>commit</Name>\n");
+            printf("                <Operations>E</Operations>\n");
+            printf("                <MultipleInstances>Single</MultipleInstances>\n");
+            printf("                <Mandatory>Optional</Mandatory>\n");
+            printf("                <Type></Type>\n");
+            printf("                <RangeEnumeration></RangeEnumeration>\n");
+            printf("                <Units></Units>\n");
+            printf("                <Description>Commit changes</Description>\n");
+            printf("            </Item>\n");
+
+            /* Start with 1 because 0 is already used for the commit executable */
+            int index = 1;
             char* buf = "";
             hndlr->hndlr_export(_registry_generate_items, 0, &buf, &index);
             
