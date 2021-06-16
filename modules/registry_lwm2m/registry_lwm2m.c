@@ -26,6 +26,9 @@
 #include "registry_lwm2m.h"
 #include "registry.h"
 
+#define LWM2M_OBJECT_ID_PRIVATE_RANGE_START 32769
+#define LWM2M_OBJECT_ID_PRIVATE_RANGE_END 42768
+
 /* counts how many objects are stored in obj_list_counter, which is necessary no know its size for reallocation */
 int obj_list_counter = 3;
 
@@ -56,13 +59,16 @@ void registry_lwm2m_cli_init(void)
         puts("No registry handlers registered.");
     }
 
+    int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START;
     do  {
         node = node->next;
         registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
 
         obj_list_counter++;
         obj_list = realloc(obj_list, obj_list_counter * sizeof(*obj_list));
-        obj_list[obj_list_counter - 1] = lwm2m_get_object_registry(hndlr);
+        obj_list[obj_list_counter - 1] = lwm2m_get_object_registry(hndlr, obj_id);
+
+        obj_id++;
     } while (node != registry_handlers.next);
 
     /* start the lwm2m client */
@@ -110,7 +116,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
 
         clist_node_t *node = registry_handlers.next;
 
-        int obj_id = 32769;
+        int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START;
         do  {
             node = node->next;
             registry_handler_t *hndlr = container_of(node, registry_handler_t, node);

@@ -6,6 +6,7 @@
 #include "registry_lwm2m.h"
 #include "registry.h"
 #include "application_registry_handler.h"
+#include "application_registry_handler_2.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -22,6 +23,7 @@ int main(void) {
 
     /* add application registry handler */
     registry_register(&my_handler);
+    registry_register(&my_handler_2);
 
     /* for the thread running the shell */
     registry_coap_cli_init();

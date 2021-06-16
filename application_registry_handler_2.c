@@ -5,7 +5,7 @@
 
 #include "registry.h"
 
-#include "application_registry_handler.h"
+#include "application_registry_handler_2.h"
 
 #define MAX_THRESHOLD (500)
 
@@ -24,8 +24,8 @@ Note the Registry Handler is not aware of any storage mechanism.
 
 /* Define a registry handler for the current RIOT module.
    To be registered in the RIOT Registry */
-registry_handler_t my_handler = {
-        .name = "my_handler",
+registry_handler_t my_handler_2 = {
+        .name = "my_handler_2",
         .hndlr_get = my_get_handler,
         .hndlr_set = my_set_handler,
         .hndlr_commit = my_commit_handler,
@@ -137,18 +137,18 @@ static int my_export_handler(int (*export_func)(const char *name, char *val, voi
     /* Prepare `buf` to contain is_enabled in a string representation */
     memcpy(buf, &is_enabled, sizeof(is_enabled));
 
-    export_func("my_handler/is_enabled", buf, context);
+    export_func("my_handler_2/is_enabled", buf, context);
 
     /* Prepare `buf` to contain threshold in a string representation */
     memcpy(buf, &threshold, sizeof(threshold));
 
-    export_func("my_handler/threshold", buf, context);
+    export_func("my_handler_2/threshold", buf, context);
 
     /* Prepare `buf` to contain name in a string representation */
     char name_buf[sizeof(name)];
     strcpy(name_buf, name);
 
-    export_func("my_handler/name", name_buf, context);
+    export_func("my_handler_2/name", name_buf, context);
 
     return 0;
 }

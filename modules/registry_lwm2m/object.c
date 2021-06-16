@@ -207,7 +207,7 @@ bool lwm2m_registry_reboot_requested(void)
     return reboot;
 }
 
-lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr)
+lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
 {
     lwm2m_object_t *obj;
 
@@ -226,7 +226,7 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr)
 
     memset(obj->instanceList, 0, sizeof(lwm2m_list_t));
 
-    obj->objID = LWM2M_REGISTRY_OBJECT_ID;
+    obj->objID = obj_id;
 
     obj->readFunc = prv_registry_read;
     obj->writeFunc = prv_registry_write;

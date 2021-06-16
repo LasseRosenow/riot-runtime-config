@@ -33,8 +33,6 @@ extern "C" {
 #include "lwm2m_client.h"
 #include "registry.h"
 
-#define LWM2M_REGISTRY_OBJECT_ID 32769
-
 /**
  * @brief Error codes for the
  * @ref lwm2m_registry_resources::LWM2M_RES_ERROR_CODE "Error" resource in the
@@ -52,7 +50,7 @@ enum lwm2m_registry_error_codes {
     LWM2M_REGISTRY_ERR_PERIPH_ERR = 8  /**< Peripheral malfunction */
 };
 
-lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr);
+lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id);
 
 void lwm2m_free_object_registry(lwm2m_object_t *obj);
 
