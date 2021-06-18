@@ -75,34 +75,6 @@ void registry_lwm2m_cli_init(void)
     lwm2m_client_run(&client_data, obj_list, obj_list_counter);
 }
 
-static int _registry_generate_items(const char *name, char *val, void *context) {
-    (void)val;
-
-    /* Remove "handler name" from "name" */
-    while ((*name) != REGISTRY_NAME_SEPARATOR) {
-        name++;
-    }
-
-    name++;
-
-    /* Print the Item part of the lwm2m model */
-    printf("            <Item ID=\"%d\">\n", *((int*)context));
-	printf("                <Name>%s</Name>\n", name);
-	printf("                <Operations>RW</Operations>\n");
-	printf("                <MultipleInstances>Single</MultipleInstances>\n");
-	printf("                <Mandatory>Optional</Mandatory>\n");
-	printf("                <Type>String</Type>\n");
-	printf("                <RangeEnumeration></RangeEnumeration>\n");
-	printf("                <Units></Units>\n");
-	printf("                <Description></Description>\n");
-	printf("            </Item>\n");
-
-    /* Increment the id, so that the next call will have a higher id */
-    (*(int*)context)++;
-
-    return 0;
-}
-
 int registry_lwm2m_cli_cmd(int argc, char **argv)
 {
     if (argc == 1) {
@@ -116,14 +88,14 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
 
         clist_node_t *node = registry_handlers.next;
 
-        int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START;
         do  {
             node = node->next;
             registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+            int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START + hndlr->id;
             
             printf("    <Object ObjectType=\"MODefinition\">\n");
             printf("        <Name>%s</Name>\n", hndlr->name);
-	        printf("        <Description1></Description1>\n");
+	        printf("        <Description1>%s</Description1>\n", hndlr->description);
             printf("        <ObjectID>%d</ObjectID>\n", obj_id);
             printf("        <ObjectURN>urn:oma:lwm2m:x:%d</ObjectURN>\n", obj_id);
             printf("        <LWM2MVersion>1.0</LWM2MVersion>\n");
@@ -144,10 +116,20 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("                <Description>Commit changes</Description>\n");
             printf("            </Item>\n");
 
-            /* Start with 1 because 0 is already used for the commit executable */
-            int index = 1;
-            char* buf = "";
-            hndlr->hndlr_export(_registry_generate_items, 0, &buf, &index);
+            for (int i = 0; i < hndlr->parameters_len; i++) {
+                registry_parameter_t parameter = hndlr->parameters[i];
+
+                printf("            <Item ID=\"%d\">\n", parameter.id + 1); // Increase by 1 because the first item is the commit executable
+                printf("                <Name>%s</Name>\n", parameter.name);
+                printf("                <Operations>RW</Operations>\n");
+                printf("                <MultipleInstances>Single</MultipleInstances>\n");
+                printf("                <Mandatory>Optional</Mandatory>\n");
+                printf("                <Type>String</Type>\n");
+                printf("                <RangeEnumeration></RangeEnumeration>\n");
+                printf("                <Units></Units>\n");
+                printf("                <Description>%s</Description>\n", parameter.description);
+                printf("            </Item>\n");
+            }
             
             printf("        </Resources>\n");
             printf("        <Description2></Description2>\n");

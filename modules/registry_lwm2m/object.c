@@ -41,25 +41,6 @@ typedef struct {
     } while (node != registry_handlers.next);
 } */
 
-static int _registry_export(const char *name, char *val, void *context) {
-    (void)val;
-    reg_data_t *userData = (reg_data_t *)context;
-
-    /* Free space for the string name of the exported property */
-    char* new_name = malloc(strlen(name)+1);
-    strcpy(new_name, name);
-
-    /* Increase the size of the list of property names to fit in the new exported property name */
-    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
-    userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_READ_WRITE;
-    userData->res_list[userData->res_list_size].value = new_name;
-
-    /* Increase the size counter of the list */
-    userData->res_list_size += 1;
-
-    return 0;
-}
-
 static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
                                    lwm2m_data_t **data_arrayP,
                                    lwm2m_object_t *objectP)
@@ -133,6 +114,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
             if (userData->res_list[index].type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
                 char buf[REGISTRY_MAX_VAL_LEN];
                 char* value = registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
+                printf("HAAAAAAAAAAAAAAAAAAAAALLOOOO: %s\n", value);
                 lwm2m_data_encode_string(value, *data_arrayP + i);
                 result = COAP_205_CONTENT;
             }
@@ -264,9 +246,18 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
     userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_EXEC;
     userData->res_list_size += 1;
 
-    /* call hndlr_export to init the res_list */
-    char* buf = "";
-    hndlr->hndlr_export(_registry_export, 0, &buf, userData);
+    /* init the res_list */
+    for (int i = 0; i < userData->hndlr->parameters_len; i++) {
+        registry_parameter_t parameter = hndlr->parameters[i];
+
+        /* Increase the size of the list of property names to fit in the new exported property name */
+        userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
+        userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_READ_WRITE;
+        userData->res_list[userData->res_list_size].value = parameter.name; // TODO replace with id TODO group is missing, so this does not work
+
+        /* Increase the size counter of the list */
+        userData->res_list_size += 1;
+    }
 
     return obj;
 

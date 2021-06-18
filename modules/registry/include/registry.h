@@ -199,6 +199,32 @@ typedef struct registry_store_itf {
 } registry_store_itf_t;
 
 /**
+ * @brief Parameter of a configuration group.
+ */
+typedef struct {
+    int id; /**< Integer representing the configuration parameter */
+    union {
+        int8_t i8;      /**< 8-bits integer */
+        int16_t i16;    /**< 16-bits integer */
+        int32_t i32;    /**< 32-bits integer */
+        char* string;   /**< String */
+        void* bytes;    /**< Binary data */
+        bool boolean;   /**< Boolean */
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+        int16_t i16;     /**< 64-bits integer */
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+        int16_t i16;    /**< Float */
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+    } value; /**< Union representing the value of the configuration parameter */
+    registry_type_t type; /**< Enum representing the type of the configuration parameter */
+    char *name; /**< String describing the configuration parameter */
+    char *description; /**< String describing the configuration parameter with more details */
+} registry_parameter_t;
+
+/**
  * @brief Handler for configuration groups. Each configuration group should
  * register a handler using the @ref registry_register() function.
  * A handler provides the pointer to get, set, commit and export configuration
@@ -206,7 +232,11 @@ typedef struct registry_store_itf {
  */
 typedef struct {
     clist_node_t node; /**< Linked list node */
-    char *name; /**< String representing the configuration group */
+    int id; /**< Integer representing the configuration group */
+    char *name; /**< String describing the configuration group */
+    char *description; /**< String describing the configuration group with more details */
+    registry_parameter_t *parameters; /**< Array representing all the configuration parameters that belong to this group */
+    int parameters_len; /**< Size of parameters array */
 
     /**
      * @brief Handler to get the current value of a configuration parameter

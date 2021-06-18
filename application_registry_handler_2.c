@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "kernel_defines.h"
 
 #include "registry.h"
 
@@ -22,14 +23,42 @@ when `is_enabled==false`.
 Note the Registry Handler is not aware of any storage mechanism.
 */
 
+static registry_parameter_t parameters[] = {
+    {
+        .id = 0,
+        .value.boolean = true,
+        .type = REGISTRY_TYPE_BOOL,
+        .name = "is_enabled",
+        .description = "Example is_enabled description.",
+    },
+    {
+        .id = 1,
+        .value.i32 = 42,
+        .type = REGISTRY_TYPE_INT32,
+        .name = "threshold",
+        .description = "Example threshold description.",
+    },
+    {
+        .id = 2,
+        .value.string = "Testname",
+        .type = REGISTRY_TYPE_STRING,
+        .name = "name",
+        .description = "Example name description.",
+    },
+};
+
 /* Define a registry handler for the current RIOT module.
    To be registered in the RIOT Registry */
 registry_handler_t my_handler_2 = {
-        .name = "my_handler_2",
-        .hndlr_get = my_get_handler,
-        .hndlr_set = my_set_handler,
-        .hndlr_commit = my_commit_handler,
-        .hndlr_export = my_export_handler
+    .id = 1,
+    .name = "my_handler_2",
+    .description = "Example my_handler_2 description.",
+    .parameters = parameters,
+    .parameters_len = ARRAY_SIZE(parameters),
+    .hndlr_get = my_get_handler,
+    .hndlr_set = my_set_handler,
+    .hndlr_commit = my_commit_handler,
+    .hndlr_export = my_export_handler,
 };
 
 /* These are the state variables and parameters defined for this module */
