@@ -91,19 +91,26 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         return COAP_404_NOT_FOUND;
     }
 
+
     /* Full object requested */
     if (*num_dataP == 0) {
         /* This list must contain all available resources */
-        int len = userData->res_list_size;
+        int res_len = userData->res_list_size;
 
-        *data_arrayP = lwm2m_data_new(len);
+        /* Create data_arrayP */
+        *data_arrayP = lwm2m_data_new(res_len);
         if (*data_arrayP == NULL) {
             return COAP_500_INTERNAL_SERVER_ERROR;
         }
 
-        *num_dataP = userData->res_list_size;
-        for (int i = 0; i < len; i++) {
-            (*data_arrayP)[i].id = i;
+        /* Calculate readable res count and init data_arrayP */
+        int data_arrayP_index = 0;
+        for (int i = 0; i < res_len; i++) {
+            if (userData->res_list[i].type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
+                (*data_arrayP)[data_arrayP_index].id = i;
+                data_arrayP_index++;
+                (*num_dataP) += 1;
+            }
         }
     }
 
@@ -111,13 +118,10 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
     for (int i = 0; i < *num_dataP; i++) {
         int index = (*data_arrayP)[i].id;
         if (index < userData->res_list_size) {
-            if (userData->res_list[index].type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
-                char buf[REGISTRY_MAX_VAL_LEN];
-                char* value = registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
-                printf("HAAAAAAAAAAAAAAAAAAAAALLOOOO: %s\n", value);
-                lwm2m_data_encode_string(value, *data_arrayP + i);
-                result = COAP_205_CONTENT;
-            }
+            char buf[REGISTRY_MAX_VAL_LEN];
+            char* value = registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
+            lwm2m_data_encode_string(value, *data_arrayP + i);
+            result = COAP_205_CONTENT;
         } else {
             result = COAP_404_NOT_FOUND;
         }
@@ -234,26 +238,32 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
     /*  */
     /* memset(obj->userData, 0, sizeof(reg_data_t)); */
 
-    /* init userData for riot registry integration */
+    /* Init userData for riot registry integration */
     obj->userData = lwm2m_malloc(sizeof(reg_data_t));
     reg_data_t* userData = (reg_data_t*)(obj->userData);
     userData->hndlr = hndlr;
     userData->res_list_size = 0;
     userData->res_list = malloc(0); // Initial malloc for realloc to work properly
 
-    /* init the commit executable item inside res_list */
+    /* Init the commit executable item inside res_list */
     userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
     userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_EXEC;
     userData->res_list_size += 1;
 
-    /* init the res_list */
+    /* Init the res_list */
     for (int i = 0; i < userData->hndlr->parameters_len; i++) {
         registry_parameter_t parameter = hndlr->parameters[i];
+
+        /* Generate whole registry parameter path from group and parameter name */
+        char *path = malloc(strlen(hndlr->name) + strlen(parameter.name) + 1);
+        strcpy(path, hndlr->name);
+        strcpy(path + strlen(hndlr->name), "/");
+        strcpy(path + strlen(hndlr->name) + 1, parameter.name);
 
         /* Increase the size of the list of property names to fit in the new exported property name */
         userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
         userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_READ_WRITE;
-        userData->res_list[userData->res_list_size].value = parameter.name; // TODO replace with id TODO group is missing, so this does not work
+        userData->res_list[userData->res_list_size].value = path; // TODO replace with id
 
         /* Increase the size counter of the list */
         userData->res_list_size += 1;
