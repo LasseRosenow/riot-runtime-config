@@ -168,9 +168,7 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
                                   lwm2m_object_t *objectP)
 {
     uint8_t result;
-    reg_data_t *data = (reg_data_t *)objectP->userData;
-
-    (void)data;
+    reg_data_t *userData = (reg_data_t *)objectP->userData;
 
     (void)buffer;
     (void)length;
@@ -187,10 +185,11 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
         goto err_out;
     }
 
-    switch (resource_id) {
-        //case LWM2M_RES_EXAMPLE:
-        default:
-            result = COAP_405_METHOD_NOT_ALLOWED;
+    if (userData->res_list[resource_id].type == REG_DATA_OPERATION_TYPE_EXEC) {
+        userData->hndlr->hndlr_commit(userData->hndlr->context);
+        result = COAP_204_CHANGED;
+    } else {
+        result = COAP_405_METHOD_NOT_ALLOWED;
     }
 
 err_out:
