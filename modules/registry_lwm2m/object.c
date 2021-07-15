@@ -119,8 +119,8 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         int index = (*data_arrayP)[i].id;
         if (index < userData->res_list_size) {
             char buf[REGISTRY_MAX_VAL_LEN];
-            char* value = registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
-            lwm2m_data_encode_string(value, *data_arrayP + i);
+            registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
+            lwm2m_data_encode_string(buf, *data_arrayP + i); // TODO Add types!
             result = COAP_205_CONTENT;
         } else {
             result = COAP_404_NOT_FOUND;

@@ -40,7 +40,6 @@
  * - @ref registry_handler_t::hndlr_get "get"
  * - @ref registry_handler_t::hndlr_set "set"
  * - @ref registry_handler_t::hndlr_commit "commit"
- * - @ref registry_handler_t::hndlr_export "export"
  *
  * It is responsibility of the module to implement these handlers and perform
  * all necessary checks before applying values to the configuration parameters.
@@ -118,7 +117,6 @@ typedef enum {
     REGISTRY_TYPE_INT16,     /**< 16-bits integer */
     REGISTRY_TYPE_INT32,     /**< 32-bits integer */
     REGISTRY_TYPE_STRING,    /**< String */
-    REGISTRY_TYPE_BYTES,     /**< Binary data */
     REGISTRY_TYPE_BOOL,      /**< Boolean */
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
@@ -129,6 +127,38 @@ typedef enum {
     REGISTRY_TYPE_FLOAT,     /**< Float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT */
 } registry_type_t;
+
+/**
+ * @brief Concrete parameter data configuration group parameter.
+ */
+typedef struct {
+    union {
+        int8_t i8;      /**< 8-bits integer */
+        int16_t i16;    /**< 16-bits integer */
+        int32_t i32;    /**< 32-bits integer */
+        char string[REGISTRY_MAX_VAL_LEN];   /**< String */
+        bool boolean;   /**< Boolean */
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+        int64_t i64;     /**< 64-bits integer */
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+        float f32;    /**< 32-bits float */
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+    } value; /**< Union representing the value of the configuration parameter */
+    registry_type_t type; /**< Enum representing the type of the configuration parameter */
+} registry_parameter_data_t;
+
+/**
+ * @brief Parameter of a configuration group.
+ */
+typedef struct {
+    int id; /**< Integer representing the configuration parameter */
+    registry_parameter_data_t data; /**< Struct representing the concrete parameter data */
+    char *name; /**< String describing the configuration parameter */
+    char *description; /**< String describing the configuration parameter with more details */
+} registry_parameter_t;
 
 
 /**
@@ -183,10 +213,10 @@ typedef struct registry_store_itf {
      *
      * @param[in] store Storage facility descriptor
      * @param[in] name String representing the parameter (key)
-     * @param[in] value String representing the value of the parameter
+     * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const char *name, const char *value);
+    int (*save)(registry_store_t *store, const char *name, const registry_parameter_data_t value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -199,35 +229,9 @@ typedef struct registry_store_itf {
 } registry_store_itf_t;
 
 /**
- * @brief Parameter of a configuration group.
- */
-typedef struct {
-    int id; /**< Integer representing the configuration parameter */
-    union {
-        int8_t i8;      /**< 8-bits integer */
-        int16_t i16;    /**< 16-bits integer */
-        int32_t i32;    /**< 32-bits integer */
-        char* string;   /**< String */
-        void* bytes;    /**< Binary data */
-        bool boolean;   /**< Boolean */
-
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-        int16_t i16;     /**< 64-bits integer */
-#endif /* CONFIG_REGISTRY_USE_INT64 */
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-        int16_t i16;    /**< Float */
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
-    } value; /**< Union representing the value of the configuration parameter */
-    registry_type_t type; /**< Enum representing the type of the configuration parameter */
-    char *name; /**< String describing the configuration parameter */
-    char *description; /**< String describing the configuration parameter with more details */
-} registry_parameter_t;
-
-/**
  * @brief Handler for configuration groups. Each configuration group should
  * register a handler using the @ref registry_register() function.
- * A handler provides the pointer to get, set, commit and export configuration
+ * A handler provides the pointer to get, set and commit configuration
  * parameters.
  */
 typedef struct {
@@ -239,40 +243,34 @@ typedef struct {
     int parameters_len; /**< Size of parameters array */
 
     /**
-     * @brief Handler to get the current value of a configuration parameter
-     * from the configuration group. The handler should return the current value
-     * of the configuration parameter as a string copied to val.
+     * @brief Callback executed when a configuration parameter was read.
      *
      * @param[in] argc Number of elements in @p argv
      * @param[in] argv Parsed string representing the configuration parameter.
-     * @param[out] val Buffer to return the current value
+     * @param[in] val Buffer containing the value
      * @param[in] val_len_max Size of @p val
      * @param[in] context Context of the handler
-     * @return Pointer to the buffer containing the current value, NULL on
-     * failure
      *
      * @note The strings passed in @p argv do not contain the string of the name
      * of the configuration group. E.g. If a parameter name is 'group/foo/var'
      * and the name of the group is 'group', argv will contain 'foo' and 'var'.
      */
-    char *(*hndlr_get)(int argc, char **argv, char *val, int val_len_max,
+    void (*hndlr_get_cb)(int argc, char **argv, const char *val, int val_len_max,
                        void *context);
 
     /**
-     * @brief Handler to set a the value of a configuration parameter.
-     * The value will be passed as a string in @p val.
+     * @brief Callback executed when a configuration parameter was changed.
      *
      * @param[in] argc Number of elements in @p argv
      * @param[in] argv Parsed string representing the configuration parameter.
-     * @param[out] val Buffer containing the string of the new value //TODO Is this really [out]?
+     * @param[in] val Buffer containing the new value
      * @param[in] context Context of the handler
-     * @return 0 on success, non-zero on failure
      *
      * @note The strings passed in @p argv do not contain the string of the name
      * of the configuration group. E.g. If a parameter name is 'group/foo/var'
      * and the name of the group is 'group', argv will contain 'foo' and 'var'.
      */
-    int (*hndlr_set)(int argc, char **argv, char *val, void *context);
+    void (*hndlr_set_cb)(int argc, char **argv, const char *val, void *context);
 
     /**
      * @brief Handler to apply (commit) the configuration parameters of the
@@ -285,31 +283,6 @@ typedef struct {
      * @return 0 on success, non-zero on failure
      */
     int (*hndlr_commit)(void *context);
-
-    /**
-     * @brief Handler to export the configuration parameters of the group.
-     * The handler must call the @p export_func function with the name and the
-     * string representing the value of the requested configuration parameter
-     * defined by @p argv.
-     *
-     * If @p argc is 0 then the handler should call the @p export_func for every
-     * configuration parameter of the group.
-     *
-     * @param[in] export_func Export function that should be called by the
-     * handler.
-     * @param[in] argc Number of elements in @p argv
-     * @param[in] argv Parsed string representing the configuration parameter.
-     * @param[in] context Context of the handler
-     * @return 0 on success, non-zero on failure (if @p export_func fails,
-     *         i.e. returns non-zero, this error code should be returned by the
-     *         handler as it is considered a failure).
-     *
-     * @note The strings passed in @p argv do not contain the string of the name
-     * of the configuration group. E.g. If a parameter name is 'group/foo/var'
-     * and the name of the group is 'group', argv will contain 'foo' and 'var'.
-     */
-    int (*hndlr_export)(int (*export_func)(const char *name, char *val, void *context),
-                        int argc, char **argv, void *context);
 
     void *context; /**< Optional context used by the handlers */
 } registry_handler_t;
@@ -377,7 +350,7 @@ int registry_set_value(char *name, char *val_str);
  * @param[in] buf_len Length of the buffer to store the current value
  * @return Pointer to the beginning of the buffer
  */
-char *registry_get_value(char *name, char *buf, int buf_len);
+char *registry_get_value(const char *name, char *buf, int buf_len);
 
 /**
  * @brief If a @p name is passed it calls the commit handler for that
@@ -469,10 +442,10 @@ int registry_save(void);
  * facility, with the provided value (@p val).
  *
  * @param[in] name String representing the configuration parameter
- * @param[in] val String representing the value of the configuration parameter
+ * @param[in] val Struct representing the value of the configuration parameter
  * @return 0 on success, non-zero on failure
  */
-int registry_save_one(const char *name, char *val, void *context);
+int registry_save_one(const char *name, registry_parameter_data_t val, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
@@ -484,7 +457,7 @@ int registry_save_one(const char *name, char *val, void *context);
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const char *name, char *val, void *context),
+int registry_export(int (*export_func)(const char *name, registry_parameter_data_t val, void *context),
                     char *name);
 
 #ifdef __cplusplus

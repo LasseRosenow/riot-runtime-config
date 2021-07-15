@@ -81,6 +81,26 @@ static registry_handler_t *_handler_parse_and_lookup(char *name, int *name_argc,
     return _handler_lookup(name_argv[0]);
 }
 
+static size_t _get_registry_parameter_data_len(registry_parameter_data_t *param)
+{
+    switch (param->type) {
+        case REGISTRY_TYPE_INT8: return sizeof(int8_t);
+        case REGISTRY_TYPE_INT16: return sizeof(int16_t);
+        case REGISTRY_TYPE_INT32: return sizeof(int32_t);
+        case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
+        case REGISTRY_TYPE_BOOL: return sizeof(bool);
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+        case REGISTRY_TYPE_INT64: return sizeof(int64_t);
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+        case REGISTRY_TYPE_FLOAT: return sizeof(float);
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+        
+        default: return 0;
+    }
+}
+
 int registry_set_value(char *name, char *val_str)
 {
     int name_argc;
@@ -96,11 +116,26 @@ int registry_set_value(char *name, char *val_str)
         return -EINVAL;
     }
 
-    return hndlr->hndlr_set(name_argc - 1, &name_argv[1], val_str,
-                            hndlr->context);
+    for (int i = 0; i < hndlr->parameters_len; i++) {
+        registry_parameter_t *param = &hndlr->parameters[i];
+
+        /* If name contains this params name */
+        int str_len = strlen(name);
+        int suffix_len = strlen(param->name);
+        if ((str_len >= suffix_len) && (0 == strcmp(name + (str_len-suffix_len), param->name))) {
+            registry_value_from_str(val_str, param->data.type, &param->data.value, _get_registry_parameter_data_len(&param->data));
+            break;
+        }
+    }
+
+    if (!hndlr->hndlr_set_cb) {
+        hndlr->hndlr_set_cb(name_argc - 1, &name_argv[1], val_str, hndlr->context);
+    }
+
+    return 0;
 }
 
-char *registry_get_value(char *name, char *buf, int buf_len)
+char *registry_get_value(const char *name, char *buf, int buf_len)
 {
     int name_argc;
     char *name_argv[REGISTRY_MAX_DIR_DEPTH];
@@ -114,13 +149,24 @@ char *registry_get_value(char *name, char *buf, int buf_len)
     if (!hndlr) {
         return NULL;
     }
+    
+    for (int i = 0; i < hndlr->parameters_len; i++) {
+        registry_parameter_t *param = &hndlr->parameters[i];
 
-    if (!hndlr->hndlr_get) {
-        return NULL;
+        /* If name contains this params name */
+        int str_len = strlen(name);
+        int suffix_len = strlen(param->name);
+        if ((str_len >= suffix_len) && (0 == strcmp(name + (str_len-suffix_len), param->name))) {
+            registry_str_from_value(param->data.type, &param->data.value, buf, buf_len);
+            break;
+        }
     }
 
-    return hndlr->hndlr_get(name_argc - 1, &name_argv[1], buf, buf_len,
-                            hndlr->context);
+    if (!hndlr->hndlr_get_cb) {
+        hndlr->hndlr_get_cb(name_argc - 1, &name_argv[1], buf, buf_len, hndlr->context);
+    }
+
+    return buf;
 }
 
 static int _registry_call_commit(clist_node_t *current, void *res)
@@ -167,7 +213,7 @@ int registry_commit(char *name)
     }
 }
 
-int registry_export(int (*export_func)(const char *name, char *val, void *context), char *name)
+int registry_export(int (*export_func)(const char *name, registry_parameter_data_t val, void *context), char *name)
 {
     assert(export_func != NULL);
     int name_argc;
@@ -184,13 +230,18 @@ int registry_export(int (*export_func)(const char *name, char *val, void *contex
         if (!hndlr) {
             return -EINVAL;
         }
-        if (hndlr->hndlr_export) {
-            return hndlr->hndlr_export(export_func, name_argc - 1,
-                                       &name_argv[1], hndlr->context);
+
+        for (int i = 0; i < hndlr->parameters_len; i++) {
+            registry_parameter_t param = hndlr->parameters[i];
+            
+            /* Generate whole registry parameter path from group and parameter name */
+            char path[strlen(hndlr->name) + strlen(param.name) + 1];
+            strcpy(path, hndlr->name);
+            strcpy(path + strlen(hndlr->name), "/");
+            strcpy(path + strlen(hndlr->name) + 1, param.name);
+            export_func(path, param.data, hndlr->context);
         }
-        else {
-            return 0;
-        }
+        return 0;
     }
     else {
         DEBUG("[registry export] exporting all\n");
@@ -203,8 +254,16 @@ int registry_export(int (*export_func)(const char *name, char *val, void *contex
         do  {
             node = node->next;
             hndlr = container_of(node, registry_handler_t, node);
-            if (hndlr->hndlr_export) {
-                hndlr->hndlr_export(export_func, 0, NULL, hndlr->context);
+            
+            for (int i = 0; i < hndlr->parameters_len; i++) {
+                registry_parameter_t param = hndlr->parameters[i];
+                
+                /* Generate whole registry parameter path from group and parameter name */
+                char path[strlen(hndlr->name) + strlen(param.name) + 1];
+                strcpy(path, hndlr->name);
+                strcpy(path + strlen(hndlr->name), "/");
+                strcpy(path + strlen(hndlr->name) + 1, param.name);
+                export_func(path, param.data, hndlr->context);
             }
         } while (node != registry_handlers.next);
         return 0;

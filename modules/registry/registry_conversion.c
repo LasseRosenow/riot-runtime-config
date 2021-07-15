@@ -113,7 +113,7 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
             if (val + 1 > maxlen) {
                 goto err;
             }
-            strcpy(vp, val_str);
+            strcpy((char *)vp, val_str);
             break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
@@ -185,8 +185,10 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
     int32_t val = 0;
 
     if (type == REGISTRY_TYPE_STRING) {
-        if (strlen((const char *)vp) <= (size_t)buf_len) {
-            strcpy(buf, (const char *)vp);
+        char* str_val = (char *)vp;
+        
+        if (strlen(str_val) <= (size_t)buf_len) {
+            strcpy(buf, str_val);
             return buf;
         }
         else {
@@ -233,6 +235,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
         default:
             return NULL;
     }
+
     snprintf(buf, buf_len, "%" PRId32, val);
     return buf;
 }

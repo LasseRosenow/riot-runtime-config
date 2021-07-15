@@ -69,19 +69,23 @@ static void _registry_dup_check_cb(char *name, char *val, void *cb_arg)
     }
 }
 
-int registry_save_one(const char *name, char *value, void *context)
+int registry_save_one(const char *name, registry_parameter_data_t value, void *context)
 {
     (void) context;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
-    DEBUG("[registry_store] Saving: %s = %s\n",name, value);
+    
+    char buf[REGISTRY_MAX_VAL_LEN];
+    registry_str_from_value(value.type, &value.value, buf, sizeof(buf));
+
+    DEBUG("[registry_store] Saving: %s = %s\n", name, buf);
 
     if (!dst) {
         return -ENOENT;
     }
 
     dup.name = (char *)name;
-    dup.val = value;
+    dup.val = buf;
     dup.is_dup = 0;
 
     save_dst->itf->load(save_dst, _registry_dup_check_cb, &dup);
@@ -110,12 +114,9 @@ int registry_save(void)
 
     do  {
         hndlr = container_of(node, registry_handler_t, node);
-        if (hndlr->hndlr_export) {
-            res2 = hndlr->hndlr_export(registry_save_one, 0, NULL,
-                                       hndlr->context);
-            if (res == 0) {
-                res = res2;
-            }
+        res2 = registry_export(registry_save_one, hndlr->name);
+        if (res == 0) {
+            res = res2;
         }
     } while (node != registry_handlers.next);
 
