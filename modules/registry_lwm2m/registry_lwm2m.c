@@ -23,6 +23,10 @@
 #include "lwm2m_platform.h"
 #include "object.h"
 
+//#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+#include "float.h"
+//#endif /* CONFIG_REGISTRY_USE_INT64 */
+
 #include "registry_lwm2m.h"
 #include "registry.h"
 
@@ -168,8 +172,45 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         break;
                 }
                 printf("</Type>\n");
+
+                printf("                <RangeEnumeration>");
+                switch (parameter.data.type) {
+                    case REGISTRY_TYPE_NONE: break;
+
+                    case REGISTRY_TYPE_INT8:
+                        printf("%d-%d", INT8_MIN, INT8_MAX);
+                        break;
+
+                    case REGISTRY_TYPE_INT16:
+                        printf("%d-%d", INT16_MIN, INT16_MAX);
+                        break;
+
+                    case REGISTRY_TYPE_INT32:
+                        printf("%d-%d", INT32_MIN, INT32_MAX);
+                        break;
+
+                    case REGISTRY_TYPE_STRING:
+                        printf("0-%d", REGISTRY_MAX_VAL_LEN);
+                        break;
+
+                    case REGISTRY_TYPE_BOOL: break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_INT64:
+                        printf("%lld-%lld", INT64_MIN, INT64_MAX);
+                        break;
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT:
+                        printf("-%f-%f", FLT_MAX, FLT_MAX);
+                        break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+                    
+                    default: break;
+                }
+                printf("</RangeEnumeration>\n");
                 
-                printf("                <RangeEnumeration></RangeEnumeration>\n");
                 printf("                <Units></Units>\n");
                 printf("                <Description>%s</Description>\n", parameter.description);
                 printf("            </Item>\n");

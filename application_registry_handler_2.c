@@ -25,28 +25,64 @@ Note the Registry Handler is not aware of any storage mechanism.
 static registry_parameter_t parameters[] = {
     {
         .id = 0,
-        .name = "is_enabled",
-        .description = "Example is_enabled description.",
+        .name = "i8",
+        .description = "Example i8 description.",
         .data = {
-            .value.boolean = true,
-            .type = REGISTRY_TYPE_BOOL,
+            .value.i8 = 2,
+            .type = REGISTRY_TYPE_INT8,
         },
     },
     {
         .id = 1,
-        .name = "answer_to_everything",
-        .description = "Example threshold description.",
+        .name = "i16",
+        .description = "Example i16 description.",
+        .data = {
+            .value.i16 = 9,
+            .type = REGISTRY_TYPE_INT16,
+        },
+    },
+    {
+        .id = 2,
+        .name = "i32",
+        .description = "Example i32 description.",
         .data = {
             .value.i32 = 42,
             .type = REGISTRY_TYPE_INT32,
         },
     },
     {
-        .id = 2,
-        .name = "name",
-        .description = "Example name description.",
+        .id = 3,
+        .name = "i62",
+        .description = "Example i64 description.",
         .data = {
-            .value.string = "Testname",
+            .value.i64 = 407,
+            .type = REGISTRY_TYPE_INT64,
+        },
+    },
+    {
+        .id = 4,
+        .name = "float",
+        .description = "Example string description.",
+        .data = {
+            .value.f32 = 7.4,
+            .type = REGISTRY_TYPE_FLOAT,
+        },
+    },
+    {
+        .id = 5,
+        .name = "bool",
+        .description = "Example bool description.",
+        .data = {
+            .value.boolean = true,
+            .type = REGISTRY_TYPE_BOOL,
+        },
+    },
+    {
+        .id = 6,
+        .name = "string",
+        .description = "Example string description.",
+        .data = {
+            .value.string = "This is a string",
             .type = REGISTRY_TYPE_STRING,
         },
     },

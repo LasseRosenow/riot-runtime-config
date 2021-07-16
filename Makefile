@@ -40,7 +40,9 @@ USEMODULE += periph_uart
 
 
 
-
+# Riot registry enable int64 and float support
+CFLAGS += -DCONFIG_REGISTRY_USE_INT64=1
+CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT=1
 
 # External modules
 EXTERNAL_MODULE_DIRS += modules/registry
