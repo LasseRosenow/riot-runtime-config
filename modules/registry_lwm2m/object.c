@@ -18,7 +18,8 @@ typedef enum {
 } reg_data_operation_type_t;
 
 typedef struct {
-    reg_data_operation_type_t type;
+    reg_data_operation_type_t operation_type;
+    registry_type_t data_type;
     char *value;
 } reg_data_res_t;
 
@@ -106,7 +107,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         /* Calculate readable res count and init data_arrayP */
         int data_arrayP_index = 0;
         for (int i = 0; i < res_len; i++) {
-            if (userData->res_list[i].type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
+            if (userData->res_list[i].operation_type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
                 (*data_arrayP)[data_arrayP_index].id = i;
                 data_arrayP_index++;
                 (*num_dataP) += 1;
@@ -120,7 +121,65 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         if (index < userData->res_list_size) {
             char buf[REGISTRY_MAX_VAL_LEN];
             registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
-            lwm2m_data_encode_string(buf, *data_arrayP + i); // TODO Add types!
+            switch (userData->res_list[index].data_type) {
+                case REGISTRY_TYPE_NONE:
+                    return COAP_400_BAD_REQUEST;
+                    break;
+
+                case REGISTRY_TYPE_INT8: {
+                    int8_t value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_INT8, &value, 0);
+                    lwm2m_data_encode_int(value, *data_arrayP + i);
+                    break;
+                }
+
+                case REGISTRY_TYPE_INT16: {
+                    int value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_INT16, &value, 0);
+                    lwm2m_data_encode_int(value, *data_arrayP + i);
+                    break;
+                }
+
+                case REGISTRY_TYPE_INT32: {
+                    int value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_INT32, &value, 0);
+                    lwm2m_data_encode_int(value, *data_arrayP + i);
+                    break;
+                }
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+                case REGISTRY_TYPE_INT64: {
+                    int value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_INT64, &value, 0);
+                    lwm2m_data_encode_int(value, *data_arrayP + i);
+                    break;
+                }
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+                case REGISTRY_TYPE_STRING:
+                    lwm2m_data_encode_string(buf, *data_arrayP + i);
+                    break;
+
+                case REGISTRY_TYPE_BOOL: {
+                    bool value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_BOOL, &value, sizeof(bool));
+                    lwm2m_data_encode_bool(value, *data_arrayP + i);
+                    break;
+                }
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+                case REGISTRY_TYPE_FLOAT: {
+                    float value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT, &value, 0);
+                    lwm2m_data_encode_float(value, *data_arrayP + i);
+                    break;
+                }
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+                
+                default:
+                    return COAP_400_BAD_REQUEST;
+                    break;
+            }
             result = COAP_205_CONTENT;
         } else {
             result = COAP_404_NOT_FOUND;
@@ -147,15 +206,71 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                 continue;
             }
 
-            /* The registry only supports strings */
-            if (data_array[i].type == LWM2M_TYPE_STRING || data_array[i].type == LWM2M_TYPE_OPAQUE) {
-                int index = data_array[i].id;
-                char buf[REGISTRY_MAX_VAL_LEN] = {0};
-                strncpy(buf, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
-                registry_set_value(userData->res_list[index].value, buf);
-                result = COAP_204_CHANGED;
-            } else {
-                result = COAP_400_BAD_REQUEST;
+            switch (data_array[i].type) {
+                case LWM2M_TYPE_OPAQUE: {
+                    int index = data_array[i].id;
+                    char buf[REGISTRY_MAX_VAL_LEN] = {0};
+
+                    switch (userData->res_list[index].data_type) {
+                        case REGISTRY_TYPE_NONE:
+                            return COAP_400_BAD_REQUEST;
+                            break;
+
+                        case REGISTRY_TYPE_INT8:
+                        case REGISTRY_TYPE_INT16:
+                        case REGISTRY_TYPE_INT32:
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+                        case REGISTRY_TYPE_INT64:
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+                        {
+                            int64_t value;
+                            lwm2m_data_decode_int(&data_array[i], &value);
+                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%" PRId64, value);
+                            break;
+                        }
+
+                        case REGISTRY_TYPE_STRING:
+                            strncpy(buf, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
+                            break;
+
+                        case REGISTRY_TYPE_BOOL: {
+                            bool value;
+                            lwm2m_data_decode_bool(&data_array[i], &value);
+                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%" PRId32, value);
+                            break;
+                        }
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+                        case REGISTRY_TYPE_FLOAT: {
+                            double value;
+                            lwm2m_data_decode_float(&data_array[i], &value);
+                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
+                            break;
+                        }
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+                        
+                        default:
+                            return COAP_400_BAD_REQUEST;
+                            break;
+                    }
+                    registry_set_value(userData->res_list[index].value, buf);
+                    result = COAP_204_CHANGED;
+                    break;
+                }
+
+                case LWM2M_TYPE_STRING: {
+                    result = COAP_204_CHANGED;
+                    break;
+                }
+
+                case LWM2M_TYPE_BOOLEAN: {
+                    result = COAP_204_CHANGED;
+                    break;
+                }
+                
+                default:
+                    result = COAP_400_BAD_REQUEST;
+                    break;
             }
         }
     }
@@ -185,7 +300,7 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
         goto err_out;
     }
 
-    if (userData->res_list[resource_id].type == REG_DATA_OPERATION_TYPE_EXEC) {
+    if (userData->res_list[resource_id].operation_type == REG_DATA_OPERATION_TYPE_EXEC) {
         userData->hndlr->hndlr_commit(userData->hndlr->context);
         result = COAP_204_CHANGED;
     } else {
@@ -246,7 +361,7 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
 
     /* Init the commit executable item inside res_list */
     userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
-    userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_EXEC;
+    userData->res_list[userData->res_list_size].operation_type = REG_DATA_OPERATION_TYPE_EXEC;
     userData->res_list_size += 1;
 
     /* Init the res_list */
@@ -261,7 +376,8 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
 
         /* Increase the size of the list of property names to fit in the new exported property name */
         userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
-        userData->res_list[userData->res_list_size].type = REG_DATA_OPERATION_TYPE_READ_WRITE;
+        userData->res_list[userData->res_list_size].operation_type = REG_DATA_OPERATION_TYPE_READ_WRITE;
+        userData->res_list[userData->res_list_size].data_type = parameter.data.type;
         userData->res_list[userData->res_list_size].value = path; // TODO replace with id
 
         /* Increase the size counter of the list */

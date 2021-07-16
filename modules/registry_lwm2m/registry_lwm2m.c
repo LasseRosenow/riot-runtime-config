@@ -124,7 +124,51 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                 printf("                <Operations>RW</Operations>\n");
                 printf("                <MultipleInstances>Single</MultipleInstances>\n");
                 printf("                <Mandatory>Optional</Mandatory>\n");
-                printf("                <Type>String</Type>\n");
+
+                printf("                <Type>");
+                switch (parameter.data.type) {
+                    case REGISTRY_TYPE_NONE:
+                        printf("String");
+                        break;
+
+                    case REGISTRY_TYPE_INT8:
+                        printf("Integer");
+                        break;
+
+                    case REGISTRY_TYPE_INT16:
+                        printf("Integer");
+                        break;
+
+                    case REGISTRY_TYPE_INT32:
+                        printf("Integer");
+                        break;
+
+                    case REGISTRY_TYPE_STRING:
+                        printf("String");
+                        break;
+
+                    case REGISTRY_TYPE_BOOL:
+                        printf("Boolean");
+                        break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_INT64:
+                        printf("Integer");
+                        break;
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT:
+                        printf("Float");
+                        break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+                    
+                    default:
+                        printf("String");
+                        break;
+                }
+                printf("</Type>\n");
+                
                 printf("                <RangeEnumeration></RangeEnumeration>\n");
                 printf("                <Units></Units>\n");
                 printf("                <Description>%s</Description>\n", parameter.description);

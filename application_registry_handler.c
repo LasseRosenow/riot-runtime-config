@@ -55,7 +55,7 @@ static registry_parameter_t parameters[] = {
 /* Define a registry handler for the current RIOT module.
    To be registered in the RIOT Registry */
 registry_handler_t my_handler = {
-    .id = 1,
+    .id = 0,
     .name = "my_handler",
     .description = "Example my_handler description.",
     .parameters = parameters,
