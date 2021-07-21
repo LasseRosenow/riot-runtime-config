@@ -120,17 +120,18 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("                <Description>Commit changes</Description>\n");
             printf("            </Item>\n");
 
-            for (int i = 0; i < hndlr->parameters_len; i++) {
-                registry_parameter_t parameter = hndlr->parameters[i];
+            for (int i = 0; i < hndlr->schemas_len; i++) {
+                registry_schema_t schema = hndlr->schemas[i];
+                registry_parameter_t parameter = schema.value.parameter;
 
-                printf("            <Item ID=\"%d\">\n", parameter.id + 1); // Increase by 1 because the first item is the commit executable
-                printf("                <Name>%s</Name>\n", parameter.name);
+                printf("            <Item ID=\"%d\">\n", schema.id + 1); // Increase by 1 because the first item is the commit executable
+                printf("                <Name>%s</Name>\n", schema.name);
                 printf("                <Operations>RW</Operations>\n");
                 printf("                <MultipleInstances>Single</MultipleInstances>\n");
                 printf("                <Mandatory>Optional</Mandatory>\n");
 
                 printf("                <Type>");
-                switch (parameter.data.type) {
+                switch (parameter.type) {
                     case REGISTRY_TYPE_NONE:
                         printf("String");
                         break;
@@ -174,7 +175,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                 printf("</Type>\n");
 
                 printf("                <RangeEnumeration>");
-                switch (parameter.data.type) {
+                switch (parameter.type) {
                     case REGISTRY_TYPE_NONE: break;
 
                     case REGISTRY_TYPE_INT8:
@@ -212,7 +213,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                 printf("</RangeEnumeration>\n");
                 
                 printf("                <Units></Units>\n");
-                printf("                <Description>%s</Description>\n", parameter.description);
+                printf("                <Description>%s</Description>\n", schema.description);
                 printf("            </Item>\n");
             }
             

@@ -129,9 +129,10 @@ typedef enum {
 } registry_type_t;
 
 /**
- * @brief Concrete parameter data configuration group parameter.
+ * @brief Parameter of a configuration group.
  */
 typedef struct {
+    registry_type_t type; /**< Enum representing the type of the configuration parameter */
     union {
         int8_t i8;      /**< 8-bits integer */
         int16_t i16;    /**< 16-bits integer */
@@ -147,31 +148,45 @@ typedef struct {
         float f32;    /**< 32-bits float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT */
     } value; /**< Union representing the value of the configuration parameter */
-    registry_type_t type; /**< Enum representing the type of the configuration parameter */
-} registry_parameter_data_t;
-
-/**
- * @brief Parameter of a configuration group.
- */
-typedef struct {
-    int id; /**< Integer representing the configuration parameter */
-    registry_parameter_data_t data; /**< Struct representing the concrete parameter data */
-    char *name; /**< String describing the configuration parameter */
-    char *description; /**< String describing the configuration parameter with more details */
 } registry_parameter_t;
 
+typedef struct _registry_schema_t registry_schema_t;
+
+/**
+ * @brief Configuration group.
+ */
+typedef struct {
+    registry_schema_t *schemas;
+    int schemas_len;
+} registry_group_t;
+
+typedef enum {
+    REGISTRY_SCHEMA_TYPE_GROUP,
+    REGISTRY_SCHEMA_TYPE_PARAMETER,
+} registry_schema_type_t;
+
+struct _registry_schema_t {
+    int id; /**< Integer representing the configuration parameter */
+    char *name; /**< String describing the configuration parameter */
+    char *description; /**< String describing the configuration parameter with more details */
+    registry_schema_type_t type;
+    union {
+        registry_group_t group;
+        registry_parameter_t parameter;
+    } value;
+};
 
 /**
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(char *name, char *val, void *cb_arg);
+typedef void (*load_cb_t)(int *path, int path_len, char *val, void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities
  */
 typedef struct {
-    char *name; /**< name of the parameter being checked */
+    const int *path; /**< name of the parameter being checked */
     char *val;  /**< value of the parameter being checked */
     int is_dup; /**< flag indicating if the parameter is duplicated or not */
 } registry_dup_check_arg_t;
@@ -216,7 +231,7 @@ typedef struct registry_store_itf {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const char *name, const registry_parameter_data_t value);
+    int (*save)(registry_store_t *store, const int *path, int path_len, const registry_parameter_t value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -239,8 +254,8 @@ typedef struct {
     int id; /**< Integer representing the configuration group */
     char *name; /**< String describing the configuration group */
     char *description; /**< String describing the configuration group with more details */
-    registry_parameter_t *parameters; /**< Array representing all the configuration parameters that belong to this group */
-    int parameters_len; /**< Size of parameters array */
+    registry_schema_t *schemas; /**< Array representing all the configuration parameters that belong to this group */
+    int schemas_len; /**< Size of schemas array */
 
     /**
      * @brief Callback executed when a configuration parameter was read.
@@ -255,7 +270,7 @@ typedef struct {
      * of the configuration group. E.g. If a parameter name is 'group/foo/var'
      * and the name of the group is 'group', argv will contain 'foo' and 'var'.
      */
-    void (*hndlr_get_cb)(int argc, char **argv, const char *val, int val_len_max,
+    void (*hndlr_get_cb)(int *path, int path_len, const char *val, int val_len_max,
                        void *context);
 
     /**
@@ -270,7 +285,7 @@ typedef struct {
      * of the configuration group. E.g. If a parameter name is 'group/foo/var'
      * and the name of the group is 'group', argv will contain 'foo' and 'var'.
      */
-    void (*hndlr_set_cb)(int argc, char **argv, const char *val, void *context);
+    void (*hndlr_set_cb)(int *path, int path_len, const char *val, void *context);
 
     /**
      * @brief Handler to apply (commit) the configuration parameters of the
@@ -339,7 +354,7 @@ void registry_dst_register(registry_store_t *dst);
  * @return -EINVAL if handlers could not be found, otherwise returns the
  *             value of the set handler function.
  */
-int registry_set_value(char *name, char *val_str);
+int registry_set_value(int *path, int path_len, char *val_str);
 
 /**
  * @brief Gets the current value of a parameter that belongs to a configuration
@@ -350,7 +365,7 @@ int registry_set_value(char *name, char *val_str);
  * @param[in] buf_len Length of the buffer to store the current value
  * @return Pointer to the beginning of the buffer
  */
-char *registry_get_value(const char *name, char *buf, int buf_len);
+char *registry_get_value(int *path, int path_len, char *buf, int buf_len);
 
 /**
  * @brief If a @p name is passed it calls the commit handler for that
@@ -362,7 +377,7 @@ char *registry_get_value(const char *name, char *buf, int buf_len);
  * @return 0 on success, -EINVAL if the group has not implemented the commit
  * function.
  */
-int registry_commit(char *name);
+int registry_commit(int *path, int path_len);
 
 /**
  * @brief Convenience function to parse a configuration parameter value from
@@ -445,7 +460,7 @@ int registry_save(void);
  * @param[in] val Struct representing the value of the configuration parameter
  * @return 0 on success, non-zero on failure
  */
-int registry_save_one(const char *name, registry_parameter_data_t val, void *context);
+int registry_save_one(const int *path, int path_len, registry_parameter_t val, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
@@ -457,8 +472,8 @@ int registry_save_one(const char *name, registry_parameter_data_t val, void *con
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const char *name, registry_parameter_data_t val, void *context),
-                    char *name);
+int registry_export(int (*export_func)(const int *path, int path_len, registry_parameter_t val, void *context),
+                    int *path, int path_len);
 
 #ifdef __cplusplus
 }

@@ -10,8 +10,8 @@
 
 #define MAX_THRESHOLD (500)
 
-static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, void *context);
-static void my_set_cb(int argc, char **argv, const char *val, void *context);
+static void my_get_cb(int* path, int path_len, const char *val, int val_len_max, void *context);
+static void my_set_cb(int* path, int path_len, const char *val, void *context);
 static int my_commit_handler(void *context);
 
 /*
@@ -22,12 +22,13 @@ when `is_enabled==false`.
 Note the Registry Handler is not aware of any storage mechanism.
 */
 
-static registry_parameter_t parameters[] = {
+static registry_schema_t schemas[] = {
     {
         .id = 0,
         .name = "i8",
         .description = "Example i8 description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.i8 = 2,
             .type = REGISTRY_TYPE_INT8,
         },
@@ -36,7 +37,8 @@ static registry_parameter_t parameters[] = {
         .id = 1,
         .name = "i16",
         .description = "Example i16 description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.i16 = 9,
             .type = REGISTRY_TYPE_INT16,
         },
@@ -45,7 +47,8 @@ static registry_parameter_t parameters[] = {
         .id = 2,
         .name = "i32",
         .description = "Example i32 description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.i32 = 42,
             .type = REGISTRY_TYPE_INT32,
         },
@@ -54,7 +57,8 @@ static registry_parameter_t parameters[] = {
         .id = 3,
         .name = "i62",
         .description = "Example i64 description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.i64 = 407,
             .type = REGISTRY_TYPE_INT64,
         },
@@ -63,7 +67,8 @@ static registry_parameter_t parameters[] = {
         .id = 4,
         .name = "float",
         .description = "Example string description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.f32 = 7.4,
             .type = REGISTRY_TYPE_FLOAT,
         },
@@ -72,7 +77,8 @@ static registry_parameter_t parameters[] = {
         .id = 5,
         .name = "bool",
         .description = "Example bool description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.boolean = true,
             .type = REGISTRY_TYPE_BOOL,
         },
@@ -81,7 +87,8 @@ static registry_parameter_t parameters[] = {
         .id = 6,
         .name = "string",
         .description = "Example string description.",
-        .data = {
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .value.string = "This is a string",
             .type = REGISTRY_TYPE_STRING,
         },
@@ -94,8 +101,8 @@ registry_handler_t my_handler_2 = {
     .id = 1,
     .name = "my_handler_2",
     .description = "Example my_handler_2 description.",
-    .parameters = parameters,
-    .parameters_len = ARRAY_SIZE(parameters),
+    .schemas = schemas,
+    .schemas_len = ARRAY_SIZE(schemas),
     .hndlr_get_cb = my_get_cb,
     .hndlr_set_cb = my_set_cb,
     .hndlr_commit = my_commit_handler,
@@ -104,9 +111,9 @@ registry_handler_t my_handler_2 = {
 /* Dummy implementation of `get` handler.
    For both configuration parameters, it copies the value to a `val` variable.
 */
-static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, void *context) {
-    (void) argc;
-    (void) argv;
+static void my_get_cb(int* path, int path_len, const char *val, int val_len_max, void *context) {
+    (void) path;
+    (void) path_len;
     (void) val;
     (void) val_len_max;
     (void) context;
@@ -115,9 +122,9 @@ static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, v
 /* Dummy implementation of `set` handler.
    For both configuration parameters, it sets the value from `val`.
 */
-static void my_set_cb(int argc, char **argv, const char *val, void *context) {
-    (void) argc;
-    (void) argv;
+static void my_set_cb(int* path, int path_len, const char *val, void *context) {
+    (void) path;
+    (void) path_len;
     (void) val;
     (void) context;
 }

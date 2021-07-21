@@ -10,11 +10,24 @@
 registry_store_t *save_dst;
 clist_node_t load_srcs;
 
-static void _registry_load_cb(char *name, char *val, void *cb_arg)
+void _debug_print_path(const int *path, int path_len) {
+    for (int i = 0; i < path_len; i++) {
+        DEBUG("%d", path[i]);
+        
+        if (i < path_len - 1) {
+            DEBUG("/");
+        }
+    }
+}
+
+static void _registry_load_cb(int *path, int path_len, char *val, void *cb_arg)
 {
     (void)cb_arg;
-    DEBUG("[registry_store] Setting %s to %s\n", name, val);
-    registry_set_value(name, val);
+    DEBUG("[registry_store] Setting ");
+    _debug_print_path(path, path_len);
+    DEBUG(" to %s\n", val);
+
+    registry_set_value(path, path_len, val);
 }
 
 void registry_store_init(void)
@@ -50,12 +63,14 @@ int registry_load(void)
     return 0;
 }
 
-static void _registry_dup_check_cb(char *name, char *val, void *cb_arg)
+static void _registry_dup_check_cb(int *path, int path_len, char *val, void *cb_arg)
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
-    if (strcmp(name, dup_arg->name)) {
-        return;
+    for (int i = 0; i < path_len; i++) {
+        if (path[i] != dup_arg->path[i]) {
+            return;
+        }
     }
     if (!val) {
         if (!dup_arg->val || dup_arg->val[0] == '\0') {
@@ -69,7 +84,7 @@ static void _registry_dup_check_cb(char *name, char *val, void *cb_arg)
     }
 }
 
-int registry_save_one(const char *name, registry_parameter_data_t value, void *context)
+int registry_save_one(const int *path, int path_len, registry_parameter_t value, void *context)
 {
     (void) context;
     registry_store_t *dst = save_dst;
@@ -78,13 +93,15 @@ int registry_save_one(const char *name, registry_parameter_data_t value, void *c
     char buf[REGISTRY_MAX_VAL_LEN];
     registry_str_from_value(value.type, &value.value, buf, sizeof(buf));
 
-    DEBUG("[registry_store] Saving: %s = %s\n", name, buf);
+    DEBUG("[registry_store] Saving: ");
+    _debug_print_path(path, path_len);
+    DEBUG(" = %s\n", buf);
 
     if (!dst) {
         return -ENOENT;
     }
 
-    dup.name = (char *)name;
+    dup.path = path;
     dup.val = buf;
     dup.is_dup = 0;
 
@@ -94,7 +111,7 @@ int registry_save_one(const char *name, registry_parameter_data_t value, void *c
         return -EEXIST;
     }
 
-    return dst->itf->save(dst, name, value);
+    return dst->itf->save(dst, path, path_len, value);
 }
 
 int registry_save(void)
@@ -114,7 +131,7 @@ int registry_save(void)
 
     do  {
         hndlr = container_of(node, registry_handler_t, node);
-        res2 = registry_export(registry_save_one, hndlr->name);
+        res2 = registry_export(registry_save_one, &hndlr->id, 1);
         if (res == 0) {
             res = res2;
         }

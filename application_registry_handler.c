@@ -10,8 +10,8 @@
 
 #define MAX_THRESHOLD (500)
 
-static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, void *context);
-static void my_set_cb(int argc, char **argv, const char *val, void *context);
+static void my_get_cb(int* path, int path_len, const char *val, int val_len_max, void *context);
+static void my_set_cb(int* path, int path_len, const char *val, void *context);
 static int my_commit_handler(void *context);
 
 /*
@@ -22,32 +22,35 @@ when `is_enabled==false`.
 Note the Registry Handler is not aware of any storage mechanism.
 */
 
-static registry_parameter_t parameters[] = {
+static registry_schema_t schemas[] = {
     {
         .id = 0,
         .name = "is_enabled",
         .description = "Example is_enabled description.",
-        .data = {
-            .value.boolean = false,
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .type = REGISTRY_TYPE_BOOL,
+            .value.boolean = false,
         },
     },
     {
         .id = 1,
         .name = "threshold",
         .description = "Example threshold description.",
-        .data = {
-            .value.i32 = 7,
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .type = REGISTRY_TYPE_INT32,
+            .value.i32 = 7,
         },
     },
     {
         .id = 2,
         .name = "name",
         .description = "Example name description.",
-        .data = {
-            .value.string = "Lasse",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
             .type = REGISTRY_TYPE_STRING,
+            .value.string = "Lasse",
         },
     },
 };
@@ -58,8 +61,8 @@ registry_handler_t my_handler = {
     .id = 0,
     .name = "my_handler",
     .description = "Example my_handler description.",
-    .parameters = parameters,
-    .parameters_len = ARRAY_SIZE(parameters),
+    .schemas = schemas,
+    .schemas_len = ARRAY_SIZE(schemas),
     .hndlr_get_cb = my_get_cb,
     .hndlr_set_cb = my_set_cb,
     .hndlr_commit = my_commit_handler,
@@ -68,9 +71,9 @@ registry_handler_t my_handler = {
 /* Dummy implementation of `get` handler.
    For both configuration parameters, it copies the value to a `val` variable.
 */
-static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, void *context) {
-    (void) argc;
-    (void) argv;
+static void my_get_cb(int* path, int path_len, const char *val, int val_len_max, void *context) {
+    (void) path;
+    (void) path_len;
     (void) val;
     (void) val_len_max;
     (void) context;
@@ -79,9 +82,9 @@ static void my_get_cb(int argc, char **argv, const char *val, int val_len_max, v
 /* Dummy implementation of `set` handler.
    For both configuration parameters, it sets the value from `val`.
 */
-static void my_set_cb(int argc, char **argv, const char *val, void *context) {
-    (void) argc;
-    (void) argv;
+static void my_set_cb(int* path, int path_len, const char *val, void *context) {
+    (void) path;
+    (void) path_len;
     (void) val;
     (void) context;
 }

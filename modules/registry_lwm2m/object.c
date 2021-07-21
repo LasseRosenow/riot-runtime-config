@@ -20,7 +20,8 @@ typedef enum {
 typedef struct {
     reg_data_operation_type_t operation_type;
     registry_type_t data_type;
-    char *value;
+    int* path;
+    int path_len;
 } reg_data_res_t;
 
 typedef struct {
@@ -120,7 +121,7 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         int index = (*data_arrayP)[i].id;
         if (index < userData->res_list_size) {
             char buf[REGISTRY_MAX_VAL_LEN];
-            registry_get_value(userData->res_list[index].value, buf, REGISTRY_MAX_VAL_LEN);
+            registry_get_value(userData->res_list[index].path, userData->res_list[index].path_len, buf, REGISTRY_MAX_VAL_LEN);
             switch (userData->res_list[index].data_type) {
                 case REGISTRY_TYPE_NONE:
                     return COAP_400_BAD_REQUEST;
@@ -211,6 +212,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                     int index = data_array[i].id;
                     char buf[REGISTRY_MAX_VAL_LEN] = {0};
 
+                    // TODO what if index would be something like 35508 even though res_list would only contain 6 items? ... something like a map or a helper function?
                     switch (userData->res_list[index].data_type) {
                         case REGISTRY_TYPE_NONE:
                             return COAP_400_BAD_REQUEST;
@@ -253,7 +255,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                             return COAP_400_BAD_REQUEST;
                             break;
                     }
-                    registry_set_value(userData->res_list[index].value, buf);
+                    registry_set_value(userData->res_list[index].path, userData->res_list[index].path_len, buf);
                     result = COAP_204_CHANGED;
                     break;
                 }
@@ -365,20 +367,22 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
     userData->res_list_size += 1;
 
     /* Init the res_list */
-    for (int i = 0; i < userData->hndlr->parameters_len; i++) {
-        registry_parameter_t parameter = hndlr->parameters[i];
+    for (int i = 0; i < userData->hndlr->schemas_len; i++) {
+        registry_schema_t schema = hndlr->schemas[i];
+        registry_parameter_t parameter = hndlr->schemas[i].value.parameter;
 
-        /* Generate whole registry parameter path from group and parameter name */
-        char *path = malloc(strlen(hndlr->name) + strlen(parameter.name) + 1);
-        strcpy(path, hndlr->name);
-        strcpy(path + strlen(hndlr->name), "/");
-        strcpy(path + strlen(hndlr->name) + 1, parameter.name);
+        // TODO this only works for 1 level paths. No nesting etc.
+        int path_len = 2;
+        int *path = malloc(2*sizeof(int));
+        path[0] = hndlr->id;
+        path[1] = schema.id;
 
         /* Increase the size of the list of property names to fit in the new exported property name */
         userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
         userData->res_list[userData->res_list_size].operation_type = REG_DATA_OPERATION_TYPE_READ_WRITE;
-        userData->res_list[userData->res_list_size].data_type = parameter.data.type;
-        userData->res_list[userData->res_list_size].value = path; // TODO replace with id
+        userData->res_list[userData->res_list_size].data_type = parameter.type;
+        userData->res_list[userData->res_list_size].path = path;
+        userData->res_list[userData->res_list_size].path_len = path_len;
 
         /* Increase the size counter of the list */
         userData->res_list_size += 1;
