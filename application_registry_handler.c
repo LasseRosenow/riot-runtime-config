@@ -22,9 +22,15 @@ when `is_enabled==false`.
 Note the Registry Handler is not aware of any storage mechanism.
 */
 
+typedef enum {
+    IS_ENABLED,
+    THREASHOLD,
+    NAME,
+} schema_indices_t;
+
 static registry_schema_t schemas[] = {
     {
-        .id = 0,
+        .id = IS_ENABLED,
         .name = "is_enabled",
         .description = "Example is_enabled description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
@@ -34,7 +40,7 @@ static registry_schema_t schemas[] = {
         },
     },
     {
-        .id = 1,
+        .id = THREASHOLD,
         .name = "threshold",
         .description = "Example threshold description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
@@ -44,7 +50,7 @@ static registry_schema_t schemas[] = {
         },
     },
     {
-        .id = 2,
+        .id = NAME,
         .name = "name",
         .description = "Example name description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,

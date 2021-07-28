@@ -22,75 +22,85 @@ when `is_enabled==false`.
 Note the Registry Handler is not aware of any storage mechanism.
 */
 
+typedef enum {
+    I_8,
+    I_16,
+    I_32,
+    I_64,
+    FLOAT,
+    BOOL,
+    STRING,
+} schema_indices_t;
+
 static registry_schema_t schemas[] = {
     {
-        .id = 0,
+        .id = I_8,
         .name = "i8",
         .description = "Example i8 description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.i8 = 2,
             .type = REGISTRY_TYPE_INT8,
+            .value.i8 = 2,
         },
     },
     {
-        .id = 1,
+        .id = I_16,
         .name = "i16",
         .description = "Example i16 description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.i16 = 9,
             .type = REGISTRY_TYPE_INT16,
+            .value.i16 = 9,
         },
     },
     {
-        .id = 2,
+        .id = I_32,
         .name = "i32",
         .description = "Example i32 description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.i32 = 42,
             .type = REGISTRY_TYPE_INT32,
+            .value.i32 = 42,
         },
     },
     {
-        .id = 3,
-        .name = "i62",
+        .id = I_64,
+        .name = "i64",
         .description = "Example i64 description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.i64 = 407,
             .type = REGISTRY_TYPE_INT64,
+            .value.i64 = 407,
         },
     },
     {
-        .id = 4,
+        .id = FLOAT,
         .name = "float",
         .description = "Example string description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.f32 = 7.4,
             .type = REGISTRY_TYPE_FLOAT,
+            .value.f32 = 7.4,
         },
     },
     {
-        .id = 5,
+        .id = BOOL,
         .name = "bool",
         .description = "Example bool description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.boolean = true,
             .type = REGISTRY_TYPE_BOOL,
+            .value.boolean = true,
         },
     },
     {
-        .id = 6,
+        .id = STRING,
         .name = "string",
         .description = "Example string description.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .value.string = "This is a string",
             .type = REGISTRY_TYPE_STRING,
+            .value.string = "This is a string",
         },
     },
 };
