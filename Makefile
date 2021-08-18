@@ -45,17 +45,15 @@ CFLAGS += -DCONFIG_REGISTRY_USE_INT64=1
 CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT=1
 
 # External modules
-EXTERNAL_MODULE_DIRS += modules/registry
-EXTERNAL_MODULE_DIRS += modules/registry_coap
-EXTERNAL_MODULE_DIRS += modules/registry_lwm2m
 USEMODULE += registry
 USEMODULE += registry_coap
 USEMODULE += registry_lwm2m
+EXTERNAL_MODULE_DIRS += external_modules
 # LwM2M logging
-CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=0
+CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1
 # Specific the server URI  address (NOTE: Domain names not supported yet)
 ifndef CONFIG_LWM2M_SERVER_URI
-  CFLAGS += -DCONFIG_LWM2M_SERVER_URI='"coap://[fe80::a8bb:ccff:fedd:eeff]:5683"'
+  CFLAGS += -DCONFIG_LWM2M_SERVER_URI='"coap://[fe80::845c:97ff:feec:c1c6]:5683"'
 endif
 ifndef CONFIG_LWM2M_DEVICE_NAME
   CFLAGS += -DCONFIG_LWM2M_DEVICE_NAME='"riot-device"'

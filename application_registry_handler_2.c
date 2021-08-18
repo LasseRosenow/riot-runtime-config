@@ -63,7 +63,7 @@ static registry_schema_t schemas[] = {
             .value.i32 = 42,
         },
     },
-    {
+    /* {
         .id = I_64,
         .name = "i64",
         .description = "Example i64 description.",
@@ -82,7 +82,7 @@ static registry_schema_t schemas[] = {
             .type = REGISTRY_TYPE_FLOAT,
             .value.f32 = 7.4,
         },
-    },
+    }, */
     {
         .id = BOOL,
         .name = "bool",
