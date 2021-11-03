@@ -20,28 +20,28 @@
  * ## Architecture
  *
  * The Registry interacts with other RIOT modules via
- * @ref registry_handler_t "Registry Handlers", and with non-volatile devices
+ * @ref registry_schema_t "Registry Schemas", and with non-volatile devices
  * via @ref sys_registry_store "Storage Facilities". This way the functionality
  * of the RIOT Registry is independent of the functionality of the module and
  * storage devices.
  *
  * ![RIOT Registry architecture](riot-registry-architecture.svg)
  *
- * ### Registry Handlers
+ * ### Registry Schemas
  *
- * @ref registry_handler_t "Registry Handlers" (RH) represent Configuration
+ * @ref registry_schema_t "Registry Schemas" (RS) represent Configuration
  * Groups in the RIOT Registry. A RIOT module is required to implement and
- * register a RH in order to expose its configurations in the Registry.
+ * register a RS in order to expose its configurations in the Registry.
  *
- * A RH is defined by a @ref registry_handler_t::name "name" and a series of
- * handlers for interacting with the configuration parametes of the
- * configuration group. The handlers are:
+ * A RS is defined by a @ref registry_schema_t::name "name" and a series of
+ * schemas for interacting with the configuration parametes of the
+ * configuration group. The schemas are:
  *
- * - @ref registry_handler_t::hndlr_get "get"
- * - @ref registry_handler_t::hndlr_set "set"
- * - @ref registry_handler_t::hndlr_commit "commit"
+ * - @ref registry_schema_t::hndlr_get "get"
+ * - @ref registry_schema_t::hndlr_set "set"
+ * - @ref registry_schema_t::hndlr_commit "commit"
  *
- * It is responsibility of the module to implement these handlers and perform
+ * It is responsibility of the module to implement these schemas and perform
  * all necessary checks before applying values to the configuration parameters.
  *
  * ### Storage Facilities
@@ -134,30 +134,15 @@ typedef enum {
  */
 typedef struct {
     registry_type_t type; /**< Enum representing the type of the configuration parameter */
-    union {
-        int8_t i8;      /**< 8-bits integer */
-        int16_t i16;    /**< 16-bits integer */
-        int32_t i32;    /**< 32-bits integer */
-        char string[REGISTRY_MAX_VAL_LEN];   /**< String */
-        bool boolean;   /**< Boolean */
-
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-        int64_t i64;     /**< 64-bits integer */
-#endif /* CONFIG_REGISTRY_USE_INT64 */
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-        float f32;    /**< 32-bits float */
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
-    } value; /**< Union representing the value of the configuration parameter */
 } registry_parameter_t;
 
-typedef struct _registry_schema_t registry_schema_t;
+typedef struct _registry_schema_item_t registry_schema_item_t;
 
 /**
  * @brief Configuration group.
  */
 typedef struct {
-    registry_schema_t *schemas;
+    registry_schema_item_t *schemas;
     int schemas_len;
 } registry_group_t;
 
@@ -166,7 +151,7 @@ typedef enum {
     REGISTRY_SCHEMA_TYPE_PARAMETER,
 } registry_schema_type_t;
 
-struct _registry_schema_t {
+struct _registry_schema_item_t {
     int id; /**< Integer representing the configuration parameter */
     char *name; /**< String describing the configuration parameter */
     char *description; /**< String describing the configuration parameter with more details */
@@ -245,9 +230,9 @@ typedef struct registry_store_itf {
 } registry_store_itf_t;
 
 /**
- * @brief Handler for configuration groups. Each configuration group should
- * register a handler using the @ref registry_register() function.
- * A handler provides the pointer to get, set and commit configuration
+ * @brief Schema for configuration groups. Each configuration group should
+ * register a schema using the @ref registry_register() function.
+ * A schema provides the pointer to get, set and commit configuration
  * parameters.
  */
 typedef struct {
@@ -255,58 +240,53 @@ typedef struct {
     int id; /**< Integer representing the configuration group */
     char *name; /**< String describing the configuration group */
     char *description; /**< String describing the configuration group with more details */
-    registry_schema_t *schemas; /**< Array representing all the configuration parameters that belong to this group */
+    registry_schema_item_t *schemas; /**< Array representing all the configuration parameters that belong to this group */
     int schemas_len; /**< Size of schemas array */
+    clist_node_t instances;
 
     /**
-     * @brief Callback executed when a configuration parameter was read.
+     * @brief Handler to get the current value of a configuration parameter.
      *
-     * @param[in] argc Number of elements in @p argv
-     * @param[in] argv Parsed string representing the configuration parameter.
-     * @param[in] val Buffer containing the value
-     * @param[in] val_len_max Size of @p val
-     * @param[in] context Context of the handler
-     *
-     * @note The strings passed in @p argv do not contain the string of the name
-     * of the configuration group. E.g. If a parameter name is 'group/foo/var'
-     * and the name of the group is 'group', argv will contain 'foo' and 'var'.
+     * @param[in] param_id ID of the parameter that contains the value
+     * @param[in] instance Pointer to the instance of the schema, that contains the parameter
+     * @param[out] buf Pointer to a buffer to store the current value
+     * @param[in] buf_len Length of the buffer to store the current value
+     * @param[in] context Context of the schema
      */
-    void (*hndlr_get_cb)(int *path, int path_len, const char *val, int val_len_max,
-                       void *context);
+    void (*hndlr_get)(int param_id, void *instance, void *buf,
+                    int buf_len, void *context);
 
     /**
-     * @brief Callback executed when a configuration parameter was changed.
+     * @brief Handler to set a the value of a configuration parameter.
      *
-     * @param[in] argc Number of elements in @p argv
-     * @param[in] argv Parsed string representing the configuration parameter.
+     * @param[in] param_id ID of the parameter that contains the value
+     * @param[in] instance Pointer to the instance of the schema, that contains the parameter
      * @param[in] val Buffer containing the new value
-     * @param[in] context Context of the handler
-     *
-     * @note The strings passed in @p argv do not contain the string of the name
-     * of the configuration group. E.g. If a parameter name is 'group/foo/var'
-     * and the name of the group is 'group', argv will contain 'foo' and 'var'.
+     * @param[in] val_len Length of the buffer to store the current value
+     * @param[in] context Context of the schema
      */
-    void (*hndlr_set_cb)(int *path, int path_len, const char *val, void *context);
+    void (*hndlr_set)(int param_id, void *instance, void *val,
+                    int val_len, void *context);
 
     /**
-     * @brief Handler to apply (commit) the configuration parameters of the
+     * @brief Schema to apply (commit) the configuration parameters of the
      * group, called once all configurations are loaded from storage.
      * This is useful when a special logic is needed to apply the parameters
-     * (e.g. when dependencies exist). This handler should also be called after
+     * (e.g. when dependencies exist). This schema should also be called after
      * setting the value of a configuration parameter.
      *
-     * @param[in] context Context of the handler
+     * @param[in] context Context of the schema
      * @return 0 on success, non-zero on failure
      */
-    int (*hndlr_commit)(void *context);
+    int (*hndlr_commit_cb)(void *context);
 
-    void *context; /**< Optional context used by the handlers */
-} registry_handler_t;
+    void *context; /**< Optional context used by the schemas */
+} registry_schema_t;
 
 /**
- * @brief List of registered handlers
+ * @brief List of registered schemas
  */
-extern clist_node_t registry_handlers;
+extern clist_node_t registry_schemas;
 
 /**
  * @brief Initializes the RIOT Registry and the store modules.
@@ -319,11 +299,11 @@ void registry_init(void);
 void registry_store_init(void);
 
 /**
- * @brief Registers a new group of handlers for a configuration group.
+ * @brief Registers a new group of schemas for a configuration group.
  *
- * @param[in] handler Pointer to the handlers structure.
+ * @param[in] schema Pointer to the schemas structure.
  */
-void registry_register(registry_handler_t *handler);
+void registry_register(registry_schema_t *schema);
 
 /**
  * @brief Registers a new storage as a source of configurations. Multiple
@@ -348,12 +328,22 @@ void registry_src_register(registry_store_t *src);
 void registry_dst_register(registry_store_t *dst);
 
 /**
+ * @brief Adds a new instance of a schema.
+ *
+ * @param[in] schema_id ID of the schema.
+ * @param[in] instance Pointer to the linked list node of the new instance.
+ * @return -EINVAL if schema could not be found, otherwise returns the
+ *             index of the new instance.
+ */
+int registry_add_instance(int schema_id, clist_node_t *instance);
+
+/**
  * @brief Sets the value of a parameter that belongs to a configuration group.
  *
  * @param[in] name String of the name of the parameter to be set
  * @param[in] val_str New value for the parameter
- * @return -EINVAL if handlers could not be found, otherwise returns the
- *             value of the set handler function.
+ * @return -EINVAL if schema could not be found, otherwise returns the
+ *             value of the set schema function.
  */
 int registry_set_value(int *path, int path_len, char *val_str);
 
@@ -369,8 +359,8 @@ int registry_set_value(int *path, int path_len, char *val_str);
 char *registry_get_value(int *path, int path_len, char *buf, int buf_len);
 
 /**
- * @brief If a @p name is passed it calls the commit handler for that
- *        configuration group. If no @p name is passed the commit handler is
+ * @brief If a @p name is passed it calls the commit schema for that
+ *        configuration group. If no @p name is passed the commit schema is
  *        called for every registered configuration group.
  *
  * @param[in] name Name of the configuration group to commit the changes (can
@@ -411,7 +401,7 @@ int registry_bytes_from_str(char *val_str, void *vp, int *len);
  * @brief Convenience function to transform a configuration parameter value into
  * a string, when the parameter is not of `bytes` type, in this case
  * @ref registry_str_from_bytes() should be used. This is used for example to
- * implement the `get` or `export` handlers.
+ * implement the `get` or `export` schemas.
  *
  * @param[in] type Type of the parameter to be converted
  * @param[in] vp Pointer to the value to be converted
@@ -425,7 +415,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
 /**
  * @brief Convenience function to transform a configuration parameter value of
  * `bytes` type into a string. This is used for example to implement the `get`
- * or `export` handlers.
+ * or `export` schemas.
  *
  * @param[in] vp Pointer to the value to be converted
  * @param[in] vp_len Length of @p vp

@@ -1,0 +1,121 @@
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "kernel_defines.h"
+
+#include "registry.h"
+
+#include "application_registry_schema_2.h"
+
+#define MAX_THRESHOLD (500)
+
+static void get(int param_id, void *instance, void *buf, int buf_len, void *context);
+static void set(int param_id, void *instance, void *val, int val_len, void *context);
+static int commit_cb(void *context);
+
+static registry_schema_item_t schemas[] = {
+    {
+        .id = I_8,
+        .name = "i8",
+        .description = "Example i8 description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_INT8,
+        },
+    },
+    {
+        .id = I_16,
+        .name = "i16",
+        .description = "Example i16 description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_INT16,
+        },
+    },
+    {
+        .id = I_32,
+        .name = "i32",
+        .description = "Example i32 description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_INT32,
+        },
+    },
+    
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+    {
+        .id = I_64,
+        .name = "i64",
+        .description = "Example i64 description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_INT64,
+        },
+    },
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+    {
+        .id = FLOAT,
+        .name = "float",
+        .description = "Example string description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_FLOAT,
+        },
+    },
+#endif /* CONFIG_REGISTRY_USE_FLOAT */
+
+    {
+        .id = BOOL,
+        .name = "bool",
+        .description = "Example bool description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_BOOL,
+        },
+    },
+    {
+        .id = STRING,
+        .name = "string",
+        .description = "Example string description.",
+        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
+        .value.parameter = {
+            .type = REGISTRY_TYPE_STRING,
+        },
+    },
+};
+
+registry_schema_t my_schema_2 = {
+    .id = 1,
+    .name = "my_schema_2",
+    .description = "Example my_schema_2 description.",
+    .schemas = schemas,
+    .schemas_len = ARRAY_SIZE(schemas),
+    .hndlr_get = get,
+    .hndlr_set = set,
+    .hndlr_commit_cb = commit_cb,
+};
+
+static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {
+    (void) param_id;
+    (void) instance;
+    (void) buf;
+    (void) buf_len;
+    (void) context;
+}
+
+static void set(int param_id, void *instance, void *val, int val_len, void *context) {
+    (void) param_id;
+    (void) instance;
+    (void) val;
+    (void) val_len;
+    (void) context;
+}
+
+static int commit_cb(void *context) {
+    (void) context;
+
+    return 0;
+}

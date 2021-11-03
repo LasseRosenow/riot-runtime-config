@@ -50,7 +50,7 @@ enum lwm2m_registry_error_codes {
     LWM2M_REGISTRY_ERR_PERIPH_ERR = 8  /**< Peripheral malfunction */
 };
 
-lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id);
+lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id);
 
 void lwm2m_free_object_registry(lwm2m_object_t *obj);
 

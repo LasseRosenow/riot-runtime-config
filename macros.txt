@@ -1,0 +1,24 @@
+/* #define NUMARGS(...)  (sizeof((int[]){__VA_ARGS__})/sizeof(int))
+
+#define CREATE_SCHEMA(_id, _instances, _name, _description, _parameters...)\
+    static registry_schema_item_t schemas[] = {\
+        .id = _id,\
+        .name = #_name,\
+        .description = _description,\
+        .parameters_len = NUMARGS(_parameters),\
+        .parameters = [_parameters],
+    }
+
+#define CREATE_SCHEMA_PARAMETER(_id, _name, _description, _type)\
+    {\
+        .id = _id,\
+        .name = #_name,\
+        .description = _description,\
+        .type = _type,\
+    }
+
+CREATE_SCHEMA(0, 2, MY_SCHEMA, "Example my_schema description.",
+    CREATE_SCHEMA_PARAMETER(0, IS_ENABLED, "Example is_enabled description.", REGISTRY_TYPE_BOOL),
+    CREATE_SCHEMA_PARAMETER(1, THRESHOLD, "Example threshold description.", REGISTRY_TYPE_INT32),
+    CREATE_SCHEMA_PARAMETER(2, NAME, "Example name description.", REGISTRY_TYPE_STRING),
+); */

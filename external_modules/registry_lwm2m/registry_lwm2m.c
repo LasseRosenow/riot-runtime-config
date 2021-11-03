@@ -57,23 +57,23 @@ void registry_lwm2m_cli_init(void)
 
     /* create the Riot Registry objects */
 
-    clist_node_t *node = registry_handlers.next;
+    clist_node_t *node = registry_schemas.next;
 
     if (!node) {
-        puts("No registry handlers registered.");
+        puts("No registry schema instances registered.");
     }
 
     int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START;
-    do  {
+    do {
         node = node->next;
-        registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+        registry_schema_t *hndlr = container_of(node, registry_schema_t, node);
 
         obj_list_counter++;
         obj_list = realloc(obj_list, obj_list_counter * sizeof(*obj_list));
         obj_list[obj_list_counter - 1] = lwm2m_get_object_registry(hndlr, obj_id);
 
         obj_id++;
-    } while (node != registry_handlers.next);
+    } while (node != registry_schemas.next);
 
     /* start the lwm2m client */
     lwm2m_client_run(&client_data, obj_list, obj_list_counter);
@@ -90,11 +90,11 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
         printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
         printf("<LWM2M xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://openmobilealliance.org/tech/profiles/LWM2M.xsd\">\n");
 
-        clist_node_t *node = registry_handlers.next;
+        clist_node_t *node = registry_schemas.next;
 
         do  {
             node = node->next;
-            registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+            registry_schema_t *hndlr = container_of(node, registry_schema_t, node);
             int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START + hndlr->id;
             
             printf("    <Object ObjectType=\"MODefinition\">\n");
@@ -121,7 +121,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("            </Item>\n");
 
             for (int i = 0; i < hndlr->schemas_len; i++) {
-                registry_schema_t schema = hndlr->schemas[i];
+                registry_schema_item_t schema = hndlr->schemas[i];
                 registry_parameter_t parameter = schema.value.parameter;
 
                 printf("            <Item ID=\"%d\">\n", schema.id + 1); // Increase by 1 because the first item is the commit executable
@@ -222,7 +222,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("    </Object>\n");
 
             obj_id++;
-        } while (node != registry_handlers.next);
+        } while (node != registry_schemas.next);
 
         printf("</LWM2M>\n");
 

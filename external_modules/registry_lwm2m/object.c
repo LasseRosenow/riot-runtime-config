@@ -25,22 +25,22 @@ typedef struct {
 } reg_data_res_t;
 
 typedef struct {
-    registry_handler_t *hndlr;
+    registry_schema_t *hndlr;
     reg_data_res_t *res_list;
     int res_list_size;
 } reg_data_t;
 
-/* static void _get_reg_data_from_registry_handlers(uint16_t* reg_data) {
-    clist_node_t *node = registry_handlers.next;
+/* static void _get_reg_data_from_registry_schemas(uint16_t* reg_data) {
+    clist_node_t *node = registry_schemas.next;
     int size = 0;
 
     do  {
         node = node->next;
-        registry_handler_t *hndlr = container_of(node, registry_handler_t, node);
+        registry_schema_t *hndlr = container_of(node, registry_schema_t, node);
         size++;
 
         reg_data = realloc(reg_data, size * sizeof(uint16_t));
-    } while (node != registry_handlers.next);
+    } while (node != registry_schemas.next);
 } */
 
 static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
@@ -321,7 +321,7 @@ bool lwm2m_registry_reboot_requested(void)
     return reboot;
 }
 
-lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
+lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id)
 {
     lwm2m_object_t *obj;
 
@@ -368,7 +368,7 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_handler_t *hndlr, int obj_id)
 
     /* Init the res_list */
     for (int i = 0; i < userData->hndlr->schemas_len; i++) {
-        registry_schema_t schema = hndlr->schemas[i];
+        registry_schema_item_t schema = hndlr->schemas[i];
         registry_parameter_t parameter = hndlr->schemas[i].value.parameter;
 
         // TODO this only works for 1 level paths. No nesting etc.

@@ -1,6 +1,0 @@
-#ifndef RUNTIME_CONFIG_REGISTRY_HANDLER_2_H
-#define RUNTIME_CONFIG_REGISTRY_HANDLER_2_H
-
-extern registry_handler_t my_handler_2;
-
-#endif //RUNTIME_CONFIG_REGISTRY_HANDLER_2_H

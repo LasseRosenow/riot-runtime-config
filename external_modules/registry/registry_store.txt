@@ -1,4 +1,4 @@
-#include <string.h>
+/* #include <string.h>
 #include <errno.h>
 #include "kernel_defines.h"
 #include "clist.h"
@@ -116,8 +116,8 @@ int registry_save_one(const int *path, int path_len, registry_parameter_t value,
 
 int registry_save(void)
 {
-    registry_handler_t *hndlr;
-    clist_node_t *node = registry_handlers.next;
+    registry_schema_t *hndlr;
+    clist_node_t *node = registry_schemas.next;
     int res = 0;
     int res2;
 
@@ -130,12 +130,12 @@ int registry_save(void)
     }
 
     do  {
-        hndlr = container_of(node, registry_handler_t, node);
+        hndlr = container_of(node, registry_schema_t, node);
         res2 = registry_export(registry_save_one, &hndlr->id, 1);
         if (res == 0) {
             res = res2;
         }
-    } while (node != registry_handlers.next);
+    } while (node != registry_schemas.next);
 
     if (save_dst->itf->save_end) {
         save_dst->itf->save_end(save_dst);
@@ -143,3 +143,4 @@ int registry_save(void)
 
     return res;
 }
+ */
