@@ -39,6 +39,8 @@ my_schema_2_t my_schema_2_instance_1 = {
     .i8 = 8,
     .i16 = 16,
     .i32 = 32,
+    .i64 = 19,
+    .f32 = 3.7,
     .boolean = true,
     .string = "hallo",
 };
@@ -52,10 +54,10 @@ int main(void) {
     registry_register(&my_schema_2);
 
     /* add schema instances */
-    printf("my_schema: Add instance -> index: %d\n", registry_add_instance(my_schema.id, &my_schema_instance_1.node));
-    printf("my_schema: Add instance -> index: %d\n", registry_add_instance(my_schema.id, &my_schema_instance_2.node));
-    printf("my_schema: Add instance -> index: %d\n", registry_add_instance(my_schema.id, &my_schema_instance_3.node));
-    printf("my_schema_2: Add instance -> index: %d\n", registry_add_instance(my_schema_2.id, &my_schema_2_instance_1.node));
+    registry_add_instance(my_schema.id, &my_schema_instance_1.node);
+    registry_add_instance(my_schema.id, &my_schema_instance_2.node);
+    registry_add_instance(my_schema.id, &my_schema_instance_3.node);
+    registry_add_instance(my_schema_2.id, &my_schema_2_instance_1.node);
 
     // test my_schema
     clist_node_t *my_schema_node = my_schema.instances.next->next;
@@ -69,12 +71,12 @@ int main(void) {
 
     // test get
     char buf[REGISTRY_MAX_VAL_LEN];
-    int path[] = {my_schema.id, 0, 2};
+    int path[] = {my_schema_2.id, 0, 4};
     registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
     printf("RESULT: %s\n", buf);
 
     // test set
-    registry_set_value(path, 3, "Banaana");
+    registry_set_value(path, 3, "2.9");
 
     registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
     printf("RESULT: %s\n", buf);
