@@ -39,8 +39,8 @@ my_schema_2_t my_schema_2_instance_1 = {
     .i8 = 8,
     .i16 = 16,
     .i32 = 32,
-    .i64 = 19,
-    .f32 = 3.7,
+    .i64 = 64,
+    .f32 = 3.2,
     .boolean = true,
     .string = "hallo",
 };
@@ -76,7 +76,7 @@ int main(void) {
     printf("RESULT: %s\n", buf);
 
     // test set
-    registry_set_value(path, 3, "2.9");
+    registry_set_value(path, 3, "7.9");
 
     registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
     printf("RESULT: %s\n", buf);
