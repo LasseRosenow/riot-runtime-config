@@ -1,7 +1,7 @@
-#ifndef RUNTIME_CONFIG_REGISTRY_SCHEMA_2_H
-#define RUNTIME_CONFIG_REGISTRY_SCHEMA_2_H
+#ifndef RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H
+#define RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H
 
-extern registry_schema_t my_schema_2;
+extern registry_schema_t registry_schema_test;
 
 typedef struct {
     clist_node_t node;
@@ -19,23 +19,23 @@ typedef struct {
 
     bool boolean;
     char* string;
-} my_schema_2_t;
+} registry_schema_test_t;
 
 typedef enum {
-    I_8,
-    I_16,
-    I_32,
+    REGISTRY_SCHEMA_TEST_I_8,
+    REGISTRY_SCHEMA_TEST_I_16,
+    REGISTRY_SCHEMA_TEST_I_32,
     
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-    I_64,
+    REGISTRY_SCHEMA_TEST_I_64,
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-    FLOAT,
+    REGISTRY_SCHEMA_TEST_FLOAT,
 #endif /* CONFIG_REGISTRY_USE_FLOAT */
 
-    BOOL,
-    STRING,
-} schema_indices_t;
+    REGISTRY_SCHEMA_TEST_BOOL,
+    REGISTRY_SCHEMA_TEST_STRING,
+} registry_schema_test_indices_t;
 
-#endif //RUNTIME_CONFIG_REGISTRY_SCHEMA_2_H
+#endif //RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H

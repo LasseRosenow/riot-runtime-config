@@ -5,8 +5,8 @@
 #include "registry_coap.h"
 #include "registry_lwm2m.h"
 #include "registry.h"
-#include "application_registry_schema.h"
-#include "application_registry_schema_2.h"
+#include "registry_schema_rgb.h"
+#include "registry_schema_test.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -17,25 +17,25 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
-my_schema_t my_schema_instance_1 = {
-    .is_enabled = false,
-    .threshold = 30,
-    .name = "Gollum",
+registry_schema_rgb_t rgb_instance_1 = {
+    .r = 0,
+    .g = 255,
+    .b = 70,
 };
 
-my_schema_t my_schema_instance_2 = {
-    .is_enabled = true,
-    .threshold = 9999,
-    .name = "Smeagol",
+registry_schema_rgb_t rgb_instance_2 = {
+    .r = 90,
+    .g = 4,
+    .b = 0,
 };
 
-my_schema_t my_schema_instance_3 = {
-    .is_enabled = false,
-    .threshold = 0,
-    .name = "Frodo",
+registry_schema_rgb_t rgb_instance_3 = {
+    .r = 7,
+    .g = 8,
+    .b = 9,
 };
 
-my_schema_2_t my_schema_2_instance_1 = {
+registry_schema_test_t test_instance_1 = {
     .i8 = 8,
     .i16 = 16,
     .i32 = 32,
@@ -50,35 +50,35 @@ int main(void) {
     registry_init();
 
     /* add application registry schema */
-    registry_register(&my_schema);
-    registry_register(&my_schema_2);
+    registry_register(&registry_schema_rgb);
+    registry_register(&registry_schema_test);
 
     /* add schema instances */
-    registry_add_instance(my_schema.id, &my_schema_instance_1.node);
-    registry_add_instance(my_schema.id, &my_schema_instance_2.node);
-    registry_add_instance(my_schema.id, &my_schema_instance_3.node);
-    registry_add_instance(my_schema_2.id, &my_schema_2_instance_1.node);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_1.node);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_2.node);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_3.node);
+    registry_add_instance(registry_schema_test.id, &test_instance_1.node);
 
-    // test my_schema
-    clist_node_t *my_schema_node = my_schema.instances.next->next;
-    my_schema_t* my_schema_instance = container_of(my_schema_node, my_schema_t, node);
-    printf("Test: my_schema: Get \"name\" of first: %s\n", my_schema_instance->name);
+    // test rgb_schema
+    clist_node_t *rgb_node = registry_schema_rgb.instances.next->next;
+    registry_schema_rgb_t* rgb_instance = container_of(rgb_node, registry_schema_rgb_t, node);
+    printf("Test: registry_schema_rgb: Get \"b\" of first: %d\n", rgb_instance->b);
 
-    // test my_schema_2
-    clist_node_t *my_schema_2_node = my_schema_2.instances.next->next;
-    my_schema_2_t* my_schema_2_instance = container_of(my_schema_2_node, my_schema_2_t, node);
-    printf("Test: my_schema_2: Get \"string\" of first: %s\n", my_schema_2_instance->string);
+    // test test_schema
+    clist_node_t *test_node = registry_schema_test.instances.next->next;
+    registry_schema_test_t* test_instance = container_of(test_node, registry_schema_test_t, node);
+    printf("Test: registry_schema_test: Get \"string\" of first: %s\n", test_instance->string);
 
     // test get
     char buf[REGISTRY_MAX_VAL_LEN];
-    int path[] = {my_schema_2.id, 0, 4};
-    registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
+    int path[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_FLOAT};
+    registry_get_value(path, ARRAY_SIZE(path), buf, REGISTRY_MAX_VAL_LEN);
     printf("RESULT: %s\n", buf);
 
     // test set
-    registry_set_value(path, 3, "7.9");
+    registry_set_value(path, ARRAY_SIZE(path), "7.9");
 
-    registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
+    registry_get_value(path, ARRAY_SIZE(path), buf, REGISTRY_MAX_VAL_LEN);
     printf("RESULT: %s\n", buf);
 
     /* for the thread running the shell */
