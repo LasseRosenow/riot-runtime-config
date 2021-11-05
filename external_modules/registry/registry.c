@@ -46,8 +46,7 @@ void registry_register(registry_schema_t *schema)
     clist_rpush(&registry_schemas, &(schema->node));
 }
 
-// TODO
-/* static size_t _get_registry_parameter_data_len(registry_type_t type)
+static size_t _get_registry_parameter_data_len(registry_type_t type)
 {
     switch (type) {
         case REGISTRY_TYPE_INT8: return sizeof(int8_t);
@@ -65,7 +64,7 @@ void registry_register(registry_schema_t *schema)
         
         default: return 0;
     }
-} */
+}
 
 static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
     assert(schema != NULL);
@@ -75,7 +74,8 @@ static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
     int index = 0;
     do {
         node = node->next;
-        void *instance = container_of(node, void, node);
+        // TODO registry_schema_t is WRONG
+        void *instance = container_of(node, registry_schema_t, node);
         
         /* check if index equals instance_id */
         if (index == instance_id) {
@@ -140,7 +140,6 @@ int registry_set_value(int *path, int path_len, char *val_str)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
-
     if (!schema) {
         return -EINVAL;
     }
@@ -152,15 +151,14 @@ int registry_set_value(int *path, int path_len, char *val_str)
     }
 
     /* lookup parameter meta data */
-    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, hndlr);
-    
+    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
     if (!param_meta) {
         return -EINVAL;
     }
 
     /* convert string value to native value */
     int buf_len = REGISTRY_MAX_VAL_LEN;
-    void buf[buf_len];
+    uint8_t buf[buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
     registry_value_from_str(val_str, param_meta->value.parameter.type, &buf, _get_registry_parameter_data_len(param_meta->value.parameter.type));
 
     /* call handler to apply the new value to the correct parameter in the instance of the schema */
@@ -173,27 +171,25 @@ char *registry_get_value(int *path, int path_len, char *buf, int buf_len)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
-
     if (!schema) {
-        return -EINVAL;
+        return NULL;
     }
 
     /* lookup instance */
     void *instance = _instance_lookup(schema, path[1]);
     if (!instance) {
-        return -EINVAL;
+        return NULL;
     }
 
     /* lookup parameter meta data */
-    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, hndlr);
-    
+    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
     if (!param_meta) {
-        return -EINVAL;
+        return NULL;
     }
 
     /* call handler to get the parameter value from the instance of the schema */
     int native_buf_len = REGISTRY_MAX_VAL_LEN;
-    void native_buf[native_buf_len];
+    uint8_t native_buf[native_buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
     schema->hndlr_get(param_meta->id, instance, native_buf, native_buf_len, schema->context);
 
     /* convert native value to string value */
@@ -222,15 +218,13 @@ int registry_commit(int *path, int path_len)
 
     if (path_len > 0) {
         registry_schema_t *hndlr = _schema_lookup(path[0]);
-
         if (!hndlr) {
             return -EINVAL;
         }
 
         if (hndlr->hndlr_commit_cb) {
             return hndlr->hndlr_commit_cb(hndlr->context);
-        }
-        else {
+        } else {
             return 0;
         }
     }

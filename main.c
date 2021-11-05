@@ -67,6 +67,18 @@ int main(void) {
     my_schema_2_t* my_schema_2_instance = container_of(my_schema_2_node, my_schema_2_t, node);
     printf("Test: my_schema_2: Get \"string\" of first: %s\n", my_schema_2_instance->string);
 
+    // test get
+    char buf[REGISTRY_MAX_VAL_LEN];
+    int path[] = {my_schema.id, 0, 2};
+    registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
+    printf("RESULT: %s\n", buf);
+
+    // test set
+    registry_set_value(path, 3, "Banaana");
+
+    registry_get_value(path, 3, buf, REGISTRY_MAX_VAL_LEN);
+    printf("RESULT: %s\n", buf);
+
     /* for the thread running the shell */
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();

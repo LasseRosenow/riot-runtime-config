@@ -99,19 +99,85 @@ registry_schema_t my_schema_2 = {
 };
 
 static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {
-    (void) param_id;
-    (void) instance;
-    (void) buf;
     (void) buf_len;
     (void) context;
+
+    my_schema_2_t* _instance = (my_schema_2_t*) instance;
+
+    switch (param_id) {
+        case I_8:
+            memcpy(buf, &_instance->i8, sizeof(_instance->i8));
+            break;
+        
+        case I_16:
+            memcpy(buf, &_instance->i16, sizeof(_instance->i16));
+            break;
+
+        case I_32:
+            memcpy(buf, &_instance->i32, sizeof(_instance->i32));
+            break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+        case I_64:
+            memcpy(buf, &_instance->i64, sizeof(_instance->i64));
+            break;
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+        case FLOAT:
+            memcpy(buf, &_instance->f32, sizeof(_instance->f32));
+            break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT */        
+
+        case BOOL:
+            memcpy(buf, &_instance->boolean, sizeof(_instance->boolean));
+            break;
+
+        case STRING:
+            strcpy(buf, _instance->string);
+            break;
+    }
 }
 
 static void set(int param_id, void *instance, void *val, int val_len, void *context) {
-    (void) param_id;
-    (void) instance;
-    (void) val;
     (void) val_len;
     (void) context;
+
+    my_schema_2_t* _instance = (my_schema_2_t*) instance;
+
+    switch (param_id) {
+        case I_8:
+            memcpy(&_instance->i8, val, sizeof(_instance->i8));
+            break;
+        
+        case I_16:
+            memcpy(&_instance->i16, val, sizeof(_instance->i16));
+            break;
+
+        case I_32:
+            memcpy(&_instance->i32, val, sizeof(_instance->i32));
+            break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+        case I_64:
+            memcpy(&_instance->i64, val, sizeof(_instance->i64));
+            break;
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+        case FLOAT:
+            memcpy(&_instance->f32, val, sizeof(_instance->f32));
+            break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT */        
+
+        case BOOL:
+            memcpy(&_instance->boolean, val, sizeof(_instance->boolean));
+            break;
+
+        case STRING:
+            strcpy(_instance->string, val);
+            break;
+    }
 }
 
 static int commit_cb(void *context) {

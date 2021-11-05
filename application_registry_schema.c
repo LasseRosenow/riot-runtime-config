@@ -54,19 +54,45 @@ registry_schema_t my_schema = {
 };
 
 static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {
-    (void) param_id;
-    (void) instance;
-    (void) buf;
     (void) buf_len;
     (void) context;
+
+    my_schema_t* _instance = (my_schema_t*) instance;
+
+    switch (param_id) {
+        case IS_ENABLED:
+            memcpy(buf, &_instance->is_enabled, sizeof(_instance->is_enabled));
+            break;
+        
+        case THRESHOLD:
+            memcpy(buf, &_instance->threshold, sizeof(_instance->threshold));
+            break;
+
+        case NAME:
+            strcpy(buf, _instance->name);
+            break;
+    }
 }
 
 static void set(int param_id, void *instance, void *val, int val_len, void *context) {
-    (void) param_id;
-    (void) instance;
-    (void) val;
     (void) val_len;
     (void) context;
+
+    my_schema_t* _instance = (my_schema_t*) instance;
+
+    switch (param_id) {
+        case IS_ENABLED:
+            memcpy(&_instance->is_enabled, val , sizeof(_instance->is_enabled));
+            break;
+        
+        case THRESHOLD:
+            memcpy(&_instance->threshold, val, sizeof(_instance->threshold));
+            break;
+
+        case NAME:
+            strcpy(_instance->name, val);
+            break;
+    }
 }
 
 static int commit_cb(void *context) {
