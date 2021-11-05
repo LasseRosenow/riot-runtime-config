@@ -303,7 +303,7 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
     }
 
     if (userData->res_list[resource_id].operation_type == REG_DATA_OPERATION_TYPE_EXEC) {
-        userData->hndlr->hndlr_commit_cb(userData->hndlr->context);
+        userData->hndlr->commit_cb(userData->hndlr->context);
         result = COAP_204_CHANGED;
     } else {
         result = COAP_405_METHOD_NOT_ALLOWED;

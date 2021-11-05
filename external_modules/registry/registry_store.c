@@ -1,4 +1,4 @@
-/* #include <string.h>
+#include <string.h>
 #include <errno.h>
 #include "kernel_defines.h"
 #include "clist.h"
@@ -84,25 +84,22 @@ static void _registry_dup_check_cb(int *path, int path_len, char *val, void *cb_
     }
 }
 
-int registry_save_one(const int *path, int path_len, registry_parameter_t value, void *context)
+int _registry_save_one(const int *path, int path_len, char* value, void *context)
 {
     (void) context;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
-    
-    char buf[REGISTRY_MAX_VAL_LEN];
-    registry_str_from_value(value.type, &value.value, buf, sizeof(buf));
 
     DEBUG("[registry_store] Saving: ");
     _debug_print_path(path, path_len);
-    DEBUG(" = %s\n", buf);
+    DEBUG(" = %s\n", value);
 
     if (!dst) {
         return -ENOENT;
     }
 
     dup.path = path;
-    dup.val = buf;
+    dup.val = value;
     dup.is_dup = 0;
 
     save_dst->itf->load(save_dst, _registry_dup_check_cb, &dup);
@@ -112,6 +109,16 @@ int registry_save_one(const int *path, int path_len, registry_parameter_t value,
     }
 
     return dst->itf->save(dst, path, path_len, value);
+}
+
+int registry_save_one(const int *path, int path_len, void *context)
+{
+    (void) context;
+    
+    char buf[REGISTRY_MAX_VAL_LEN];
+    registry_get_value(path, path_len, buf, sizeof(buf));
+
+    return _registry_save_one(path, path_len, buf, context);
 }
 
 int registry_save(void)
@@ -131,7 +138,7 @@ int registry_save(void)
 
     do  {
         hndlr = container_of(node, registry_schema_t, node);
-        res2 = registry_export(registry_save_one, &hndlr->id, 1);
+        res2 = registry_export(_registry_save_one, &hndlr->id, 1);
         if (res == 0) {
             res = res2;
         }
@@ -143,4 +150,3 @@ int registry_save(void)
 
     return res;
 }
- */

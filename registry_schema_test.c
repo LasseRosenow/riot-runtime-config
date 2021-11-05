@@ -91,9 +91,9 @@ registry_schema_t registry_schema_test = {
     .description = "Test schema containing all possible types for testing purposes.",
     .schemas = schemas,
     .schemas_len = ARRAY_SIZE(schemas),
-    .hndlr_get = get,
-    .hndlr_set = set,
-    .hndlr_commit_cb = commit_cb,
+    .get = get,
+    .set = set,
+    .commit_cb = commit_cb,
 };
 
 static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {

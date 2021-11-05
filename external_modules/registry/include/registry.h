@@ -37,9 +37,9 @@
  * schemas for interacting with the configuration parametes of the
  * configuration group. The schemas are:
  *
- * - @ref registry_schema_t::hndlr_get "get"
- * - @ref registry_schema_t::hndlr_set "set"
- * - @ref registry_schema_t::hndlr_commit "commit"
+ * - @ref registry_schema_t::get "get"
+ * - @ref registry_schema_t::set "set"
+ * - @ref registry_schema_t::commit "commit"
  *
  * It is responsibility of the module to implement these schemas and perform
  * all necessary checks before applying values to the configuration parameters.
@@ -217,7 +217,7 @@ typedef struct registry_store_itf {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const int *path, int path_len, const registry_parameter_t value);
+    int (*save)(registry_store_t *store, const int *path, int path_len, const char* value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -253,7 +253,7 @@ typedef struct {
      * @param[in] buf_len Length of the buffer to store the current value
      * @param[in] context Context of the schema
      */
-    void (*hndlr_get)(int param_id, void *instance, void *buf,
+    void (*get)(int param_id, void *instance, void *buf,
                     int buf_len, void *context);
 
     /**
@@ -265,7 +265,7 @@ typedef struct {
      * @param[in] val_len Length of the buffer to store the current value
      * @param[in] context Context of the schema
      */
-    void (*hndlr_set)(int param_id, void *instance, void *val,
+    void (*set)(int param_id, void *instance, void *val,
                     int val_len, void *context);
 
     /**
@@ -278,7 +278,7 @@ typedef struct {
      * @param[in] context Context of the schema
      * @return 0 on success, non-zero on failure
      */
-    int (*hndlr_commit_cb)(void *context);
+    int (*commit_cb)(void *context);
 
     void *context; /**< Optional context used by the schemas */
 } registry_schema_t;
@@ -356,7 +356,7 @@ int registry_set_value(int *path, int path_len, char *val_str);
  * @param[in] buf_len Length of the buffer to store the current value
  * @return Pointer to the beginning of the buffer
  */
-char *registry_get_value(int *path, int path_len, char *buf, int buf_len);
+char *registry_get_value(const int *path, int path_len, char *buf, int buf_len);
 
 /**
  * @brief If a @p name is passed it calls the commit schema for that
@@ -444,14 +444,14 @@ int registry_load(void);
 int registry_save(void);
 
 /**
- * @brief Save an specific configuration paramter to the registered storage
+ * @brief Save a specific configuration paramter to the registered storage
  * facility, with the provided value (@p val).
  *
  * @param[in] name String representing the configuration parameter
  * @param[in] val Struct representing the value of the configuration parameter
  * @return 0 on success, non-zero on failure
  */
-int registry_save_one(const int *path, int path_len, registry_parameter_t val, void *context);
+int registry_save_one(const int *path, int path_len, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
@@ -463,7 +463,7 @@ int registry_save_one(const int *path, int path_len, registry_parameter_t val, v
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const int *path, int path_len, registry_parameter_t val, void *context),
+int registry_export(int (*export_func)(const int *path, int path_len, char* val, void *context),
                     int *path, int path_len);
 
 #ifdef __cplusplus

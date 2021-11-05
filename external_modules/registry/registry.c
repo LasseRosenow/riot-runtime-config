@@ -88,7 +88,7 @@ static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
     return NULL;
 }
 
-static registry_schema_item_t *_parameter_meta_lookup(int *path, int path_len, registry_schema_t *hndlr) {
+static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *hndlr) {
     registry_schema_item_t *schema;
     registry_schema_item_t *schemas = hndlr->schemas;
     int schemas_len = hndlr->schemas_len;
@@ -162,12 +162,12 @@ int registry_set_value(int *path, int path_len, char *val_str)
     registry_value_from_str(val_str, param_meta->value.parameter.type, &buf, _get_registry_parameter_data_len(param_meta->value.parameter.type));
 
     /* call handler to apply the new value to the correct parameter in the instance of the schema */
-    schema->hndlr_set(param_meta->id, instance, &buf, buf_len, schema->context);
+    schema->set(param_meta->id, instance, &buf, buf_len, schema->context);
 
     return 0;
 }
 
-char *registry_get_value(int *path, int path_len, char *buf, int buf_len)
+char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
@@ -190,7 +190,7 @@ char *registry_get_value(int *path, int path_len, char *buf, int buf_len)
     /* call handler to get the parameter value from the instance of the schema */
     int native_buf_len = REGISTRY_MAX_VAL_LEN;
     uint8_t native_buf[native_buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
-    schema->hndlr_get(param_meta->id, instance, native_buf, native_buf_len, schema->context);
+    schema->get(param_meta->id, instance, native_buf, native_buf_len, schema->context);
 
     /* convert native value to string value */
     registry_str_from_value(param_meta->value.parameter.type, &native_buf, buf, buf_len);
@@ -203,8 +203,8 @@ static int _registry_call_commit(clist_node_t *current, void *res)
     assert(current != NULL);
     int _res = *(int *)res;
     registry_schema_t *hndlr = container_of(current, registry_schema_t, node);
-    if (hndlr->hndlr_commit_cb) {
-        _res = hndlr->hndlr_commit_cb(hndlr->context);
+    if (hndlr->commit_cb) {
+        _res = hndlr->commit_cb(hndlr->context);
         if (!*(int *)res) {
             *(int *)res = _res;
         }
@@ -222,8 +222,8 @@ int registry_commit(int *path, int path_len)
             return -EINVAL;
         }
 
-        if (hndlr->hndlr_commit_cb) {
-            return hndlr->hndlr_commit_cb(hndlr->context);
+        if (hndlr->commit_cb) {
+            return hndlr->commit_cb(hndlr->context);
         } else {
             return 0;
         }
@@ -235,12 +235,13 @@ int registry_commit(int *path, int path_len)
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len, registry_parameter_t val, void *context), int *path, int path_len)
+int registry_export(int (*export_func)(const int *path, int path_len, char* val, void *context), int *path, int path_len)
 {
     (void)export_func;
     (void)path;
     (void)path_len;
     return 0;
+    // TODO implement export
     /* assert(export_func != NULL);
     registry_schema_t *hndlr;
 
