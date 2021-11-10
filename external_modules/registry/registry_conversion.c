@@ -10,52 +10,9 @@
 
 #include "registry.h"
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_UINT64)
 #include <fmt.h>
-
-static int64_t dec_to_s64(char *p_str, char **e_ptr)
-{
-    uint64_t val = 0U;
-    uint64_t prev_val = 0U;
-    bool neg = false;
-    int digit;
-
-    if (*p_str == '-') {
-        neg = true;
-        p_str++;
-    } else if (*p_str == '+') {
-        p_str++;
-    }
-
-    while (1) {
-        if (*p_str >= '0' && *p_str <= '9') {
-            digit = *p_str - '0';
-        } else {
-            break;
-        }
-
-        val *= 10;
-        val += digit;
-
-        if (val < prev_val) {
-            break;
-        }
-
-        prev_val = val;
-        p_str++;
-    }
-
-    if (e_ptr != NULL) {
-        *e_ptr = p_str;
-    }
-
-    if (neg) {
-        return -val;
-    } else {
-        return val;
-    }
-}
-#endif /* CONFIG_REGISTRY_USE_INT64 */
+#endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_UINT64 */
 
 int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
                             int maxlen)
@@ -86,6 +43,14 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
     }
 
     switch (type) {
+        case REGISTRY_TYPE_STRING:
+            val_i = strlen(val_str);
+            if (val_i + 1 > maxlen) {
+                goto err;
+            }
+            strcpy((char *)vp, val_str);
+            break;
+
         case REGISTRY_TYPE_UINT8:
         case REGISTRY_TYPE_UINT16:
         case REGISTRY_TYPE_UINT32:
@@ -112,7 +77,7 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
         case REGISTRY_TYPE_UINT64:
-            val_u = dec_to_u64(val_str, &eptr);
+            val_u = strtoull(val_str, &eptr, 0);
             if (*eptr != '\0') {
                 goto err;
             }
@@ -150,17 +115,10 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
                 *(int32_t *)vp = val_i;
             }
             break;
-        case REGISTRY_TYPE_STRING:
-            val_i = strlen(val_str);
-            if (val_i + 1 > maxlen) {
-                goto err;
-            }
-            strcpy((char *)vp, val_str);
-            break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
         case REGISTRY_TYPE_INT64:
-            val_i = dec_to_s64(val_str, &eptr);
+            val_i = strtoull(val_str, &eptr, 0);
             if (*eptr != '\0') {
                 goto err;
             }
@@ -243,19 +201,19 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
     uint32_t val_u = 0;
     int32_t val_i = 0;
 
-    if (type == REGISTRY_TYPE_STRING) {
-        char* str_val = (char *)vp;
-        
-        if (strlen(str_val) <= (size_t)buf_len) {
-            strcpy(buf, str_val);
-            return buf;
-        }
-        else {
-            return NULL;
-        }
-    }
-
     switch(type) {
+        case REGISTRY_TYPE_STRING: {
+            char* str_val = (char *)vp;
+        
+            if (strlen(str_val) <= (size_t)buf_len) {
+                strcpy(buf, str_val);
+                return buf;
+            }
+            else {
+                return NULL;
+            }
+        }
+
         case REGISTRY_TYPE_UINT8:
         case REGISTRY_TYPE_UINT16:
         case REGISTRY_TYPE_UINT32:
@@ -299,7 +257,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
             else if (type == REGISTRY_TYPE_BOOL) {
                 val_i = *(bool *)vp;
             }
-            snprintf(buf, buf_len, "%" PRId32, val_u);
+            snprintf(buf, buf_len, "%" PRId32, val_i);
             return buf;
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
@@ -328,11 +286,11 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
         case REGISTRY_TYPE_FLOAT64:
             // TODO fmt_double????
-            len = fmt_float(NULL, *(double *)vp, 7);
+            len = fmt_float(NULL, *(double *)vp, 16);
             if (len > buf_len - 1) {
                 return NULL;
             }
-            fmt_float(buf, *(double *)vp, 7);
+            fmt_float(buf, *(double *)vp, 16);
             buf[len] = '\0';
             return buf;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
