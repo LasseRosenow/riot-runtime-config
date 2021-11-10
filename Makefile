@@ -34,6 +34,8 @@ USEMODULE += xtimer
 
 USEMODULE += periph_uart
 
+USEMODULE += embunit
+
 
 
 
@@ -41,8 +43,10 @@ USEMODULE += periph_uart
 
 
 # Riot registry enable int64 and float support
+CFLAGS += -DCONFIG_REGISTRY_USE_UINT64=1
 CFLAGS += -DCONFIG_REGISTRY_USE_INT64=1
-CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT=1
+CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT32=1
+CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT64=1
 
 # External modules
 USEMODULE += registry

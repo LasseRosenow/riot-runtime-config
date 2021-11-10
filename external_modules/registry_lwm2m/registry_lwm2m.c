@@ -23,9 +23,9 @@
 #include "lwm2m_platform.h"
 #include "object.h"
 
-//#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
 #include "float.h"
-//#endif /* CONFIG_REGISTRY_USE_INT64 */
+//#endif /* CONFIG_REGISTRY_USE_FLOAT32 || CONFIG_REGISTRY_USE_FLOAT64 */
 
 #include "registry_lwm2m.h"
 #include "registry.h"
@@ -120,8 +120,8 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("                <Description>Commit changes</Description>\n");
             printf("            </Item>\n");
 
-            for (int i = 0; i < hndlr->schemas_len; i++) {
-                registry_schema_item_t schema = hndlr->schemas[i];
+            for (int i = 0; i < hndlr->schema_len; i++) {
+                registry_schema_item_t schema = hndlr->schema[i];
                 registry_parameter_t parameter = schema.value.parameter;
 
                 printf("            <Item ID=\"%d\">\n", schema.id + 1); // Increase by 1 because the first item is the commit executable
@@ -136,6 +136,32 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         printf("String");
                         break;
 
+                    case REGISTRY_TYPE_STRING:
+                        printf("String");
+                        break;
+
+                    case REGISTRY_TYPE_BOOL:
+                        printf("Boolean");
+                        break;
+
+                    case REGISTRY_TYPE_UINT8:
+                        printf("Integer");
+                        break;
+
+                    case REGISTRY_TYPE_UINT16:
+                        printf("Integer");
+                        break;
+
+                    case REGISTRY_TYPE_UINT32:
+                        printf("Integer");
+                        break;
+
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_UINT64:
+                        printf("Integer");
+                        break;
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+                    
                     case REGISTRY_TYPE_INT8:
                         printf("Integer");
                         break;
@@ -148,25 +174,23 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         printf("Integer");
                         break;
 
-                    case REGISTRY_TYPE_STRING:
-                        printf("String");
-                        break;
-
-                    case REGISTRY_TYPE_BOOL:
-                        printf("Boolean");
-                        break;
-
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
                     case REGISTRY_TYPE_INT64:
                         printf("Integer");
                         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT:
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT32:
                         printf("Float");
                         break;
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT64:
+                        printf("Float");
+                        break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
                     
                     default:
                         printf("String");
@@ -177,6 +201,30 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                 printf("                <RangeEnumeration>");
                 switch (parameter.type) {
                     case REGISTRY_TYPE_NONE: break;
+
+                    case REGISTRY_TYPE_STRING:
+                        printf("0-%d", REGISTRY_MAX_VAL_LEN);
+                        break;
+
+                    case REGISTRY_TYPE_BOOL: break;
+
+                    case REGISTRY_TYPE_UINT8:
+                        printf("%d-%d", 0, UINT8_MAX);
+                        break;
+
+                    case REGISTRY_TYPE_UINT16:
+                        printf("%d-%d", 0, UINT16_MAX);
+                        break;
+
+                    case REGISTRY_TYPE_UINT32:
+                        printf("%d-%d", 0, UINT32_MAX);
+                        break;
+
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_UINT64:
+                        printf("%d-%lld", 0, UINT64_MAX);
+                        break;
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
 
                     case REGISTRY_TYPE_INT8:
                         printf("%d-%d", INT8_MIN, INT8_MAX);
@@ -190,23 +238,23 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         printf("%d-%d", INT32_MIN, INT32_MAX);
                         break;
 
-                    case REGISTRY_TYPE_STRING:
-                        printf("0-%d", REGISTRY_MAX_VAL_LEN);
-                        break;
-
-                    case REGISTRY_TYPE_BOOL: break;
-
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
                     case REGISTRY_TYPE_INT64:
                         printf("%lld-%lld", INT64_MIN, INT64_MAX);
                         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT:
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT32:
                         printf("-%f-%f", FLT_MAX, FLT_MAX);
                         break;
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+                    case REGISTRY_TYPE_FLOAT64:
+                        printf("-%f-%f", DBL_MAX, DBL_MAX);
+                        break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
                     
                     default: break;
                 }

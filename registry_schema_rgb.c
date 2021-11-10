@@ -12,7 +12,7 @@ static void get(int param_id, void *instance, void *buf, int buf_len, void *cont
 static void set(int param_id, void *instance, void *val, int val_len, void *context);
 static int commit_cb(void *context);
 
-static registry_schema_item_t schemas[] = {
+static registry_schema_item_t schema[] = {
     {
         .id = REGISTRY_SCHEMA_RGB_RED,
         .name = "red",
@@ -46,8 +46,8 @@ registry_schema_t registry_schema_rgb = {
     .id = 0,
     .name = "rgb",
     .description = "Representation of a rgb color.",
-    .schemas = schemas,
-    .schemas_len = ARRAY_SIZE(schemas),
+    .schema = schema,
+    .schema_len = ARRAY_SIZE(schema),
     .get = get,
     .set = set,
     .commit_cb = commit_cb,

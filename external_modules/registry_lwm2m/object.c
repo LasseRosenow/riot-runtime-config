@@ -168,14 +168,23 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
                     break;
                 }
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-                case REGISTRY_TYPE_FLOAT: {
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+                case REGISTRY_TYPE_FLOAT32: {
                     float value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT, &value, 0);
+                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT32, &value, 0);
                     lwm2m_data_encode_float(value, *data_arrayP + i);
                     break;
                 }
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+                case REGISTRY_TYPE_FLOAT64: {
+                    float value;
+                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT64, &value, 0);
+                    lwm2m_data_encode_float(value, *data_arrayP + i);
+                    break;
+                }
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
                 
                 default:
                     return COAP_400_BAD_REQUEST;
@@ -242,14 +251,23 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                             break;
                         }
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-                        case REGISTRY_TYPE_FLOAT: {
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+                        case REGISTRY_TYPE_FLOAT32: {
                             double value;
                             lwm2m_data_decode_float(&data_array[i], &value);
                             snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
                             break;
                         }
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+                        case REGISTRY_TYPE_FLOAT64: {
+                            double value;
+                            lwm2m_data_decode_float(&data_array[i], &value);
+                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
+                            break;
+                        }
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
                         
                         default:
                             return COAP_400_BAD_REQUEST;
@@ -367,9 +385,9 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id)
     userData->res_list_size += 1;
 
     /* Init the res_list */
-    for (int i = 0; i < userData->hndlr->schemas_len; i++) {
-        registry_schema_item_t schema = hndlr->schemas[i];
-        registry_parameter_t parameter = hndlr->schemas[i].value.parameter;
+    for (int i = 0; i < userData->hndlr->schema_len; i++) {
+        registry_schema_item_t schema = hndlr->schema[i];
+        registry_parameter_t parameter = hndlr->schema[i].value.parameter;
 
         // TODO this only works for 1 level paths. No nesting etc.
         int path_len = 2;

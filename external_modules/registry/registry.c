@@ -49,18 +49,31 @@ void registry_register(registry_schema_t *schema)
 static size_t _get_registry_parameter_data_len(registry_type_t type)
 {
     switch (type) {
+        case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
+        case REGISTRY_TYPE_BOOL: return sizeof(bool);
+
+        case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
+        case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
+        case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+        case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
+#endif // CONFIG_REGISTRY_USE_UINT64
+
         case REGISTRY_TYPE_INT8: return sizeof(int8_t);
         case REGISTRY_TYPE_INT16: return sizeof(int16_t);
         case REGISTRY_TYPE_INT32: return sizeof(int32_t);
-        case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
-        case REGISTRY_TYPE_BOOL: return sizeof(bool);
+
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
         case REGISTRY_TYPE_INT64: return sizeof(int64_t);
 #endif // CONFIG_REGISTRY_USE_INT64
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-        case REGISTRY_TYPE_FLOAT: return sizeof(float);
-#endif // CONFIG_REGISTRY_USE_FLOAT
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+        case REGISTRY_TYPE_FLOAT32: return sizeof(float);
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+        case REGISTRY_TYPE_FLOAT64: return sizeof(double);
+#endif // CONFIG_REGISTRY_USE_FLOAT32
         
         default: return 0;
     }
@@ -90,12 +103,12 @@ static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
 
 static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *hndlr) {
     registry_schema_item_t *schema;
-    registry_schema_item_t *schemas = hndlr->schemas;
-    int schemas_len = hndlr->schemas_len;
+    registry_schema_item_t *schemas = hndlr->schema;
+    int schemas_len = hndlr->schema_len;
 
     for (int path_index = 0; path_index < path_len; path_index++) {
         for (int i = 0; i < schemas_len; i++) {
-            schema = &hndlr->schemas[i];
+            schema = &hndlr->schema[i];
 
             if (schema->id == path[path_index]) {
                 if (schema->type == REGISTRY_SCHEMA_TYPE_PARAMETER && path_index == path_len -1) {
@@ -103,8 +116,8 @@ static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_
                     return schema;
                 } else if (schema->type == REGISTRY_SCHEMA_TYPE_GROUP) {
                     // If this is not the last path segment and its a group => update schemas and schemas_len values
-                    schemas = schema->value.group.schemas;
-                    schemas_len = schemas->value.group.schemas_len;
+                    schemas = schema->value.group.schema;
+                    schemas_len = schemas->value.group.schema_len;
                 }
             }
         }

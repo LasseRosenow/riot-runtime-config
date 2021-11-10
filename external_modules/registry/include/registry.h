@@ -114,19 +114,32 @@ extern "C" {
  */
 typedef enum {
     REGISTRY_TYPE_NONE = 0,  /**< No type specified */
+    REGISTRY_TYPE_STRING,    /**< String */
+    REGISTRY_TYPE_BOOL,      /**< Boolean */
+    
+    REGISTRY_TYPE_UINT8,      /**< 8-bits integer */
+    REGISTRY_TYPE_UINT16,     /**< 16-bits integer */
+    REGISTRY_TYPE_UINT32,     /**< 32-bits integer */
+
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+    REGISTRY_TYPE_UINT64,     /**< 64-bits integer */
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+
     REGISTRY_TYPE_INT8,      /**< 8-bits integer */
     REGISTRY_TYPE_INT16,     /**< 16-bits integer */
     REGISTRY_TYPE_INT32,     /**< 32-bits integer */
-    REGISTRY_TYPE_STRING,    /**< String */
-    REGISTRY_TYPE_BOOL,      /**< Boolean */
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
     REGISTRY_TYPE_INT64,     /**< 64-bits integer */
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT) || defined(DOXYGEN)
-    REGISTRY_TYPE_FLOAT,     /**< Float */
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+    REGISTRY_TYPE_FLOAT32,     /**< Float */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+    REGISTRY_TYPE_FLOAT64,     /**< Float */
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
 
 /**
@@ -142,8 +155,8 @@ typedef struct _registry_schema_item_t registry_schema_item_t;
  * @brief Configuration group.
  */
 typedef struct {
-    registry_schema_item_t *schemas;
-    int schemas_len;
+    registry_schema_item_t *schema;
+    int schema_len;
 } registry_group_t;
 
 typedef enum {
@@ -240,8 +253,8 @@ typedef struct {
     int id; /**< Integer representing the configuration group */
     char *name; /**< String describing the configuration group */
     char *description; /**< String describing the configuration group with more details */
-    registry_schema_item_t *schemas; /**< Array representing all the configuration parameters that belong to this group */
-    int schemas_len; /**< Size of schemas array */
+    registry_schema_item_t *schema; /**< Array representing all the configuration parameters that belong to this group */
+    int schema_len; /**< Size of schema array */
     clist_node_t instances;
 
     /**
@@ -299,9 +312,9 @@ void registry_init(void);
 void registry_store_init(void);
 
 /**
- * @brief Registers a new group of schemas for a configuration group.
+ * @brief Registers a new schema for a configuration group.
  *
- * @param[in] schema Pointer to the schemas structure.
+ * @param[in] schema Pointer to the schema structure.
  */
 void registry_register(registry_schema_t *schema);
 
@@ -401,7 +414,7 @@ int registry_bytes_from_str(char *val_str, void *vp, int *len);
  * @brief Convenience function to transform a configuration parameter value into
  * a string, when the parameter is not of `bytes` type, in this case
  * @ref registry_str_from_bytes() should be used. This is used for example to
- * implement the `get` or `export` schemas.
+ * implement the `get` or `export` functions.
  *
  * @param[in] type Type of the parameter to be converted
  * @param[in] vp Pointer to the value to be converted

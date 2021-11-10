@@ -62,14 +62,22 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
 {
     assert(vp != NULL);
 #if defined(CONFIG_REGISTRY_USE_INT64)
-    int64_t val = 0;
+    int64_t val_i = 0;
 #else /* CONFIG_REGISTRY_USE_INT64 */
-    int32_t val = 0;
+    int32_t val_i = 0;
 #endif
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+    uint64_t val_u = 0;
+#else /* CONFIG_REGISTRY_USE_UINT64 */
+    uint32_t val_u = 0;
+#endif
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+    double val_f;
+#elif defined(CONFIG_REGISTRY_USE_FLOAT32)
     float val_f;
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 || CONFIG_REGISTRY_USE_FLOAT32 */
 
     char *eptr = 0;
 
@@ -78,63 +86,107 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
     }
 
     switch (type) {
+        case REGISTRY_TYPE_UINT8:
+        case REGISTRY_TYPE_UINT16:
+        case REGISTRY_TYPE_UINT32:
+            val_u = strtoul(val_str, &eptr, 0);
+            if (*eptr != '\0') {
+                goto err;
+            }
+            else if (type == REGISTRY_TYPE_UINT8) {
+                if (val_u > UINT8_MAX) {
+                    goto err;
+                }
+                *(uint8_t *)vp = val_u;
+            }
+            else if (type == REGISTRY_TYPE_UINT16) {
+                if (val_u > UINT16_MAX) {
+                    goto err;
+                }
+                *(uint16_t *)vp = val_u;
+            }
+            else if (type == REGISTRY_TYPE_UINT32) {
+                *(uint32_t *)vp = val_u;
+            }
+            break;
+
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+        case REGISTRY_TYPE_UINT64:
+            val_u = dec_to_u64(val_str, &eptr);
+            if (*eptr != '\0') {
+                goto err;
+            }
+            *(uint64_t *)vp = val_u;
+            break;
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+
         case REGISTRY_TYPE_INT8:
         case REGISTRY_TYPE_INT16:
         case REGISTRY_TYPE_INT32:
         case REGISTRY_TYPE_BOOL:
-            val = strtol(val_str, &eptr, 0);
+            val_i = strtol(val_str, &eptr, 0);
             if (*eptr != '\0') {
                 goto err;
             }
             if (type == REGISTRY_TYPE_BOOL) {
-                if (val < 0 || val > 1) {
+                if (val_i < 0 || val_i > 1) {
                     goto err;
                 }
-                *(bool *)vp = val;
+                *(bool *)vp = val_i;
             }
             else if (type == REGISTRY_TYPE_INT8) {
-                if (val < INT8_MIN || val > INT8_MAX) {
+                if (val_i < INT8_MIN || val_i > INT8_MAX) {
                     goto err;
                 }
-                *(int8_t *)vp = val;
+                *(int8_t *)vp = val_i;
             }
             else if (type == REGISTRY_TYPE_INT16) {
-                if (val < INT16_MIN || val > INT16_MAX) {
+                if (val_i < INT16_MIN || val_i > INT16_MAX) {
                     goto err;
                 }
-                *(int16_t *)vp = val;
+                *(int16_t *)vp = val_i;
             }
             else if (type == REGISTRY_TYPE_INT32) {
-                *(int32_t *)vp = val;
+                *(int32_t *)vp = val_i;
             }
             break;
         case REGISTRY_TYPE_STRING:
-            val = strlen(val_str);
-            if (val + 1 > maxlen) {
+            val_i = strlen(val_str);
+            if (val_i + 1 > maxlen) {
                 goto err;
             }
             strcpy((char *)vp, val_str);
             break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
-            case REGISTRY_TYPE_INT64:
-            val = dec_to_s64(val_str, &eptr);
+        case REGISTRY_TYPE_INT64:
+            val_i = dec_to_s64(val_str, &eptr);
             if (*eptr != '\0') {
                 goto err;
             }
-            *(int64_t *)vp = val;
+            *(int64_t *)vp = val_i;
             break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT)
-            case REGISTRY_TYPE_FLOAT:
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+        case REGISTRY_TYPE_FLOAT32:
             val_f = strtof(val_str, &eptr);
             if (*eptr != '\0') {
                 goto err;
             }
             *(float *)vp = val_f;
             break;
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+        case REGISTRY_TYPE_FLOAT64:
+            val_f = strtod(val_str, &eptr);
+            if (*eptr != '\0') {
+                goto err;
+            }
+            *(double *)vp = val_f;
+            break;
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
         default:
             goto err;
     }
@@ -175,14 +227,21 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
                               int buf_len)
 {
     assert(vp != NULL);
+
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+    int64_t val_u64 = 0;
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+
 #if defined(CONFIG_REGISTRY_USE_INT64)
-    int64_t val64 = 0;
+    int64_t val_i64 = 0;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_FLOAT)
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(CONFIG_REGISTRY_USE_FLOAT64)
     int len;
-#endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_FLOAT */
-    int32_t val = 0;
+#endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_FLOAT32 || CONFIG_REGISTRY_USE_FLOAT64 */
+
+    uint32_t val_u = 0;
+    int32_t val_i = 0;
 
     if (type == REGISTRY_TYPE_STRING) {
         char* str_val = (char *)vp;
@@ -197,32 +256,66 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
     }
 
     switch(type) {
-        case REGISTRY_TYPE_INT8:
-            val = *(int8_t *)vp;
-            break;
-        case REGISTRY_TYPE_INT16:
-            val = *(int16_t *)vp;
-            break;
-        case REGISTRY_TYPE_INT32:
-            val = *(int32_t *)vp;
-            break;
-        case REGISTRY_TYPE_BOOL:
-            val = *(bool *)vp;
-            break;
-#if defined(CONFIG_REGISTRY_USE_INT64)
-            case REGISTRY_TYPE_INT64:
-            val64 = *(int64_t *)vp;
-            len = fmt_s64_dec(NULL, val64);
+        case REGISTRY_TYPE_UINT8:
+        case REGISTRY_TYPE_UINT16:
+        case REGISTRY_TYPE_UINT32:
+            if (type == REGISTRY_TYPE_UINT8) {
+                val_u = *(uint8_t *)vp;
+            }
+            else if (type == REGISTRY_TYPE_UINT16) {
+                val_u = *(uint16_t *)vp;
+            }
+            else if (type == REGISTRY_TYPE_UINT32) {
+                val_u = *(uint32_t *)vp;
+            }
+            snprintf(buf, buf_len, "%" PRIu32, val_u);
+            return buf;
+            
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+        case REGISTRY_TYPE_UINT64:
+            val_u64 = *(uint64_t *)vp;
+            len = fmt_s64_dec(NULL, val_u64);
             if (len > buf_len - 1) {
                 return NULL;
             }
-            fmt_s64_dec(buf, val64);
+            fmt_u64_dec(buf, val_u64);
             buf[len] = '\0';
             return buf;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT)
-            case REGISTRY_TYPE_FLOAT:
+        case REGISTRY_TYPE_INT8:
+        case REGISTRY_TYPE_INT16:
+        case REGISTRY_TYPE_INT32:
+        case REGISTRY_TYPE_BOOL:
+            if (type == REGISTRY_TYPE_INT8) {
+                val_i = *(int8_t *)vp;
+            }
+            else if (type == REGISTRY_TYPE_INT16) {
+                val_i = *(int16_t *)vp;
+            }
+            else if (type == REGISTRY_TYPE_INT32) {
+                val_i = *(int32_t *)vp;
+            }
+            else if (type == REGISTRY_TYPE_BOOL) {
+                val_i = *(bool *)vp;
+            }
+            snprintf(buf, buf_len, "%" PRId32, val_u);
+            return buf;
+
+#if defined(CONFIG_REGISTRY_USE_INT64)
+        case REGISTRY_TYPE_INT64:
+            val_i64 = *(int64_t *)vp;
+            len = fmt_s64_dec(NULL, val_i64);
+            if (len > buf_len - 1) {
+                return NULL;
+            }
+            fmt_s64_dec(buf, val_i64);
+            buf[len] = '\0';
+            return buf;
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+        case REGISTRY_TYPE_FLOAT32:
             len = fmt_float(NULL, *(float *)vp, 7);
             if (len > buf_len - 1) {
                 return NULL;
@@ -230,13 +323,24 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
             fmt_float(buf, *(float *)vp, 7);
             buf[len] = '\0';
             return buf;
-#endif /* CONFIG_REGISTRY_USE_FLOAT */
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+        case REGISTRY_TYPE_FLOAT64:
+            // TODO fmt_double????
+            len = fmt_float(NULL, *(double *)vp, 7);
+            if (len > buf_len - 1) {
+                return NULL;
+            }
+            fmt_float(buf, *(double *)vp, 7);
+            buf[len] = '\0';
+            return buf;
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
         default:
             return NULL;
     }
 
-    snprintf(buf, buf_len, "%" PRId32, val);
     return buf;
 }
 

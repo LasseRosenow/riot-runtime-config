@@ -1,6 +1,7 @@
 #include <string.h>
 #include <shell.h>
 #include <msg.h>
+#include "embUnit.h"
 
 #include "registry_coap.h"
 #include "registry_lwm2m.h"
@@ -36,16 +37,21 @@ registry_schema_rgb_t rgb_instance_3 = {
 };
 
 registry_schema_test_t test_instance_1 = {
+    .boolean = true,
+    .string = "hallo",
+    .u8 = 9,
+    .u16 = 17,
+    .u32 = 33,
+    .u64 = 65,
     .i8 = 8,
     .i16 = 16,
     .i32 = 32,
     .i64 = 64,
     .f32 = 3.2,
-    .boolean = true,
-    .string = "hallo",
+    .f64 = 6.4,
 };
 
-int main(void) {
+static void test_registry_setup(void) {
     /* init registry */
     registry_init();
 
@@ -58,28 +64,56 @@ int main(void) {
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_2.node);
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_3.node);
     registry_add_instance(registry_schema_test.id, &test_instance_1.node);
+}
 
+static void test_registry_teardown(void) {
+    
+}
+
+static void tests_registry_register(void) {
     // test rgb_schema
     clist_node_t *rgb_node = registry_schema_rgb.instances.next->next;
     registry_schema_rgb_t* rgb_instance = container_of(rgb_node, registry_schema_rgb_t, node);
-    printf("Test: registry_schema_rgb: Get \"b\" of first: %d\n", rgb_instance->b);
+    TEST_ASSERT_EQUAL_INT(0, rgb_instance->r);
+    TEST_ASSERT_EQUAL_INT(255, rgb_instance->g);
+    TEST_ASSERT_EQUAL_INT(70, rgb_instance->b);
 
     // test test_schema
     clist_node_t *test_node = registry_schema_test.instances.next->next;
     registry_schema_test_t* test_instance = container_of(test_node, registry_schema_test_t, node);
-    printf("Test: registry_schema_test: Get \"string\" of first: %s\n", test_instance->string);
+    TEST_ASSERT_EQUAL_STRING("hallo", test_instance->string);
 
     // test get
     char buf[REGISTRY_MAX_VAL_LEN];
-    int path[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_FLOAT};
+    int path[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_I32};
     registry_get_value(path, ARRAY_SIZE(path), buf, REGISTRY_MAX_VAL_LEN);
-    printf("RESULT: %s\n", buf);
+    TEST_ASSERT_EQUAL_STRING("32", buf);
+
+    int path_f32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F32};
+    registry_get_value(path_f32, ARRAY_SIZE(path_f32), buf, REGISTRY_MAX_VAL_LEN);
+    TEST_ASSERT_EQUAL_STRING("3.2", buf);
 
     // test set
-    registry_set_value(path, ARRAY_SIZE(path), "7.9");
+    registry_set_value(path_f32, ARRAY_SIZE(path_f32), "7.9");
 
-    registry_get_value(path, ARRAY_SIZE(path), buf, REGISTRY_MAX_VAL_LEN);
-    printf("RESULT: %s\n", buf);
+    registry_get_value(path_f32, ARRAY_SIZE(path_f32), buf, REGISTRY_MAX_VAL_LEN);
+    TEST_ASSERT_EQUAL_STRING("7.9", buf);
+}
+
+Test *tests_registry(void) {
+    EMB_UNIT_TESTFIXTURES(fixtures) {
+        new_TestFixture(tests_registry_register),
+    };
+
+    EMB_UNIT_TESTCALLER(registry_tests, test_registry_setup, test_registry_teardown, fixtures);
+
+    return (Test *)&registry_tests;
+}
+
+int main(void) {
+    TESTS_START();
+    TESTS_RUN(tests_registry());
+    TESTS_END();
 
     /* for the thread running the shell */
     //registry_coap_cli_init();
