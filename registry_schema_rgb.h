@@ -5,9 +5,9 @@ extern registry_schema_t registry_schema_rgb;
 
 typedef struct {
     clist_node_t node;
-    int r;
-    int g;
-    int b;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
 } registry_schema_rgb_t;
 
 typedef enum {

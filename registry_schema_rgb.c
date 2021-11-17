@@ -19,7 +19,7 @@ static registry_schema_item_t schema[] = {
         .description = "Intensity of the red color of the rgb lamp.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .type = REGISTRY_TYPE_INT16,
+            .type = REGISTRY_TYPE_UINT8,
         },
     },
     {
@@ -28,7 +28,7 @@ static registry_schema_item_t schema[] = {
         .description = "Intensity of the green color of the rgb lamp.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .type = REGISTRY_TYPE_INT16,
+            .type = REGISTRY_TYPE_UINT8,
         },
     },
     {
@@ -37,7 +37,7 @@ static registry_schema_item_t schema[] = {
         .description = "Intensity of the blue color of the rgb lamp.",
         .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
         .value.parameter = {
-            .type = REGISTRY_TYPE_INT16,
+            .type = REGISTRY_TYPE_UINT8,
         },
     },
 };

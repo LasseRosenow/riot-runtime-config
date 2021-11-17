@@ -34,6 +34,11 @@ registry_schema_test_t test_instance_1 = {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 };
 
+static void _registry_set_and_get(int* path, int path_len, char* input, char* output_buf, int output_buf_len) {
+    registry_set_value(path, path_len, input);
+    registry_get_value(path, path_len, output_buf, output_buf_len);
+}
+
 static void test_registry_setup(void) {
     /* init registry */
     registry_init();
@@ -50,33 +55,10 @@ static void test_registry_teardown(void) {
 }
 
 static void tests_registry_register(void) {
-    // test test_schema
+    // test if schema_test got registered
     clist_node_t *test_node = registry_schema_test.instances.next->next;
     registry_schema_test_t* test_instance = container_of(test_node, registry_schema_test_t, node);
-    TEST_ASSERT_EQUAL_STRING("hallo", test_instance->string);
-
-    // test get
-    char buf[REGISTRY_MAX_VAL_LEN];
-    int path[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_I32};
-    registry_get_value(path, ARRAY_SIZE(path), buf, REGISTRY_MAX_VAL_LEN);
-    TEST_ASSERT_EQUAL_STRING("32", buf);
-
-    int path_f32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F32};
-    registry_get_value(path_f32, ARRAY_SIZE(path_f32), buf, REGISTRY_MAX_VAL_LEN);
-    buf[3] = '\0'; // Crop result to ignore float precision
-    TEST_ASSERT_EQUAL_STRING("3.2", buf);
-
-    // test set
-    registry_set_value(path_f32, ARRAY_SIZE(path_f32), "7.9");
-
-    registry_get_value(path_f32, ARRAY_SIZE(path_f32), buf, REGISTRY_MAX_VAL_LEN);
-    buf[3] = '\0'; // Crop result to ignore float precision
-    TEST_ASSERT_EQUAL_STRING("7.9", buf);
-}
-
-static void _registry_set_and_get(int* path, int path_len, char* input, char* output_buf, int output_buf_len) {
-    registry_set_value(path, path_len, input);
-    registry_get_value(path, path_len, output_buf, output_buf_len);
+    TEST_ASSERT_EQUAL_INT((int)&test_instance_1, (int)test_instance);
 }
 
 static void tests_registry_all_min_values(void) {
