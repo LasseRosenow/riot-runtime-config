@@ -232,7 +232,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
 #if defined(CONFIG_REGISTRY_USE_UINT64)
         case REGISTRY_TYPE_UINT64:
             val_u64 = *(uint64_t *)vp;
-            len = fmt_s64_dec(NULL, val_u64);
+            len = fmt_u64_dec(NULL, val_u64);
             if (len > buf_len - 1) {
                 return NULL;
             }
@@ -274,6 +274,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
         case REGISTRY_TYPE_FLOAT32:
+            // TODO just convert to string. Don't care about precision
             len = fmt_float(NULL, *(float *)vp, 7);
             if (len > buf_len - 1) {
                 return NULL;

@@ -117,28 +117,28 @@ typedef enum {
     REGISTRY_TYPE_STRING,    /**< String */
     REGISTRY_TYPE_BOOL,      /**< Boolean */
     
-    REGISTRY_TYPE_UINT8,      /**< 8-bits integer */
-    REGISTRY_TYPE_UINT16,     /**< 16-bits integer */
-    REGISTRY_TYPE_UINT32,     /**< 32-bits integer */
+    REGISTRY_TYPE_UINT8,      /**< 8-bits unsigned integer */
+    REGISTRY_TYPE_UINT16,     /**< 16-bits unsigned integer */
+    REGISTRY_TYPE_UINT32,     /**< 32-bits unsigned integer */
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-    REGISTRY_TYPE_UINT64,     /**< 64-bits integer */
+    REGISTRY_TYPE_UINT64,     /**< 64-bits unsigned integer */
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-    REGISTRY_TYPE_INT8,      /**< 8-bits integer */
-    REGISTRY_TYPE_INT16,     /**< 16-bits integer */
-    REGISTRY_TYPE_INT32,     /**< 32-bits integer */
+    REGISTRY_TYPE_INT8,      /**< 8-bits signed integer */
+    REGISTRY_TYPE_INT16,     /**< 16-bits signed integer */
+    REGISTRY_TYPE_INT32,     /**< 32-bits signed integer */
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-    REGISTRY_TYPE_INT64,     /**< 64-bits integer */
+    REGISTRY_TYPE_INT64,     /**< 64-bits signed integer */
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-    REGISTRY_TYPE_FLOAT32,     /**< Float */
+    REGISTRY_TYPE_FLOAT32,     /**< 32-bits float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-    REGISTRY_TYPE_FLOAT64,     /**< Float */
+    REGISTRY_TYPE_FLOAT64,     /**< 64-bits float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
 

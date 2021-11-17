@@ -209,38 +209,38 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                     case REGISTRY_TYPE_BOOL: break;
 
                     case REGISTRY_TYPE_UINT8:
-                        printf("%d-%d", 0, UINT8_MAX);
+                        printf("0-%" PRIu8, UINT8_MAX);
                         break;
 
                     case REGISTRY_TYPE_UINT16:
-                        printf("%d-%d", 0, UINT16_MAX);
+                        printf("0-%" PRIu16, UINT16_MAX);
                         break;
 
                     case REGISTRY_TYPE_UINT32:
-                        printf("%d-%d", 0, UINT32_MAX);
+                        printf("0-%" PRIu32, UINT32_MAX);
                         break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
                     case REGISTRY_TYPE_UINT64:
-                        printf("%d-%lld", 0, UINT64_MAX);
+                        printf("0-%" PRIu64, UINT64_MAX);
                         break;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
                     case REGISTRY_TYPE_INT8:
-                        printf("%d-%d", INT8_MIN, INT8_MAX);
+                        printf("%" PRIi8 "-%" PRIi8, INT8_MIN, INT8_MAX);
                         break;
 
                     case REGISTRY_TYPE_INT16:
-                        printf("%d-%d", INT16_MIN, INT16_MAX);
+                        printf("%" PRIi16 "-%" PRIi16, INT16_MIN, INT16_MAX);
                         break;
 
                     case REGISTRY_TYPE_INT32:
-                        printf("%d-%d", INT32_MIN, INT32_MAX);
+                        printf("%" PRIi32 "-%" PRIi32, INT32_MIN, INT32_MAX);
                         break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
                     case REGISTRY_TYPE_INT64:
-                        printf("%lld-%lld", INT64_MIN, INT64_MAX);
+                        printf("%" PRIi64 "-%" PRIi64, INT64_MIN, INT64_MAX);
                         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
@@ -252,7 +252,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
                     case REGISTRY_TYPE_FLOAT64:
-                        printf("-%f-%f", DBL_MAX, DBL_MAX);
+                        printf("-%lf-%lf", DBL_MAX, DBL_MAX);
                         break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
                     
