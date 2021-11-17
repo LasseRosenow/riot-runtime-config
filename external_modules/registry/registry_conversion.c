@@ -274,25 +274,21 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
         case REGISTRY_TYPE_FLOAT32:
-            // TODO just convert to string. Don't care about precision
-            len = fmt_float(NULL, *(float *)vp, 7);
+            sprintf(buf, "%f", *(float *)vp);
+            len = strlen(buf);
             if (len > buf_len - 1) {
                 return NULL;
             }
-            fmt_float(buf, *(float *)vp, 7);
-            buf[len] = '\0';
             return buf;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
         case REGISTRY_TYPE_FLOAT64:
-            // TODO fmt_double????
-            len = fmt_float(NULL, *(double *)vp, 16);
+            sprintf(buf, "%f", *(double *)vp);
+            len = strlen(buf);
             if (len > buf_len - 1) {
                 return NULL;
             }
-            fmt_float(buf, *(double *)vp, 16);
-            buf[len] = '\0';
             return buf;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 

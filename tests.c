@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <float.h>
 #include "embUnit.h"
 #include <inttypes.h>
 
@@ -10,7 +11,7 @@
 #include "assert.h"
 
 #include "tests.h"
-
+#include <fmt.h>
 registry_schema_test_t test_instance_1 = {
     .string = "hallo",
     .boolean = true,
@@ -122,6 +123,20 @@ static void tests_registry_all_min_values(void) {
     _registry_set_and_get(path_i64, ARRAY_SIZE(path_i64), input_buf, output_buf, ARRAY_SIZE(output_buf));
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+    int path_f32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F32};
+    sprintf(input_buf, "%f", FLT_MIN);
+    _registry_set_and_get(path_f32, ARRAY_SIZE(path_f32), input_buf, output_buf, ARRAY_SIZE(output_buf));
+    TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+    int path_f64[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F64};
+    sprintf(input_buf, "%f", DBL_MIN);
+    _registry_set_and_get(path_f64, ARRAY_SIZE(path_f64), input_buf, output_buf, ARRAY_SIZE(output_buf));
+    TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 }
 
 static void tests_registry_all_max_values(void) {
