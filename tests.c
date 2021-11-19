@@ -124,6 +124,7 @@ static void tests_registry_all_min_values(void) {
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
+    // f32
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
     int path_f32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F32};
     sprintf(input_buf, "%f", -FLT_MAX);
@@ -131,6 +132,7 @@ static void tests_registry_all_min_values(void) {
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
+    // f64
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
     if (REGISTRY_MAX_VAL_LEN >= (DBL_MAX_10_EXP + 1) + 1 + 1 + 6) { // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
         int path_f64[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F64};
@@ -210,6 +212,7 @@ static void tests_registry_all_max_values(void) {
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
+    // f32
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
     int path_f32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F32};
     sprintf(input_buf, "%f", FLT_MAX);
@@ -217,6 +220,7 @@ static void tests_registry_all_max_values(void) {
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
+    // f64
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
     if (REGISTRY_MAX_VAL_LEN >= (DBL_MAX_10_EXP + 1) + 1 + 6) { // (DBL_MAX_10_EXP + 1) + dot + 6 decimal places
         int path_f64[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_F64};
