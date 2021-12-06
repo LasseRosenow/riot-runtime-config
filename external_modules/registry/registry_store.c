@@ -84,9 +84,10 @@ static void _registry_dup_check_cb(int *path, int path_len, char *val, void *cb_
     }
 }
 
-int _registry_save_one(const int *path, int path_len, char* value, void *context)
+int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta, char* value, void *context)
 {
     (void) context;
+    (void) meta;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
 
@@ -118,7 +119,7 @@ int registry_save_one(const int *path, int path_len, void *context)
     char buf[REGISTRY_MAX_VAL_LEN];
     registry_get_value(path, path_len, buf, sizeof(buf));
 
-    return _registry_save_one(path, path_len, buf, context);
+    return _registry_save_one(path, path_len, NULL, buf, context);
 }
 
 int registry_save(void)

@@ -155,8 +155,8 @@ typedef struct _registry_schema_item_t registry_schema_item_t;
  * @brief Configuration group.
  */
 typedef struct {
-    registry_schema_item_t *schema;
-    int schema_len;
+    registry_schema_item_t *items;
+    int items_len;
 } registry_group_t;
 
 typedef enum {
@@ -253,8 +253,8 @@ typedef struct {
     int id; /**< Integer representing the configuration group */
     char *name; /**< String describing the configuration group */
     char *description; /**< String describing the configuration group with more details */
-    registry_schema_item_t *schema; /**< Array representing all the configuration parameters that belong to this group */
-    int schema_len; /**< Size of schema array */
+    registry_schema_item_t *items; /**< Array representing all the configuration parameters that belong to this group */
+    int items_len; /**< Size of items array */
     clist_node_t instances;
 
     /**
@@ -476,7 +476,7 @@ int registry_save_one(const int *path, int path_len, void *context);
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const int *path, int path_len, char* val, void *context),
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context),
                     int *path, int path_len);
 
 #ifdef __cplusplus

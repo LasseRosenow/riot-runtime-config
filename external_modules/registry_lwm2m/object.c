@@ -385,9 +385,9 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id)
     userData->res_list_size += 1;
 
     /* Init the res_list */
-    for (int i = 0; i < userData->hndlr->schema_len; i++) {
-        registry_schema_item_t schema = hndlr->schema[i];
-        registry_parameter_t parameter = hndlr->schema[i].value.parameter;
+    for (int i = 0; i < userData->hndlr->items_len; i++) {
+        registry_schema_item_t schema = hndlr->items[i];
+        registry_parameter_t parameter = hndlr->items[i].value.parameter;
 
         // TODO this only works for 1 level paths. No nesting etc.
         int path_len = 2;

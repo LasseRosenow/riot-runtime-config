@@ -17,21 +17,21 @@ clist_node_t registry_schemas;
 static int _registry_cmp_id(clist_node_t *current, void *id)
 {
     assert(current != NULL);
-    registry_schema_t *hndlr = container_of(current, registry_schema_t, node);
-    return !(hndlr->id - *(int*)id);
+    registry_schema_t *schema = container_of(current, registry_schema_t, node);
+    return !(schema->id - *(int*)id);
 }
 
 static registry_schema_t *_schema_lookup(int id)
 {
     clist_node_t *node;
-    registry_schema_t *hndlr = NULL;
+    registry_schema_t *schema = NULL;
     node = clist_foreach(&registry_schemas, _registry_cmp_id, &id);
 
     if (node != NULL) {
-        hndlr = container_of(node, registry_schema_t, node);
+        schema = container_of(node, registry_schema_t, node);
     }
 
-    return hndlr;
+    return schema;
 }
 
 void registry_init(void)
@@ -101,23 +101,23 @@ static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
     return NULL;
 }
 
-static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *hndlr) {
-    registry_schema_item_t *schema;
-    registry_schema_item_t *schemas = hndlr->schema;
-    int schemas_len = hndlr->schema_len;
+static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *schema) {
+    registry_schema_item_t *schema_item;
+    registry_schema_item_t *schema_items = schema->items;
+    int schema_items_len = schema->items_len;
 
     for (int path_index = 0; path_index < path_len; path_index++) {
-        for (int i = 0; i < schemas_len; i++) {
-            schema = &hndlr->schema[i];
+        for (int i = 0; i < schema_items_len; i++) {
+            schema_item = &schema->items[i];
 
-            if (schema->id == path[path_index]) {
-                if (schema->type == REGISTRY_SCHEMA_TYPE_PARAMETER && path_index == path_len -1) {
+            if (schema_item->id == path[path_index]) {
+                if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER && path_index == path_len -1) {
                     // If this is the last path segment and it is a parameter => return the parameter
-                    return schema;
-                } else if (schema->type == REGISTRY_SCHEMA_TYPE_GROUP) {
+                    return schema_item;
+                } else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
                     // If this is not the last path segment and its a group => update schemas and schemas_len values
-                    schemas = schema->value.group.schema;
-                    schemas_len = schemas->value.group.schema_len;
+                    schema_items = schema_item->value.group.items;
+                    schema_items_len = schema_items->value.group.items_len;
                 }
             }
         }
@@ -215,9 +215,9 @@ static int _registry_call_commit(clist_node_t *current, void *res)
 {
     assert(current != NULL);
     int _res = *(int *)res;
-    registry_schema_t *hndlr = container_of(current, registry_schema_t, node);
-    if (hndlr->commit_cb) {
-        _res = hndlr->commit_cb(hndlr->context);
+    registry_schema_t *schema = container_of(current, registry_schema_t, node);
+    if (schema->commit_cb) {
+        _res = schema->commit_cb(schema->context);
         if (!*(int *)res) {
             *(int *)res = _res;
         }
@@ -230,13 +230,13 @@ int registry_commit(int *path, int path_len)
     int rc = 0;
 
     if (path_len > 0) {
-        registry_schema_t *hndlr = _schema_lookup(path[0]);
-        if (!hndlr) {
+        registry_schema_t *schema = _schema_lookup(path[0]);
+        if (!schema) {
             return -EINVAL;
         }
 
-        if (hndlr->commit_cb) {
-            return hndlr->commit_cb(hndlr->context);
+        if (schema->commit_cb) {
+            return schema->commit_cb(schema->context);
         } else {
             return 0;
         }
@@ -248,59 +248,104 @@ int registry_commit(int *path, int path_len)
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len, char* val, void *context), int *path, int path_len)
+static void _registry_export_recursive(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
 {
-    (void)export_func;
-    (void)path;
-    (void)path_len;
-    return 0;
-    // TODO implement export
-    /* assert(export_func != NULL);
-    registry_schema_t *hndlr;
+    for (int i = 0; i < schema_items_len; i++) {
+        registry_schema_item_t schema_item = schema_items[i];
 
-    if (path_len > 0) {
-        DEBUG("[registry export] exporting %s\n", name);
+        int new_path_len = current_path_len + 1;
+        int new_path[new_path_len];
+        for (int j = 0; j < current_path_len; j++) {
+            new_path[j] = current_path[j];
+        }
+        new_path[new_path_len - 1] = schema_item.id;
 
-        hndlr = _schema_lookup(path[0]);
-        if (!hndlr) {
+        if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
+            // Parameter found => Export
+            char val_buf[REGISTRY_MAX_VAL_LEN] = {0};
+            registry_get_value(new_path, new_path_len, val_buf, ARRAY_SIZE(val_buf));
+            export_func(new_path, new_path_len, &schema_item, val_buf, context);
+        } else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
+            // Group => search for parameters
+            registry_group_t group = schema_item.value.group;
+            for (int i = 0; i < group.items_len; i++) {
+                new_path[new_path_len - 1] = schema_item.id;
+                _registry_export_recursive(export_func, new_path, current_path_len + 1, group.items, group.items_len, context);
+            }
+        }
+    }
+}
+
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), int *path, int path_len)
+{    
+    assert(export_func != NULL);
+    registry_schema_t *schema;
+
+    // Schema/Instance/Item => Export concrete schema item meta data and its value
+    if (path_len >= 3) {
+        DEBUG("[registry export] exporting ");
+        for (int i = 0; i < path_len; i++) {
+            DEBUG("/%d", path[i]);
+        }
+        DEBUG("\n");
+
+        schema = _schema_lookup(path[0]);
+        if (!schema) {
             return -EINVAL;
         }
 
-        for (int i = 0; i < hndlr->schemas_len; i++) {
-            registry_parameter_t param = hndlr->schemas[i];
-            
-            // Generate whole registry parameter path from group and parameter name
-            char path[strlen(hndlr->name) + strlen(param.name) + 1];
-            strcpy(path, hndlr->name);
-            strcpy(path + strlen(hndlr->name), "/");
-            strcpy(path + strlen(hndlr->name) + 1, param.name);
-            export_func(path, path_len, param.data, hndlr->context);
-        }
-        return 0;
+        registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
+        
+        _registry_export_recursive(export_func, path, path_len, schema_item, 1, schema->context);
     }
+    // Schema/Instance => Export all schema items meta data and their values
+    else if (path_len >= 2) {
+        schema = _schema_lookup(path[0]);
+        if (!schema) {
+            return -EINVAL;
+        }
+
+        _registry_export_recursive(export_func, path, path_len, schema->items, schema->items_len, schema->context);
+    }
+    // Schema => Export all schema instances items meta data and their value
+    else if (path_len >= 1) {
+        schema = _schema_lookup(path[0]);
+        if (!schema) {
+            return -EINVAL;
+        }
+        
+        for (int i = 0; i < schema->items_len; i++) {
+            int new_path[] = {path[0], i};
+            _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
+        }
+    }
+    // TODO decide what would be best...
+    // Nothing => Export all possible pathes of all schemas + their items OR export only all available schemas?
     else {
-        DEBUG("[registry export] exporting all\n");
+        // TODO implement export else
+        /* DEBUG("[registry export] exporting all\n");
         clist_node_t *node = registry_schemas.next;
 
         if (!node) {
             return -1;
         }
 
-        do  {
+        do {
             node = node->next;
-            hndlr = container_of(node, registry_schema_t, node);
+            schema = container_of(node, registry_schema_t, node);
             
-            for (int i = 0; i < hndlr->schemas_len; i++) {
-                registry_parameter_t param = hndlr->schemas[i];
+            for (int i = 0; i < schema->items_len; i++) {
+                registry_parameter_t param = schema->items[i];
                 
                 // Generate whole registry parameter path from group and parameter name
-                char path[strlen(hndlr->name) + strlen(param.name) + 1];
-                strcpy(path, hndlr->name);
-                strcpy(path + strlen(hndlr->name), "/");
-                strcpy(path + strlen(hndlr->name) + 1, param.name);
-                export_func(path, path_len, param.data, hndlr->context);
+                char path[strlen(schema->name) + strlen(param.name) + 1];
+                strcpy(path, schema->name);
+                strcpy(path + strlen(schema->name), "/");
+                strcpy(path + strlen(schema->name) + 1, param.name);
+                export_func(path, path_len, param.data, schema->context);
             }
-        } while (node != registry_schemas.next);
-        return 0;
-    } */
+        } while (node != registry_schemas.next); */
+    }
+
+    return 0;
 }

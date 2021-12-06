@@ -12,7 +12,7 @@ static void get(int param_id, void *instance, void *buf, int buf_len, void *cont
 static void set(int param_id, void *instance, void *val, int val_len, void *context);
 static int commit_cb(void *context);
 
-static registry_schema_item_t schema[] = {
+static registry_schema_item_t schema_items[] = {
     {
         .id = REGISTRY_SCHEMA_TEST_BOOL,
         .name = "bool",
@@ -141,8 +141,8 @@ registry_schema_t registry_schema_test = {
     .id = 1,
     .name = "test",
     .description = "Test schema containing all possible types for testing purposes.",
-    .schema = schema,
-    .schema_len = ARRAY_SIZE(schema),
+    .items = schema_items,
+    .items_len = ARRAY_SIZE(schema_items),
     .get = get,
     .set = set,
     .commit_cb = commit_cb,

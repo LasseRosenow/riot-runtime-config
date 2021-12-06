@@ -120,8 +120,8 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
             printf("                <Description>Commit changes</Description>\n");
             printf("            </Item>\n");
 
-            for (int i = 0; i < hndlr->schema_len; i++) {
-                registry_schema_item_t schema = hndlr->schema[i];
+            for (int i = 0; i < hndlr->items_len; i++) {
+                registry_schema_item_t schema = hndlr->items[i];
                 registry_parameter_t parameter = schema.value.parameter;
 
                 printf("            <Item ID=\"%d\">\n", schema.id + 1); // Increase by 1 because the first item is the commit executable
