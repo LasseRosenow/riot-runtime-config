@@ -296,8 +296,15 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
         // Schema/Instance/Item => Export concrete schema item with data of the given instance
         if (path_len >= 3) {
             registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
+
+            // Create a new path which does not include the last value, because _registry_export_recursive will add it inside
+            int new_path_len = path_len - 1;
+            int new_path[new_path_len];
+            for (int j = 0; j < path_len; j++) {
+                new_path[j] = path[j];
+            }
             
-            _registry_export_recursive(export_func, path, path_len, schema_item, 1, schema->context);
+            _registry_export_recursive(export_func, new_path, new_path_len, schema_item, 1, schema->context);
         }
         // Schema/Instance => Export all schema items with data of the given instance
         else if (path_len == 2) {

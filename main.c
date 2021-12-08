@@ -38,6 +38,21 @@ registry_schema_rgb_t rgb_instance_3 = {
     .b = 9,
 };
 
+int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context) {
+    (void) meta;
+    (void) context;
+
+    printf("Exporting: ");
+
+    for (int i = 0; i < path_len; i++) {
+        printf("/%d", path[i]);
+    }
+
+    printf(" - %s\n", val);
+
+    return 0;
+}
+
 int main(void) {
     /* init registry */
     registry_init();
@@ -53,6 +68,10 @@ int main(void) {
     /* for the thread running the shell */
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
+
+    /* Test some exports */
+    int path[] = {registry_schema_rgb.id, 2, 1};
+    registry_export(_export_func, path, ARRAY_SIZE(path));
 
     /* test registry */
     tests_run();
