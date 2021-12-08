@@ -9,12 +9,11 @@
 
 #include "registry.h"
 
-static int _registry_cmp_id(clist_node_t *current, void *id);
 static int _registry_call_commit(clist_node_t *current, void *name);
 
 clist_node_t registry_schemas;
 
-static int _registry_cmp_id(clist_node_t *current, void *id)
+static int _registry_cmp_schema_id(clist_node_t *current, void *id)
 {
     assert(current != NULL);
     registry_schema_t *schema = container_of(current, registry_schema_t, node);
@@ -25,13 +24,35 @@ static registry_schema_t *_schema_lookup(int id)
 {
     clist_node_t *node;
     registry_schema_t *schema = NULL;
-    node = clist_foreach(&registry_schemas, _registry_cmp_id, &id);
+    node = clist_foreach(&registry_schemas, _registry_cmp_schema_id, &id);
 
     if (node != NULL) {
         schema = container_of(node, registry_schema_t, node);
     }
 
     return schema;
+}
+
+static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
+    assert(schema != NULL);
+
+    /* find instance with correct instance_id */
+    clist_node_t *node = schema->instances.next;
+    int index = 0;
+    do {
+        node = node->next;
+        // TODO registry_schema_t is WRONG (registry_schema_t should be registry_instance_t but this type does not exist)
+        void *instance = container_of(node, registry_schema_t, node);
+        
+        /* check if index equals instance_id */
+        if (index == instance_id) {
+            return instance;
+        }
+
+        index++;
+    } while (node != schema->instances.next);
+
+    return NULL;
 }
 
 void registry_init(void)
@@ -77,28 +98,6 @@ static size_t _get_registry_parameter_data_len(registry_type_t type)
         
         default: return 0;
     }
-}
-
-static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
-    assert(schema != NULL);
-
-    /* find instance with correct instance_id */
-    clist_node_t *node = schema->instances.next;
-    int index = 0;
-    do {
-        node = node->next;
-        // TODO registry_schema_t is WRONG
-        void *instance = container_of(node, registry_schema_t, node);
-        
-        /* check if index equals instance_id */
-        if (index == instance_id) {
-            return instance;
-        }
-
-        index++;
-    } while (node != schema->instances.next);
-
-    return NULL;
 }
 
 static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *schema) {
@@ -281,49 +280,39 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
     assert(export_func != NULL);
     registry_schema_t *schema;
 
-    // Schema/Instance/Item => Export concrete schema item meta data and its value
-    if (path_len >= 3) {
-        DEBUG("[registry export] exporting ");
-        for (int i = 0; i < path_len; i++) {
-            DEBUG("/%d", path[i]);
-        }
-        DEBUG("\n");
+    DEBUG("[registry export] exporting all in ");
+    for (int i = 0; i < path_len; i++) {
+        DEBUG("/%d", path[i]);
+    }
+    DEBUG("\n");
 
+    // Get schema, if in path
+    if (path_len >= 1) {
         schema = _schema_lookup(path[0]);
         if (!schema) {
             return -EINVAL;
         }
+    }
 
+    // Schema/Instance/Item => Export concrete schema item with data of the given instance
+    if (path_len >= 3) {
         registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
         
         _registry_export_recursive(export_func, path, path_len, schema_item, 1, schema->context);
     }
-    // Schema/Instance => Export all schema items meta data and their values
-    else if (path_len >= 2) {
-        schema = _schema_lookup(path[0]);
-        if (!schema) {
-            return -EINVAL;
-        }
-
+    // Schema/Instance => Export all schema items with data of the given instance
+    else if (path_len == 2) {
         _registry_export_recursive(export_func, path, path_len, schema->items, schema->items_len, schema->context);
     }
-    // Schema => Export all schema instances items meta data and their value
-    else if (path_len >= 1) {
-        schema = _schema_lookup(path[0]);
-        if (!schema) {
-            return -EINVAL;
-        }
-        
-        for (int i = 0; i < schema->items_len; i++) {
+    // Schema => Export all schema items with data of all instances
+    else if (path_len == 1) {
+        for (int i = 0; i < clist_count(&schema->instances); i++) {
             int new_path[] = {path[0], i};
             _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
         }
     }
-    // TODO decide what would be best...
-    // Nothing => Export all possible pathes of all schemas + their items OR export only all available schemas?
-    else {
-        // TODO implement export else
-        /* DEBUG("[registry export] exporting all\n");
+    // Empty path => Export all schema items of all schemas with data of all instances
+    else if (path_len == 0) {
         clist_node_t *node = registry_schemas.next;
 
         if (!node) {
@@ -333,18 +322,12 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
         do {
             node = node->next;
             schema = container_of(node, registry_schema_t, node);
-            
-            for (int i = 0; i < schema->items_len; i++) {
-                registry_parameter_t param = schema->items[i];
-                
-                // Generate whole registry parameter path from group and parameter name
-                char path[strlen(schema->name) + strlen(param.name) + 1];
-                strcpy(path, schema->name);
-                strcpy(path + strlen(schema->name), "/");
-                strcpy(path + strlen(schema->name) + 1, param.name);
-                export_func(path, path_len, param.data, schema->context);
+
+            for (int i = 0; i < clist_count(&schema->instances); i++) {
+                int new_path[] = {schema->id, i};
+                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
             }
-        } while (node != registry_schemas.next); */
+        } while (node != registry_schemas.next);
     }
 
     return 0;
