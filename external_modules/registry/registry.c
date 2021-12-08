@@ -292,23 +292,23 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
         if (!schema) {
             return -EINVAL;
         }
-    }
 
-    // Schema/Instance/Item => Export concrete schema item with data of the given instance
-    if (path_len >= 3) {
-        registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
-        
-        _registry_export_recursive(export_func, path, path_len, schema_item, 1, schema->context);
-    }
-    // Schema/Instance => Export all schema items with data of the given instance
-    else if (path_len == 2) {
-        _registry_export_recursive(export_func, path, path_len, schema->items, schema->items_len, schema->context);
-    }
-    // Schema => Export all schema items with data of all instances
-    else if (path_len == 1) {
-        for (int i = 0; i < clist_count(&schema->instances); i++) {
-            int new_path[] = {path[0], i};
-            _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
+        // Schema/Instance/Item => Export concrete schema item with data of the given instance
+        if (path_len >= 3) {
+            registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
+            
+            _registry_export_recursive(export_func, path, path_len, schema_item, 1, schema->context);
+        }
+        // Schema/Instance => Export all schema items with data of the given instance
+        else if (path_len == 2) {
+            _registry_export_recursive(export_func, path, path_len, schema->items, schema->items_len, schema->context);
+        }
+        // Schema => Export all schema items with data of all instances
+        else if (path_len == 1) {
+            for (size_t i = 0; i < clist_count(&schema->instances); i++) {
+                int new_path[] = {path[0], i};
+                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
+            }
         }
     }
     // Empty path => Export all schema items of all schemas with data of all instances
@@ -323,7 +323,7 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
             node = node->next;
             schema = container_of(node, registry_schema_t, node);
 
-            for (int i = 0; i < clist_count(&schema->instances); i++) {
+            for (size_t i = 0; i < clist_count(&schema->instances); i++) {
                 int new_path[] = {schema->id, i};
                 _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
             }
