@@ -45,7 +45,7 @@ static void test_registry_setup(void) {
     registry_init();
 
     /* add application registry schema */
-    registry_register(&registry_schema_test);
+    registry_register_schema(&registry_schema_test);
 
     /* add schema instances */
     registry_add_instance(registry_schema_test.id, &test_instance_1.node);
@@ -55,7 +55,7 @@ static void test_registry_teardown(void) {
     
 }
 
-static void tests_registry_register(void) {
+static void tests_registry_register_schema(void) {
     // test if schema_test got registered
     clist_node_t *test_node = registry_schema_test.instances.next->next;
     registry_schema_test_t* test_instance = container_of(test_node, registry_schema_test_t, node);
@@ -233,7 +233,7 @@ static void tests_registry_all_max_values(void) {
 
 Test *tests_registry(void) {
     EMB_UNIT_TESTFIXTURES(fixtures) {
-        new_TestFixture(tests_registry_register),
+        new_TestFixture(tests_registry_register_schema),
         new_TestFixture(tests_registry_all_min_values),
         new_TestFixture(tests_registry_all_max_values),
     };

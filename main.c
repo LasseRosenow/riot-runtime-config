@@ -58,7 +58,7 @@ int main(void) {
     registry_init();
 
     /* add application registry schema */
-    registry_register(&registry_schema_rgb);
+    registry_register_schema(&registry_schema_rgb);
 
     /* add schema instances */
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_1.node);

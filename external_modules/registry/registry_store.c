@@ -35,13 +35,13 @@ void registry_store_init(void)
     load_srcs.next = NULL;
 }
 
-void registry_src_register(registry_store_t *src)
+void registry_register_storage_src(registry_store_t *src)
 {
     assert(src != NULL);
     clist_rpush(&load_srcs, &(src->node));
 }
 
-void registry_dst_register(registry_store_t *dst)
+void registry_register_storage_dst(registry_store_t *dst)
 {
     assert(dst != NULL);
     save_dst = dst;

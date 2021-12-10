@@ -53,7 +53,7 @@
  * ## RIOT Registry usage flow
  * - 1 The RIOT registry is initialized with @ref registry_init().
  * - 2 Modules declare and register RHs for configuration groups by calling
- *     @ref registry_register().
+ *     @ref registry_register_schema().
  * - 3 SFs are registered as sources and/or destinations of configurations by
  *     calling registry_<storage-name>_src() and registry_<storage-name>_dst().
  *
@@ -244,7 +244,7 @@ typedef struct registry_store_itf {
 
 /**
  * @brief Schema for configuration groups. Each configuration group should
- * register a schema using the @ref registry_register() function.
+ * register a schema using the @ref registry_register_schema() function.
  * A schema provides the pointer to get, set and commit configuration
  * parameters.
  */
@@ -316,7 +316,7 @@ void registry_store_init(void);
  *
  * @param[in] schema Pointer to the schema structure.
  */
-void registry_register(registry_schema_t *schema);
+void registry_register_schema(registry_schema_t *schema);
 
 /**
  * @brief Registers a new storage as a source of configurations. Multiple
@@ -327,7 +327,7 @@ void registry_register(registry_schema_t *schema);
  *
  * @param[in] src Pointer to the storage to register as source.
  */
-void registry_src_register(registry_store_t *src);
+void registry_register_storage_src(registry_store_t *src);
 
 /**
  * @brief Registers a new storage as a destination for saving configurations.
@@ -338,7 +338,7 @@ void registry_src_register(registry_store_t *src);
  *
  * @param[in] dst Pointer to the storage to register
  */
-void registry_dst_register(registry_store_t *dst);
+void registry_register_storage_dst(registry_store_t *dst);
 
 /**
  * @brief Adds a new instance of a schema.

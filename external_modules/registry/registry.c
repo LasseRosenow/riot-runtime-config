@@ -61,7 +61,7 @@ void registry_init(void)
     registry_store_init();
 }
 
-void registry_register(registry_schema_t *schema)
+void registry_register_schema(registry_schema_t *schema)
 {
     assert(schema != NULL);
     clist_rpush(&registry_schemas, &(schema->node));
