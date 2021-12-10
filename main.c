@@ -20,22 +20,34 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
-registry_schema_rgb_t rgb_instance_1 = {
+registry_schema_rgb_t rgb_instance_1_data = {
     .r = 0,
     .g = 255,
     .b = 70,
 };
+registry_instance_t rgb_instance_1 = {
+    .name = "rgb-1",
+    .data = &rgb_instance_1_data,
+};
 
-registry_schema_rgb_t rgb_instance_2 = {
+registry_schema_rgb_t rgb_instance_2_data = {
     .r = 90,
     .g = 4,
     .b = 0,
 };
+registry_instance_t rgb_instance_2 = {
+    .name = "rgb-2",
+    .data = &rgb_instance_2_data,
+};
 
-registry_schema_rgb_t rgb_instance_3 = {
+registry_schema_rgb_t rgb_instance_3_data = {
     .r = 7,
     .g = 8,
     .b = 9,
+};
+registry_instance_t rgb_instance_3 = {
+    .name = "rgb-3",
+    .data = &rgb_instance_3_data,
 };
 
 int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context) {
@@ -61,9 +73,9 @@ int main(void) {
     registry_register_schema(&registry_schema_rgb);
 
     /* add schema instances */
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_1.node);
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_2.node);
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_3.node);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_1);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_2);
+    registry_add_instance(registry_schema_rgb.id, &rgb_instance_3);
 
     /* for the thread running the shell */
     //registry_coap_cli_init();

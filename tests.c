@@ -12,7 +12,8 @@
 
 #include "tests.h"
 #include <fmt.h>
-registry_schema_test_t test_instance_1 = {
+
+registry_schema_test_t test_instance_1_data = {
     .string = "hallo",
     .boolean = true,
     .u8 = 9,
@@ -35,6 +36,11 @@ registry_schema_test_t test_instance_1 = {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 };
 
+registry_instance_t test_instance_1 = {
+    .name = "test-1",
+    .data = &test_instance_1_data,
+};
+
 static void _registry_set_and_get(int* path, int path_len, char* input, char* output_buf, int output_buf_len) {
     registry_set_value(path, path_len, input);
     registry_get_value(path, path_len, output_buf, output_buf_len);
@@ -48,7 +54,7 @@ static void test_registry_setup(void) {
     registry_register_schema(&registry_schema_test);
 
     /* add schema instances */
-    registry_add_instance(registry_schema_test.id, &test_instance_1.node);
+    registry_add_instance(registry_schema_test.id, &test_instance_1);
 }
 
 static void test_registry_teardown(void) {

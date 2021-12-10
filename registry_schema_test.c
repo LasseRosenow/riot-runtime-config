@@ -8,9 +8,8 @@
 
 #include "registry_schema_test.h"
 
-static void get(int param_id, void *instance, void *buf, int buf_len, void *context);
-static void set(int param_id, void *instance, void *val, int val_len, void *context);
-static int commit_cb(void *context);
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context);
 
 static registry_schema_item_t schema_items[] = {
     {
@@ -145,14 +144,13 @@ registry_schema_t registry_schema_test = {
     .items_len = ARRAY_SIZE(schema_items),
     .get = get,
     .set = set,
-    .commit_cb = commit_cb,
 };
 
-static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context) {
     (void) buf_len;
     (void) context;
 
-    registry_schema_test_t* _instance = (registry_schema_test_t*) instance;
+    registry_schema_test_t* _instance = (registry_schema_test_t*) instance->data;
 
     switch (param_id) {
         case REGISTRY_SCHEMA_TEST_BOOL:
@@ -214,11 +212,11 @@ static void get(int param_id, void *instance, void *buf, int buf_len, void *cont
     }
 }
 
-static void set(int param_id, void *instance, void *val, int val_len, void *context) {
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context) {
     (void) val_len;
     (void) context;
 
-    registry_schema_test_t* _instance = (registry_schema_test_t*) instance;
+    registry_schema_test_t* _instance = (registry_schema_test_t*) instance->data;
 
     switch (param_id) {
         case REGISTRY_SCHEMA_TEST_BOOL:
@@ -278,10 +276,4 @@ static void set(int param_id, void *instance, void *val, int val_len, void *cont
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
     }
-}
-
-static int commit_cb(void *context) {
-    (void) context;
-
-    return 0;
 }

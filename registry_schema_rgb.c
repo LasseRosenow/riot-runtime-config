@@ -8,9 +8,8 @@
 
 #include "registry_schema_rgb.h"
 
-static void get(int param_id, void *instance, void *buf, int buf_len, void *context);
-static void set(int param_id, void *instance, void *val, int val_len, void *context);
-static int commit_cb(void *context);
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context);
 
 static registry_schema_item_t schema_items[] = {
     {
@@ -50,14 +49,13 @@ registry_schema_t registry_schema_rgb = {
     .items_len = ARRAY_SIZE(schema_items),
     .get = get,
     .set = set,
-    .commit_cb = commit_cb,
 };
 
-static void get(int param_id, void *instance, void *buf, int buf_len, void *context) {
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context) {
     (void) buf_len;
     (void) context;
 
-    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance;
+    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance->data;
 
     switch (param_id) {
         case REGISTRY_SCHEMA_RGB_RED:
@@ -74,11 +72,11 @@ static void get(int param_id, void *instance, void *buf, int buf_len, void *cont
     }
 }
 
-static void set(int param_id, void *instance, void *val, int val_len, void *context) {
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context) {
     (void) val_len;
     (void) context;
 
-    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance;
+    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance->data;
 
     switch (param_id) {
         case REGISTRY_SCHEMA_RGB_RED:
@@ -93,10 +91,4 @@ static void set(int param_id, void *instance, void *val, int val_len, void *cont
             memcpy(&_instance->b, val, sizeof(_instance->b));
             break;
     }
-}
-
-static int commit_cb(void *context) {
-    (void) context;
-
-    return 0;
 }

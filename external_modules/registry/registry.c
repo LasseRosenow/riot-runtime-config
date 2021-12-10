@@ -9,8 +9,6 @@
 
 #include "registry.h"
 
-static int _registry_call_commit(clist_node_t *current, void *name);
-
 clist_node_t registry_schemas;
 
 static int _registry_cmp_schema_id(clist_node_t *current, void *id)
@@ -33,7 +31,7 @@ static registry_schema_t *_schema_lookup(int id)
     return schema;
 }
 
-static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
+static registry_instance_t *_instance_lookup(registry_schema_t *schema, int instance_id) {
     assert(schema != NULL);
 
     /* find instance with correct instance_id */
@@ -41,8 +39,7 @@ static void *_instance_lookup(registry_schema_t *schema, int instance_id) {
     int index = 0;
     do {
         node = node->next;
-        // TODO registry_schema_t is WRONG (registry_schema_t should be registry_instance_t but this type does not exist)
-        void *instance = container_of(node, registry_schema_t, node);
+        registry_instance_t *instance = container_of(node, registry_instance_t, node);
         
         /* check if index equals instance_id */
         if (index == instance_id) {
@@ -125,7 +122,7 @@ static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_
     return NULL;
 }
 
-int registry_add_instance(int schema_id, clist_node_t* instance)
+int registry_add_instance(int schema_id, registry_instance_t* instance)
 {
     assert(instance != NULL);
 
@@ -138,7 +135,7 @@ int registry_add_instance(int schema_id, clist_node_t* instance)
         /* check if schema has correct schema_id */
         if (schema->id == schema_id) {
             /* add instance to schema */
-            clist_rpush(&(schema->instances), instance);
+            clist_rpush(&(schema->instances), &instance->node);
 
             /* count instance index */
             return clist_count(schema->instances.next) - 1;
@@ -157,7 +154,7 @@ int registry_set_value(int *path, int path_len, char *val_str)
     }
 
     /* lookup instance */
-    void *instance = _instance_lookup(schema, path[1]);
+    registry_instance_t *instance = _instance_lookup(schema, path[1]);
     if (!instance) {
         return -EINVAL;
     }
@@ -188,7 +185,7 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
     }
 
     /* lookup instance */
-    void *instance = _instance_lookup(schema, path[1]);
+    registry_instance_t *instance = _instance_lookup(schema, path[1]);
     if (!instance) {
         return NULL;
     }
@@ -210,39 +207,60 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
     return buf;
 }
 
-static int _registry_call_commit(clist_node_t *current, void *res)
-{
-    assert(current != NULL);
-    int _res = *(int *)res;
-    registry_schema_t *schema = container_of(current, registry_schema_t, node);
-    if (schema->commit_cb) {
-        _res = schema->commit_cb(schema->context);
-        if (!*(int *)res) {
-            *(int *)res = _res;
-        }
-    }
-    return 0;
-}
-
 int registry_commit(int *path, int path_len)
 {
     int rc = 0;
 
-    if (path_len > 0) {
+    /* Schema/? */
+    if (path_len >= 1) {
+        /* lookup schema */
         registry_schema_t *schema = _schema_lookup(path[0]);
         if (!schema) {
             return -EINVAL;
         }
 
-        if (schema->commit_cb) {
-            return schema->commit_cb(schema->context);
-        } else {
-            return 0;
+        /* Schema/Instance */
+        if (path_len >= 2) {
+            /* lookup instance */
+            registry_instance_t *instance = _instance_lookup(schema, path[1]);
+            if (!instance) {
+                return -EINVAL;
+            }
+            return instance->commit_cb(path, path_len, instance->context);
+        }
+        /* Only Schema */
+        else {
+            for (size_t i = 0; i < clist_count(&schema->instances); i++) {
+                registry_instance_t *instance = _instance_lookup(schema, i);
+                int _rc = instance->commit_cb(path, path_len, instance->context);
+                if (!_rc) {
+                    rc = _rc;
+                }
+            }
+            return rc;
         }
     }
+    /* No schema => call all */
     else {
-        clist_foreach(&registry_schemas, _registry_call_commit,
-                      (void *)(&rc));
+        clist_node_t *node = registry_schemas.next;
+
+        if (!node) {
+            return -EINVAL;
+        }
+
+        do {
+            node = node->next;
+            registry_schema_t* schema = container_of(node, registry_schema_t, node);
+
+            for (size_t i = 0; i < clist_count(&schema->instances); i++) {
+                registry_instance_t *instance = _instance_lookup(schema, i);
+                int _rc = instance->commit_cb(path, path_len, instance->context);
+                if (!_rc) {
+                    rc = _rc;
+                }
+            }
+        } while (node != registry_schemas.next);
+
         return rc;
     }
 }

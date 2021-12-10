@@ -243,6 +243,25 @@ typedef struct registry_store_itf {
 } registry_store_itf_t;
 
 /**
+ * @brief Instance of a schema containing its data.
+ */
+typedef struct {
+    clist_node_t node; /**< Linked list node */
+    char *name; /**< String describing the instance */
+    void *data; /**< Struct containing all configuration parameters of the schema */
+
+    /**
+     * @brief Will be called after @ref registry_commit() was called on this instance.
+     *
+     * @param[in] context Context of the instance
+     * @return 0 on success, non-zero on failure
+     */
+    int (*commit_cb)(int *path, int path_len, void *context);
+
+    void *context; /**< Optional context used by the instance */
+} registry_instance_t;
+
+/**
  * @brief Schema for configuration groups. Each configuration group should
  * register a schema using the @ref registry_register_schema() function.
  * A schema provides the pointer to get, set and commit configuration
@@ -266,7 +285,7 @@ typedef struct {
      * @param[in] buf_len Length of the buffer to store the current value
      * @param[in] context Context of the schema
      */
-    void (*get)(int param_id, void *instance, void *buf,
+    void (*get)(int param_id, registry_instance_t *instance, void *buf,
                     int buf_len, void *context);
 
     /**
@@ -278,20 +297,8 @@ typedef struct {
      * @param[in] val_len Length of the buffer to store the current value
      * @param[in] context Context of the schema
      */
-    void (*set)(int param_id, void *instance, void *val,
+    void (*set)(int param_id, registry_instance_t *instance, void *val,
                     int val_len, void *context);
-
-    /**
-     * @brief Schema to apply (commit) the configuration parameters of the
-     * group, called once all configurations are loaded from storage.
-     * This is useful when a special logic is needed to apply the parameters
-     * (e.g. when dependencies exist). This schema should also be called after
-     * setting the value of a configuration parameter.
-     *
-     * @param[in] context Context of the schema
-     * @return 0 on success, non-zero on failure
-     */
-    int (*commit_cb)(void *context);
 
     void *context; /**< Optional context used by the schemas */
 } registry_schema_t;
@@ -344,11 +351,9 @@ void registry_register_storage_dst(registry_store_t *dst);
  * @brief Adds a new instance of a schema.
  *
  * @param[in] schema_id ID of the schema.
- * @param[in] instance Pointer to the linked list node of the new instance.
- * @return -EINVAL if schema could not be found, otherwise returns the
- *             index of the new instance.
+ * @param[in] instance Pointer to instance structure.
  */
-int registry_add_instance(int schema_id, clist_node_t *instance);
+int registry_add_instance(int schema_id, registry_instance_t *instance);
 
 /**
  * @brief Sets the value of a parameter that belongs to a configuration group.
