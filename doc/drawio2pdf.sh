@@ -1,0 +1,1 @@
+drawio --export --format pdf --recursive --crop --output images/ drawio/
