@@ -75,4 +75,26 @@ Configuration System (RCS) focusing on modularity, reuse of existing
 technologies in RIOT (network stack, storage interface) and standards
 compliance.
 
-![Figure 01](./doc/images/architecture.drawio.svg "Registry Api")
+# 2. Architecture
+The proposed RCS architecture, as shown in Figure 01, is formed by one or more
+[Configuration Managers](#4-configuration-managers) and the
+[RIOT Registry](#3-the-riot-registry).
+
+The RIOT Registry acts as common interface to access Runtime Configurations and
+store them in non-volatile devices.
+
+All runtime configuration can be accessed either from the RIOT Application or
+the interfaces exposed by the Configuration Managers, via the RIOT Registry.
+
+A RIOT Application may interact with a Configuration Manager in order to
+modify access control rules or enable different exposed interfaces.
+
+![Figure 01](./doc/images/architecture.drawio.svg "Runtime Configuration Architecture")
+<p align="center">
+Figure 01 - Runtime Configuration System architecture
+</p>
+
+The diagram differentiates between 2 different kinds of Configuration Managers:
+- `Basic Configuration Managers`: These Configuration Managers are a simple representation of the default configuration structure of the RIOT registry. They only expose the parameters paths as is and do not map to any special structure.
+- `Advanced Configuration Managers`: These Configuration Managers have their own configuration structure (custom pre defined object models etc.) and can not automatically be maped to from the RIOT Registry itself. To make them work, a custom maping module needs to be implemented, which maps each configuration parameter from the registry to the correct format of the configuration manager.
+
