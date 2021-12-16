@@ -1,0 +1,1 @@
+drawio --export --format svg --recursive --crop --output images/ drawio/
