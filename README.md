@@ -143,5 +143,60 @@ A conceptual example of a RH implementation can be found in the
 [Appendix](#Appendix).
 
 ## 3.1.1 Schema Instances
-A instance of a CS, which contains the actual data values. Can be added to a CS and also contains a `commit_cb` handler, to notify the module containing the instance about changes.
+An instance of a CS, which contains the actual data values. It can be added to a CS and contains a `commit_cb` handler, to notify the module containing the instance about changes.
 - `commit_cb`: To be called once configuration parameters have been `set`, in order o apply any further logic required to make them effective (e.g. handling dependencies).
+
+## 3.2. Storage facilities
+Storage facilities MUST implement the **storage interface** to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value strings, it is responsibility of the SF to transform that to the proper format for storage (e.g. lines separated by `\n` character in a file).
+
+The interface of a SF is defined with a descriptor with the following attributes:
+- `load`: Executes a callback function for every configuration parameter stored in the storage.
+- `store`: Stores one configuration parameter in the storage.
+
+Any kind of storage encryption mechanism is not in the scope of this document, and up to the implementation of `load` and `store` or intrinsic encryption functionalities in the storage.
+
+A minimal RIOT Registry setup requires at least one source SF from which configurations are loaded and exactly one SF destination to which configurations are stored. Having multiple SF sources can be useful when it's required to migrate the data between storage facilities (e.g to migrate all configurations from SF A to B, register B as source and destination and add A as a source).
+
+A conceptual example of a SF can be found in the [Appendix](#Appendix).
+
+## 3.3. RIOT Registry Usage Flow
+
+### Registry Initialization
+As described in the flow in Figure 03, modules add their **Schema Instances (SI)** to pre defined **Configuration Schemas (CS)** or declare and register their own **CS** for configuration groups in the RIOT Registry. **Storage facilities (SF)** are registered as sources and/or destinations of configurations in the RIOT Registry.
+
+![Figure 03](./doc/images/boot.drawio.svg "Usage flow of the RIOT Registry")
+<p align="center">
+Figure 03 - Usage flow of the RIOT Registry
+</p>
+
+### Get, set, apply and export configurations
+At any time, the application or a configuration manager can _retrieve_ a
+configuration value (`registry_get_value`), _set_ a configuration value
+(`registry_set_value`), _apply_ configuration changes (`registry_commit`) or
+_export_ configurations using a user-defined callback function
+(`registry_export`).
+
+Note these functions don't interact with SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store` is called (see [Load and store configurations](#load-and-store-configurations))
+
+The following diagram shows the process of each function. It's assumed there
+are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) and an _Application_ configuration group with a `foo` configuration parameter.
+
+![Figure 04](./doc/images/basic_behavioral_flow.drawio.svg "Behavioral flow of the basic API of the RIOT Registry")
+<p align="center">
+Figure 04 - Behavioral flow of the basic API of the RIOT Registry
+</p>
+
+TODO
+-------------------------------------------
+
+### Load and store configurations
+At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_load` function) or _store_ them in the SF destination (`registry_store` function).
+
+As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store` will navigate through all RH and call their _export_ function with the SF _store_ handler as callback.
+
+Figure 05 shows the above described processes.
+
+<img src="./files/rdm-draft-alamos-lanzieri-runtime-configuration-architecture/registry-storage.svg" />
+<p align="center">
+Figure 05 - Behavioral flow of the load and store calls
+</p>
