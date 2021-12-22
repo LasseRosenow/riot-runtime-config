@@ -217,7 +217,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         break;
 
                     case REGISTRY_TYPE_UINT32:
-                        printf("0-%" PRIu32, UINT32_MAX);
+                        printf("0-%" PRIu32, (uint32_t)UINT32_MAX);
                         break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
@@ -235,7 +235,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
                         break;
 
                     case REGISTRY_TYPE_INT32:
-                        printf("%" PRIi32 "-%" PRIi32, INT32_MIN, INT32_MAX);
+                        printf("%" PRIi32 "-%" PRIi32, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
                         break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)

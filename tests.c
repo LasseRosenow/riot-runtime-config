@@ -118,7 +118,7 @@ static void tests_registry_all_min_values(void) {
 
     // i32
     int path_i32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_I32};
-    sprintf(input_buf, "%" PRIi32, INT32_MIN);
+    sprintf(input_buf, "%" PRIi32, (int32_t)INT32_MIN);
     _registry_set_and_get(path_i32, ARRAY_SIZE(path_i32), input_buf, output_buf, ARRAY_SIZE(output_buf));
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 
@@ -180,7 +180,7 @@ static void tests_registry_all_max_values(void) {
 
     // u32
     int path_u32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_U32};
-    sprintf(input_buf, "%" PRIu32, UINT32_MAX);
+    sprintf(input_buf, "%" PRIu32, (uint32_t)UINT32_MAX);
     _registry_set_and_get(path_u32, ARRAY_SIZE(path_u32), input_buf, output_buf, ARRAY_SIZE(output_buf));
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 
@@ -206,7 +206,7 @@ static void tests_registry_all_max_values(void) {
 
     // i32
     int path_i32[] = {registry_schema_test.id, 0, REGISTRY_SCHEMA_TEST_I32};
-    sprintf(input_buf, "%" PRIi32, INT32_MAX);
+    sprintf(input_buf, "%" PRIi32, (int32_t)INT32_MAX);
     _registry_set_and_get(path_i32, ARRAY_SIZE(path_i32), input_buf, output_buf, ARRAY_SIZE(output_buf));
     TEST_ASSERT_EQUAL_STRING(input_buf, output_buf);
 

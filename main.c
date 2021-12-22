@@ -1,6 +1,7 @@
 #include <string.h>
 #include <shell.h>
 #include <msg.h>
+#include <stdio.h>
 
 #include "registry_coap.h"
 #include "registry_lwm2m.h"
