@@ -7,6 +7,7 @@
 #include <fmt.h>
 #include <phydat.h>
 #include <saul_reg.h>
+#include <xtimer.h>
 
 #include "cbor_util.h"
 #include "registry_coap.h"
