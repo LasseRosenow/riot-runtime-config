@@ -138,7 +138,7 @@ int registry_add_instance(int schema_id, registry_instance_t* instance)
             clist_rpush(&(schema->instances), &instance->node);
 
             /* count instance index */
-            return clist_count(schema->instances.next) - 1;
+            return clist_count(&schema->instances) - 1;
         }
     } while (node != registry_schemas.next);
 
