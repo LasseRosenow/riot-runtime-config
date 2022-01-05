@@ -7,7 +7,7 @@ typedef struct {
     clist_node_t node;
 
     bool boolean;
-    char* string;
+    char string[REGISTRY_MAX_VAL_LEN];
 
     uint8_t u8;
     uint16_t u16;
