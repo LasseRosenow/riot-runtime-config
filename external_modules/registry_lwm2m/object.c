@@ -247,7 +247,7 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
                         case REGISTRY_TYPE_BOOL: {
                             bool value;
                             lwm2m_data_decode_bool(&data_array[i], &value);
-                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%" PRId32, value);
+                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%d", value);
                             break;
                         }
 
