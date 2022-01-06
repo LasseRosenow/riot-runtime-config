@@ -86,8 +86,8 @@ static void _registry_dup_check_cb(const int *path, int path_len, char *val, voi
     }
 }
 
-static int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta,
-                              char *value, void *context)
+static int _registry_save_one_export_func(const int *path, int path_len,
+                                          registry_schema_item_t *meta, char *value, void *context)
 {
     (void)context;
     (void)meta;
@@ -123,7 +123,7 @@ int registry_save_one(const int *path, int path_len, void *context)
 
     registry_get_value(path, path_len, buf, sizeof(buf));
 
-    return _registry_save_one(path, path_len, NULL, buf, context);
+    return _registry_save_one_export_func(path, path_len, NULL, buf, context);
 }
 
 int registry_save(void)
@@ -143,7 +143,7 @@ int registry_save(void)
 
     do {
         schema = container_of(node, registry_schema_t, node);
-        res2 = registry_export(_registry_save_one, &schema->id, 1);
+        res2 = registry_export(_registry_save_one_export_func, &schema->id, 1);
         if (res == 0) {
             res = res2;
         }
