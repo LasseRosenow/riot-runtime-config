@@ -57,7 +57,7 @@ static registry_schema_item_t schema_items[] = {
             .type = REGISTRY_TYPE_UINT32,
         },
     },
-    
+
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
     {
         .id = REGISTRY_SCHEMA_TEST_U64,
@@ -97,7 +97,7 @@ static registry_schema_item_t schema_items[] = {
             .type = REGISTRY_TYPE_INT32,
         },
     },
-    
+
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
     {
         .id = REGISTRY_SCHEMA_TEST_I64,
@@ -146,133 +146,135 @@ registry_schema_t registry_schema_test = {
     .set = set,
 };
 
-static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context) {
-    (void) buf_len;
-    (void) context;
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context)
+{
+    (void)buf_len;
+    (void)context;
 
-    registry_schema_test_t* _instance = (registry_schema_test_t*) instance->data;
+    registry_schema_test_t *_instance = (registry_schema_test_t *)instance->data;
 
     switch (param_id) {
-        case REGISTRY_SCHEMA_TEST_BOOL:
-            memcpy(buf, &_instance->boolean, sizeof(_instance->boolean));
-            break;
+    case REGISTRY_SCHEMA_TEST_BOOL:
+        memcpy(buf, &_instance->boolean, sizeof(_instance->boolean));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_STRING:
-            strcpy(buf, _instance->string);
-            break;
+    case REGISTRY_SCHEMA_TEST_STRING:
+        strcpy(buf, _instance->string);
+        break;
 
-        case REGISTRY_SCHEMA_TEST_U8:
-            memcpy(buf, &_instance->u8, sizeof(_instance->u8));
-            break;
-        
-        case REGISTRY_SCHEMA_TEST_U16:
-            memcpy(buf, &_instance->u16, sizeof(_instance->u16));
-            break;
+    case REGISTRY_SCHEMA_TEST_U8:
+        memcpy(buf, &_instance->u8, sizeof(_instance->u8));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_U32:
-            memcpy(buf, &_instance->u32, sizeof(_instance->u32));
-            break;
+    case REGISTRY_SCHEMA_TEST_U16:
+        memcpy(buf, &_instance->u16, sizeof(_instance->u16));
+        break;
+
+    case REGISTRY_SCHEMA_TEST_U32:
+        memcpy(buf, &_instance->u32, sizeof(_instance->u32));
+        break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_U64:
-            memcpy(buf, &_instance->u64, sizeof(_instance->u64));
-            break;
+    case REGISTRY_SCHEMA_TEST_U64:
+        memcpy(buf, &_instance->u64, sizeof(_instance->u64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-        case REGISTRY_SCHEMA_TEST_I8:
-            memcpy(buf, &_instance->i8, sizeof(_instance->i8));
-            break;
-        
-        case REGISTRY_SCHEMA_TEST_I16:
-            memcpy(buf, &_instance->i16, sizeof(_instance->i16));
-            break;
+    case REGISTRY_SCHEMA_TEST_I8:
+        memcpy(buf, &_instance->i8, sizeof(_instance->i8));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_I32:
-            memcpy(buf, &_instance->i32, sizeof(_instance->i32));
-            break;
+    case REGISTRY_SCHEMA_TEST_I16:
+        memcpy(buf, &_instance->i16, sizeof(_instance->i16));
+        break;
+
+    case REGISTRY_SCHEMA_TEST_I32:
+        memcpy(buf, &_instance->i32, sizeof(_instance->i32));
+        break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_I64:
-            memcpy(buf, &_instance->i64, sizeof(_instance->i64));
-            break;
+    case REGISTRY_SCHEMA_TEST_I64:
+        memcpy(buf, &_instance->i64, sizeof(_instance->i64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_F32:
-            memcpy(buf, &_instance->f32, sizeof(_instance->f32));
-            break;
+    case REGISTRY_SCHEMA_TEST_F32:
+        memcpy(buf, &_instance->f32, sizeof(_instance->f32));
+        break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_F64:
-            memcpy(buf, &_instance->f64, sizeof(_instance->f64));
-            break;
+    case REGISTRY_SCHEMA_TEST_F64:
+        memcpy(buf, &_instance->f64, sizeof(_instance->f64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
     }
 }
 
-static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context) {
-    (void) val_len;
-    (void) context;
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context)
+{
+    (void)val_len;
+    (void)context;
 
-    registry_schema_test_t* _instance = (registry_schema_test_t*) instance->data;
+    registry_schema_test_t *_instance = (registry_schema_test_t *)instance->data;
 
     switch (param_id) {
-        case REGISTRY_SCHEMA_TEST_BOOL:
-            memcpy(&_instance->boolean, val, sizeof(_instance->boolean));
-            break;
+    case REGISTRY_SCHEMA_TEST_BOOL:
+        memcpy(&_instance->boolean, val, sizeof(_instance->boolean));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_STRING:
-            strcpy(_instance->string, val);
-            break;
+    case REGISTRY_SCHEMA_TEST_STRING:
+        strcpy(_instance->string, val);
+        break;
 
-        case REGISTRY_SCHEMA_TEST_U8:
-            memcpy(&_instance->u8, val, sizeof(_instance->u8));
-            break;
-        
-        case REGISTRY_SCHEMA_TEST_U16:
-            memcpy(&_instance->u16, val, sizeof(_instance->u16));
-            break;
+    case REGISTRY_SCHEMA_TEST_U8:
+        memcpy(&_instance->u8, val, sizeof(_instance->u8));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_U32:
-            memcpy(&_instance->u32, val, sizeof(_instance->u32));
-            break;
+    case REGISTRY_SCHEMA_TEST_U16:
+        memcpy(&_instance->u16, val, sizeof(_instance->u16));
+        break;
+
+    case REGISTRY_SCHEMA_TEST_U32:
+        memcpy(&_instance->u32, val, sizeof(_instance->u32));
+        break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_U64:
-            memcpy(&_instance->u64, val, sizeof(_instance->u64));
-            break;
+    case REGISTRY_SCHEMA_TEST_U64:
+        memcpy(&_instance->u64, val, sizeof(_instance->u64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-        case REGISTRY_SCHEMA_TEST_I8:
-            memcpy(&_instance->i8, val, sizeof(_instance->i8));
-            break;
-        
-        case REGISTRY_SCHEMA_TEST_I16:
-            memcpy(&_instance->i16, val, sizeof(_instance->i16));
-            break;
+    case REGISTRY_SCHEMA_TEST_I8:
+        memcpy(&_instance->i8, val, sizeof(_instance->i8));
+        break;
 
-        case REGISTRY_SCHEMA_TEST_I32:
-            memcpy(&_instance->i32, val, sizeof(_instance->i32));
-            break;
+    case REGISTRY_SCHEMA_TEST_I16:
+        memcpy(&_instance->i16, val, sizeof(_instance->i16));
+        break;
+
+    case REGISTRY_SCHEMA_TEST_I32:
+        memcpy(&_instance->i32, val, sizeof(_instance->i32));
+        break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_I64:
-            memcpy(&_instance->i64, val, sizeof(_instance->i64));
-            break;
+    case REGISTRY_SCHEMA_TEST_I64:
+        memcpy(&_instance->i64, val, sizeof(_instance->i64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_F32:
-            memcpy(&_instance->f32, val, sizeof(_instance->f32));
-            break;
+    case REGISTRY_SCHEMA_TEST_F32:
+        memcpy(&_instance->f32, val, sizeof(_instance->f32));
+        break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-        case REGISTRY_SCHEMA_TEST_F64:
-            memcpy(&_instance->f64, val, sizeof(_instance->f64));
-            break;
+    case REGISTRY_SCHEMA_TEST_F64:
+        memcpy(&_instance->f64, val, sizeof(_instance->f64));
+        break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
     }

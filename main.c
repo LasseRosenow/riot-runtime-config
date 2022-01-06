@@ -9,6 +9,7 @@
 #include "registry_schema_rgb.h"
 #include "registry_schema_test.h"
 #include "tests.h"
+#include "cbor_example.h"
 
 #include "assert.h"
 
@@ -51,9 +52,11 @@ registry_instance_t rgb_instance_3 = {
     .data = &rgb_instance_3_data,
 };
 
-int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context) {
-    (void) meta;
-    (void) context;
+int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char *val,
+                 void *context)
+{
+    (void)meta;
+    (void)context;
 
     printf("Exporting: ");
 
@@ -66,7 +69,8 @@ int _export_func(const int *path, int path_len, registry_schema_item_t *meta, ch
     return 0;
 }
 
-int main(void) {
+int main(void)
+{
     /* init registry */
     registry_init();
 
@@ -83,14 +87,18 @@ int main(void) {
     //registry_lwm2m_cli_init();
 
     /* Test some exports */
-    int path[] = {registry_schema_rgb.id, 2, 1};
+    int path[] = { registry_schema_rgb.id, 2, 1 };
+
     registry_export(_export_func, path, ARRAY_SIZE(path));
 
     /* test registry */
     tests_run();
 
+    cbor_example_run();
+
     msg_init_queue(_shell_queue, SHELL_QUEUE_SIZE);
     char line_buf[SHELL_DEFAULT_BUFSIZE];
+
     shell_run(shell_commands, line_buf, SHELL_DEFAULT_BUFSIZE);
     return 0;
 }

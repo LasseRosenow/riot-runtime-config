@@ -10,10 +10,11 @@
 registry_store_t *save_dst;
 clist_node_t load_srcs;
 
-void _debug_print_path(const int *path, int path_len) {
+void _debug_print_path(const int *path, int path_len)
+{
     for (int i = 0; i < path_len; i++) {
         DEBUG("%d", path[i]);
-        
+
         if (i < path_len - 1) {
             DEBUG("/");
         }
@@ -67,6 +68,7 @@ static void _registry_dup_check_cb(const int *path, int path_len, char *val, voi
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
+
     for (int i = 0; i < path_len; i++) {
         if (path[i] != dup_arg->path[i]) {
             return;
@@ -84,10 +86,11 @@ static void _registry_dup_check_cb(const int *path, int path_len, char *val, voi
     }
 }
 
-int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta, char* value, void *context)
+int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta, char *value,
+                       void *context)
 {
-    (void) context;
-    (void) meta;
+    (void)context;
+    (void)meta;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
 
@@ -114,9 +117,10 @@ int _registry_save_one(const int *path, int path_len, registry_schema_item_t *me
 
 int registry_save_one(const int *path, int path_len, void *context)
 {
-    (void) context;
-    
+    (void)context;
+
     char buf[REGISTRY_MAX_VAL_LEN];
+
     registry_get_value(path, path_len, buf, sizeof(buf));
 
     return _registry_save_one(path, path_len, NULL, buf, context);
@@ -137,7 +141,7 @@ int registry_save(void)
         save_dst->itf->save_start(save_dst);
     }
 
-    do  {
+    do {
         schema = container_of(node, registry_schema_t, node);
         res2 = registry_export(_registry_save_one, &schema->id, 1);
         if (res == 0) {

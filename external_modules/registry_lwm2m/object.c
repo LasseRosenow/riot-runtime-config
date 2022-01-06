@@ -20,7 +20,7 @@ typedef enum {
 typedef struct {
     reg_data_operation_type_t operation_type;
     registry_type_t data_type;
-    int* path;
+    int *path;
     int path_len;
 } reg_data_res_t;
 
@@ -41,11 +41,11 @@ typedef struct {
 
         reg_data = realloc(reg_data, size * sizeof(uint16_t));
     } while (node != registry_schemas.next);
-} */
+   } */
 
 static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
-                                   lwm2m_data_t **data_arrayP,
-                                   lwm2m_object_t *objectP)
+                                     lwm2m_data_t **data_arrayP,
+                                     lwm2m_object_t *objectP)
 {
     uint8_t result;
     reg_data_t *userData = (reg_data_t *)objectP->userData;
@@ -82,8 +82,8 @@ static uint8_t prv_registry_discover(uint16_t instance_id, int *num_dataP,
 }
 
 static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
-                               lwm2m_data_t **data_arrayP,
-                               lwm2m_object_t *objectP)
+                                 lwm2m_data_t **data_arrayP,
+                                 lwm2m_object_t *objectP)
 {
     uint8_t result = COAP_404_NOT_FOUND;
     reg_data_t *userData = (reg_data_t *)objectP->userData;
@@ -121,77 +121,79 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
         int index = (*data_arrayP)[i].id;
         if (index < userData->res_list_size) {
             char buf[REGISTRY_MAX_VAL_LEN];
-            registry_get_value(userData->res_list[index].path, userData->res_list[index].path_len, buf, REGISTRY_MAX_VAL_LEN);
+            registry_get_value(userData->res_list[index].path, userData->res_list[index].path_len,
+                               buf, REGISTRY_MAX_VAL_LEN);
             switch (userData->res_list[index].data_type) {
-                case REGISTRY_TYPE_NONE:
-                    return COAP_400_BAD_REQUEST;
-                    break;
+            case REGISTRY_TYPE_NONE:
+                return COAP_400_BAD_REQUEST;
+                break;
 
-                case REGISTRY_TYPE_INT8: {
-                    int8_t value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_INT8, &value, 0);
-                    lwm2m_data_encode_int(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_INT8: {
+                int8_t value;
+                registry_value_from_str(buf, REGISTRY_TYPE_INT8, &value, 0);
+                lwm2m_data_encode_int(value, *data_arrayP + i);
+                break;
+            }
 
-                case REGISTRY_TYPE_INT16: {
-                    int value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_INT16, &value, 0);
-                    lwm2m_data_encode_int(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_INT16: {
+                int value;
+                registry_value_from_str(buf, REGISTRY_TYPE_INT16, &value, 0);
+                lwm2m_data_encode_int(value, *data_arrayP + i);
+                break;
+            }
 
-                case REGISTRY_TYPE_INT32: {
-                    int value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_INT32, &value, 0);
-                    lwm2m_data_encode_int(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_INT32: {
+                int value;
+                registry_value_from_str(buf, REGISTRY_TYPE_INT32, &value, 0);
+                lwm2m_data_encode_int(value, *data_arrayP + i);
+                break;
+            }
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-                case REGISTRY_TYPE_INT64: {
-                    int value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_INT64, &value, 0);
-                    lwm2m_data_encode_int(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_INT64: {
+                int value;
+                registry_value_from_str(buf, REGISTRY_TYPE_INT64, &value, 0);
+                lwm2m_data_encode_int(value, *data_arrayP + i);
+                break;
+            }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-                case REGISTRY_TYPE_STRING:
-                    lwm2m_data_encode_string(buf, *data_arrayP + i);
-                    break;
+            case REGISTRY_TYPE_STRING:
+                lwm2m_data_encode_string(buf, *data_arrayP + i);
+                break;
 
-                case REGISTRY_TYPE_BOOL: {
-                    bool value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_BOOL, &value, sizeof(bool));
-                    lwm2m_data_encode_bool(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_BOOL: {
+                bool value;
+                registry_value_from_str(buf, REGISTRY_TYPE_BOOL, &value, sizeof(bool));
+                lwm2m_data_encode_bool(value, *data_arrayP + i);
+                break;
+            }
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-                case REGISTRY_TYPE_FLOAT32: {
-                    float value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT32, &value, 0);
-                    lwm2m_data_encode_float(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_FLOAT32: {
+                float value;
+                registry_value_from_str(buf, REGISTRY_TYPE_FLOAT32, &value, 0);
+                lwm2m_data_encode_float(value, *data_arrayP + i);
+                break;
+            }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-                case REGISTRY_TYPE_FLOAT64: {
-                    float value;
-                    registry_value_from_str(buf, REGISTRY_TYPE_FLOAT64, &value, 0);
-                    lwm2m_data_encode_float(value, *data_arrayP + i);
-                    break;
-                }
+            case REGISTRY_TYPE_FLOAT64: {
+                float value;
+                registry_value_from_str(buf, REGISTRY_TYPE_FLOAT64, &value, 0);
+                lwm2m_data_encode_float(value, *data_arrayP + i);
+                break;
+            }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
-                
-                default:
-                    return COAP_400_BAD_REQUEST;
-                    break;
+
+            default:
+                return COAP_400_BAD_REQUEST;
+                break;
             }
             result = COAP_205_CONTENT;
-        } else {
+        }
+        else {
             result = COAP_404_NOT_FOUND;
         }
     }
@@ -200,8 +202,8 @@ static uint8_t prv_registry_read(uint16_t instance_id, int *num_dataP,
 }
 
 static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
-                                lwm2m_data_t *data_array,
-                                lwm2m_object_t *objectP)
+                                  lwm2m_data_t *data_array,
+                                  lwm2m_object_t *objectP)
 {
     uint8_t result = COAP_404_NOT_FOUND;
     reg_data_t *userData = (reg_data_t *)objectP->userData;
@@ -217,80 +219,82 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
             }
 
             switch (data_array[i].type) {
-                case LWM2M_TYPE_OPAQUE: {
-                    int index = data_array[i].id;
-                    char buf[REGISTRY_MAX_VAL_LEN] = {0};
+            case LWM2M_TYPE_OPAQUE: {
+                int index = data_array[i].id;
+                char buf[REGISTRY_MAX_VAL_LEN] = { 0 };
 
-                    // TODO what if index would be something like 35508 even though res_list would only contain 6 items? ... something like a map or a helper function?
-                    switch (userData->res_list[index].data_type) {
-                        case REGISTRY_TYPE_NONE:
-                            return COAP_400_BAD_REQUEST;
-                            break;
+                // TODO what if index would be something like 35508 even though res_list would only contain 6 items? ... something like a map or a helper function?
+                switch (userData->res_list[index].data_type) {
+                case REGISTRY_TYPE_NONE:
+                    return COAP_400_BAD_REQUEST;
+                    break;
 
-                        case REGISTRY_TYPE_INT8:
-                        case REGISTRY_TYPE_INT16:
-                        case REGISTRY_TYPE_INT32:
+                case REGISTRY_TYPE_INT8:
+                case REGISTRY_TYPE_INT16:
+                case REGISTRY_TYPE_INT32:
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-                        case REGISTRY_TYPE_INT64:
+                case REGISTRY_TYPE_INT64:
 #endif /* CONFIG_REGISTRY_USE_INT64 */
-                        {
-                            int64_t value;
-                            lwm2m_data_decode_int(&data_array[i], &value);
-                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%" PRId64, value);
-                            break;
-                        }
+                {
+                    int64_t value;
+                    lwm2m_data_decode_int(&data_array[i], &value);
+                    snprintf(buf, REGISTRY_MAX_VAL_LEN, "%" PRId64, value);
+                    break;
+                }
 
-                        case REGISTRY_TYPE_STRING:
-                            strncpy(buf, (char*)data_array[i].value.asBuffer.buffer, data_array[i].value.asBuffer.length);
-                            break;
+                case REGISTRY_TYPE_STRING:
+                    strncpy(buf, (char *)data_array[i].value.asBuffer.buffer,
+                            data_array[i].value.asBuffer.length);
+                    break;
 
-                        case REGISTRY_TYPE_BOOL: {
-                            bool value;
-                            lwm2m_data_decode_bool(&data_array[i], &value);
-                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%d", value);
-                            break;
-                        }
+                case REGISTRY_TYPE_BOOL: {
+                    bool value;
+                    lwm2m_data_decode_bool(&data_array[i], &value);
+                    snprintf(buf, REGISTRY_MAX_VAL_LEN, "%d", value);
+                    break;
+                }
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-                        case REGISTRY_TYPE_FLOAT32: {
-                            double value;
-                            lwm2m_data_decode_float(&data_array[i], &value);
-                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
-                            break;
-                        }
+                case REGISTRY_TYPE_FLOAT32: {
+                    double value;
+                    lwm2m_data_decode_float(&data_array[i], &value);
+                    snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
+                    break;
+                }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-                        case REGISTRY_TYPE_FLOAT64: {
-                            double value;
-                            lwm2m_data_decode_float(&data_array[i], &value);
-                            snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
-                            break;
-                        }
+                case REGISTRY_TYPE_FLOAT64: {
+                    double value;
+                    lwm2m_data_decode_float(&data_array[i], &value);
+                    snprintf(buf, REGISTRY_MAX_VAL_LEN, "%lf", value);
+                    break;
+                }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
-                        
-                        default:
-                            return COAP_400_BAD_REQUEST;
-                            break;
-                    }
-                    registry_set_value(userData->res_list[index].path, userData->res_list[index].path_len, buf);
-                    result = COAP_204_CHANGED;
-                    break;
-                }
 
-                case LWM2M_TYPE_STRING: {
-                    result = COAP_204_CHANGED;
-                    break;
-                }
-
-                case LWM2M_TYPE_BOOLEAN: {
-                    result = COAP_204_CHANGED;
-                    break;
-                }
-                
                 default:
-                    result = COAP_400_BAD_REQUEST;
+                    return COAP_400_BAD_REQUEST;
                     break;
+                }
+                registry_set_value(userData->res_list[index].path,
+                                   userData->res_list[index].path_len, buf);
+                result = COAP_204_CHANGED;
+                break;
+            }
+
+            case LWM2M_TYPE_STRING: {
+                result = COAP_204_CHANGED;
+                break;
+            }
+
+            case LWM2M_TYPE_BOOLEAN: {
+                result = COAP_204_CHANGED;
+                break;
+            }
+
+            default:
+                result = COAP_400_BAD_REQUEST;
+                break;
             }
         }
     }
@@ -299,8 +303,8 @@ static uint8_t prv_registry_write(uint16_t instance_id, int num_data,
 }
 
 static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
-                                  uint8_t *buffer, int length,
-                                  lwm2m_object_t *objectP)
+                                    uint8_t *buffer, int length,
+                                    lwm2m_object_t *objectP)
 {
     uint8_t result;
     reg_data_t *userData = (reg_data_t *)objectP->userData;
@@ -324,7 +328,8 @@ static uint8_t prv_registry_execute(uint16_t instance_id, uint16_t resource_id,
         // TODO
         //userData->hndlr->commit_cb(userData->hndlr->context);
         result = COAP_204_CHANGED;
-    } else {
+    }
+    else {
         result = COAP_405_METHOD_NOT_ALLOWED;
     }
 
@@ -375,13 +380,15 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id)
 
     /* Init userData for riot registry integration */
     obj->userData = lwm2m_malloc(sizeof(reg_data_t));
-    reg_data_t* userData = (reg_data_t*)(obj->userData);
+    reg_data_t *userData = (reg_data_t *)(obj->userData);
+
     userData->hndlr = hndlr;
     userData->res_list_size = 0;
     userData->res_list = malloc(0); // Initial malloc for realloc to work properly
 
     /* Init the commit executable item inside res_list */
-    userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
+    userData->res_list =
+        realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
     userData->res_list[userData->res_list_size].operation_type = REG_DATA_OPERATION_TYPE_EXEC;
     userData->res_list_size += 1;
 
@@ -392,13 +399,15 @@ lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id)
 
         // TODO this only works for 1 level paths. No nesting etc.
         int path_len = 2;
-        int *path = malloc(2*sizeof(int));
+        int *path = malloc(2 * sizeof(int));
         path[0] = hndlr->id;
         path[1] = schema.id;
 
         /* Increase the size of the list of property names to fit in the new exported property name */
-        userData->res_list = realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
-        userData->res_list[userData->res_list_size].operation_type = REG_DATA_OPERATION_TYPE_READ_WRITE;
+        userData->res_list =
+            realloc(userData->res_list, (userData->res_list_size + 1) * sizeof(reg_data_res_t));
+        userData->res_list[userData->res_list_size].operation_type =
+            REG_DATA_OPERATION_TYPE_READ_WRITE;
         userData->res_list[userData->res_list_size].data_type = parameter.type;
         userData->res_list[userData->res_list_size].path = path;
         userData->res_list[userData->res_list_size].path_len = path_len;

@@ -39,15 +39,15 @@ extern "C" {
  * registry object of LwM2M
  */
 enum lwm2m_registry_error_codes {
-    LWM2M_REGISTRY_ERR_NO_ERR     = 0, /**< No error */
-    LWM2M_REGISTRY_ERR_LOW_BATT   = 1, /**< Low battery power */
-    LWM2M_REGISTRY_ERR_EXT_OFF    = 2, /**< External power supply off */
-    LWM2M_REGISTRY_ERR_GPS_ERR    = 3, /**< GPS module failure */
-    LWM2M_REGISTRY_ERR_LOW_SIGNAL = 4, /**< Low received signal strength */
-    LWM2M_REGISTRY_ERR_NO_MEM     = 5, /**< Out of memory */
-    LWM2M_REGISTRY_ERR_SMS_ERR    = 6, /**< SMS failure */
-    LWM2M_REGISTRY_ERR_IP_ERR     = 7, /**< IP connectivity failure */
-    LWM2M_REGISTRY_ERR_PERIPH_ERR = 8  /**< Peripheral malfunction */
+    LWM2M_REGISTRY_ERR_NO_ERR       = 0,    /**< No error */
+    LWM2M_REGISTRY_ERR_LOW_BATT     = 1,    /**< Low battery power */
+    LWM2M_REGISTRY_ERR_EXT_OFF      = 2,    /**< External power supply off */
+    LWM2M_REGISTRY_ERR_GPS_ERR      = 3,    /**< GPS module failure */
+    LWM2M_REGISTRY_ERR_LOW_SIGNAL   = 4,    /**< Low received signal strength */
+    LWM2M_REGISTRY_ERR_NO_MEM       = 5,    /**< Out of memory */
+    LWM2M_REGISTRY_ERR_SMS_ERR      = 6,    /**< SMS failure */
+    LWM2M_REGISTRY_ERR_IP_ERR       = 7,    /**< IP connectivity failure */
+    LWM2M_REGISTRY_ERR_PERIPH_ERR   = 8     /**< Peripheral malfunction */
 };
 
 lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id);

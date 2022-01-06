@@ -12,7 +12,7 @@ typedef struct {
     uint8_t u8;
     uint16_t u16;
     uint32_t u32;
-    
+
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
     uint64_t u64;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
@@ -20,7 +20,7 @@ typedef struct {
     int8_t i8;
     int16_t i16;
     int32_t i32;
-    
+
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
     int64_t i64;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
@@ -42,7 +42,7 @@ typedef enum {
     REGISTRY_SCHEMA_TEST_U8,
     REGISTRY_SCHEMA_TEST_U16,
     REGISTRY_SCHEMA_TEST_U32,
-    
+
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
     REGISTRY_SCHEMA_TEST_U64,
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
@@ -50,7 +50,7 @@ typedef enum {
     REGISTRY_SCHEMA_TEST_I8,
     REGISTRY_SCHEMA_TEST_I16,
     REGISTRY_SCHEMA_TEST_I32,
-    
+
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
     REGISTRY_SCHEMA_TEST_I64,
 #endif /* CONFIG_REGISTRY_USE_INT64 */

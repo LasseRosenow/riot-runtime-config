@@ -101,7 +101,7 @@ extern "C" {
  * @{
  */
 #define REGISTRY_MAX_NAME_LEN      ((REGISTRY_MAX_DIR_NAME_LEN * \
-                                    REGISTRY_MAX_DIR_DEPTH) + \
+                                     REGISTRY_MAX_DIR_DEPTH) + \
                                     (REGISTRY_MAX_DIR_DEPTH - 1))
 /** @} */
 
@@ -113,21 +113,21 @@ extern "C" {
  * as they bloat the code size.
  */
 typedef enum {
-    REGISTRY_TYPE_NONE = 0,  /**< No type specified */
-    REGISTRY_TYPE_STRING,    /**< String */
-    REGISTRY_TYPE_BOOL,      /**< Boolean */
-    
-    REGISTRY_TYPE_UINT8,      /**< 8-bits unsigned integer */
-    REGISTRY_TYPE_UINT16,     /**< 16-bits unsigned integer */
-    REGISTRY_TYPE_UINT32,     /**< 32-bits unsigned integer */
+    REGISTRY_TYPE_NONE = 0,     /**< No type specified */
+    REGISTRY_TYPE_STRING,       /**< String */
+    REGISTRY_TYPE_BOOL,         /**< Boolean */
+
+    REGISTRY_TYPE_UINT8,        /**< 8-bits unsigned integer */
+    REGISTRY_TYPE_UINT16,       /**< 16-bits unsigned integer */
+    REGISTRY_TYPE_UINT32,       /**< 32-bits unsigned integer */
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
     REGISTRY_TYPE_UINT64,     /**< 64-bits unsigned integer */
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-    REGISTRY_TYPE_INT8,      /**< 8-bits signed integer */
-    REGISTRY_TYPE_INT16,     /**< 16-bits signed integer */
-    REGISTRY_TYPE_INT32,     /**< 32-bits signed integer */
+    REGISTRY_TYPE_INT8,         /**< 8-bits signed integer */
+    REGISTRY_TYPE_INT16,        /**< 16-bits signed integer */
+    REGISTRY_TYPE_INT32,        /**< 32-bits signed integer */
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
     REGISTRY_TYPE_INT64,     /**< 64-bits signed integer */
@@ -165,9 +165,9 @@ typedef enum {
 } registry_schema_type_t;
 
 struct _registry_schema_item_t {
-    int id; /**< Integer representing the configuration parameter */
-    char *name; /**< String describing the configuration parameter */
-    char *description; /**< String describing the configuration parameter with more details */
+    int id;             /**< Integer representing the configuration parameter */
+    char *name;         /**< String describing the configuration parameter */
+    char *description;  /**< String describing the configuration parameter with more details */
     registry_schema_type_t type;
     union {
         registry_group_t group;
@@ -185,17 +185,17 @@ typedef void (*load_cb_t)(const int *path, int path_len, char *val, void *cb_arg
  * @brief Descriptor used to check duplications in store facilities
  */
 typedef struct {
-    const int *path; /**< name of the parameter being checked */
-    char *val;  /**< value of the parameter being checked */
-    int is_dup; /**< flag indicating if the parameter is duplicated or not */
+    const int *path;    /**< name of the parameter being checked */
+    char *val;          /**< value of the parameter being checked */
+    int is_dup;         /**< flag indicating if the parameter is duplicated or not */
 } registry_dup_check_arg_t;
 
 /**
  * @brief Store facility descriptor
  */
 typedef struct {
-    clist_node_t node;                    /**< linked list node */
-    const struct registry_store_itf *itf; /**< interface for the facility */
+    clist_node_t node;                      /**< linked list node */
+    const struct registry_store_itf *itf;   /**< interface for the facility */
 } registry_store_t;
 
 /**
@@ -230,7 +230,7 @@ typedef struct registry_store_itf {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const int *path, int path_len, const char* value);
+    int (*save)(registry_store_t *store, const int *path, int path_len, const char *value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -246,9 +246,9 @@ typedef struct registry_store_itf {
  * @brief Instance of a schema containing its data.
  */
 typedef struct {
-    clist_node_t node; /**< Linked list node */
-    char *name; /**< String describing the instance */
-    void *data; /**< Struct containing all configuration parameters of the schema */
+    clist_node_t node;  /**< Linked list node */
+    char *name;         /**< String describing the instance */
+    void *data;         /**< Struct containing all configuration parameters of the schema */
 
     /**
      * @brief Will be called after @ref registry_commit() was called on this instance.
@@ -268,12 +268,12 @@ typedef struct {
  * parameters.
  */
 typedef struct {
-    clist_node_t node; /**< Linked list node */
-    int id; /**< Integer representing the configuration group */
-    char *name; /**< String describing the configuration group */
-    char *description; /**< String describing the configuration group with more details */
-    registry_schema_item_t *items; /**< Array representing all the configuration parameters that belong to this group */
-    int items_len; /**< Size of items array */
+    clist_node_t node;              /**< Linked list node */
+    int id;                         /**< Integer representing the configuration group */
+    char *name;                     /**< String describing the configuration group */
+    char *description;              /**< String describing the configuration group with more details */
+    registry_schema_item_t *items;  /**< Array representing all the configuration parameters that belong to this group */
+    int items_len;                  /**< Size of items array */
     clist_node_t instances;
 
     /**
@@ -286,7 +286,7 @@ typedef struct {
      * @param[in] context Context of the schema
      */
     void (*get)(int param_id, registry_instance_t *instance, void *buf,
-                    int buf_len, void *context);
+                int buf_len, void *context);
 
     /**
      * @brief Handler to set a the value of a configuration parameter.
@@ -298,7 +298,7 @@ typedef struct {
      * @param[in] context Context of the schema
      */
     void (*set)(int param_id, registry_instance_t *instance, void *val,
-                    int val_len, void *context);
+                int val_len, void *context);
 
     void *context; /**< Optional context used by the schemas */
 } registry_schema_t;
@@ -481,7 +481,8 @@ int registry_save_one(const int *path, int path_len, void *context);
  * @param[in] name String representing the configuration parameter. Can be NULL.
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context),
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
+                                       char *val, void *context),
                     const int *path, int path_len);
 
 #ifdef __cplusplus

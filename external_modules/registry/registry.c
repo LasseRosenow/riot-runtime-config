@@ -15,13 +15,15 @@ static int _registry_cmp_schema_id(clist_node_t *current, void *id)
 {
     assert(current != NULL);
     registry_schema_t *schema = container_of(current, registry_schema_t, node);
-    return !(schema->id - *(int*)id);
+
+    return !(schema->id - *(int *)id);
 }
 
 static registry_schema_t *_schema_lookup(int id)
 {
     clist_node_t *node;
     registry_schema_t *schema = NULL;
+
     node = clist_foreach(&registry_schemas, _registry_cmp_schema_id, &id);
 
     if (node != NULL) {
@@ -31,16 +33,18 @@ static registry_schema_t *_schema_lookup(int id)
     return schema;
 }
 
-static registry_instance_t *_instance_lookup(registry_schema_t *schema, int instance_id) {
+static registry_instance_t *_instance_lookup(registry_schema_t *schema, int instance_id)
+{
     assert(schema != NULL);
 
     /* find instance with correct instance_id */
     clist_node_t *node = schema->instances.next;
     int index = 0;
+
     do {
         node = node->next;
         registry_instance_t *instance = container_of(node, registry_instance_t, node);
-        
+
         /* check if index equals instance_id */
         if (index == instance_id) {
             return instance;
@@ -67,37 +71,39 @@ void registry_register_schema(registry_schema_t *schema)
 static size_t _get_registry_parameter_data_len(registry_type_t type)
 {
     switch (type) {
-        case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
-        case REGISTRY_TYPE_BOOL: return sizeof(bool);
+    case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
+    case REGISTRY_TYPE_BOOL: return sizeof(bool);
 
-        case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
-        case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
-        case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
+    case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
+    case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
+    case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-        case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
+    case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
 #endif // CONFIG_REGISTRY_USE_UINT64
 
-        case REGISTRY_TYPE_INT8: return sizeof(int8_t);
-        case REGISTRY_TYPE_INT16: return sizeof(int16_t);
-        case REGISTRY_TYPE_INT32: return sizeof(int32_t);
+    case REGISTRY_TYPE_INT8: return sizeof(int8_t);
+    case REGISTRY_TYPE_INT16: return sizeof(int16_t);
+    case REGISTRY_TYPE_INT32: return sizeof(int32_t);
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-        case REGISTRY_TYPE_INT64: return sizeof(int64_t);
+    case REGISTRY_TYPE_INT64: return sizeof(int64_t);
 #endif // CONFIG_REGISTRY_USE_INT64
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-        case REGISTRY_TYPE_FLOAT32: return sizeof(float);
+    case REGISTRY_TYPE_FLOAT32: return sizeof(float);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-        case REGISTRY_TYPE_FLOAT64: return sizeof(double);
+    case REGISTRY_TYPE_FLOAT64: return sizeof(double);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
-        
-        default: return 0;
+
+    default: return 0;
     }
 }
 
-static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len, registry_schema_t *schema) {
+static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len,
+                                                      registry_schema_t *schema)
+{
     registry_schema_item_t *schema_item;
     registry_schema_item_t *schema_items = schema->items;
     int schema_items_len = schema->items_len;
@@ -107,10 +113,12 @@ static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_
             schema_item = &schema->items[i];
 
             if (schema_item->id == path[path_index]) {
-                if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER && path_index == path_len -1) {
+                if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER &&
+                    path_index == path_len - 1) {
                     // If this is the last path segment and it is a parameter => return the parameter
                     return schema_item;
-                } else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
+                }
+                else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
                     // If this is not the last path segment and its a group => update schemas and schemas_len values
                     schema_items = schema_item->value.group.items;
                     schema_items_len = schema_items->value.group.items_len;
@@ -122,16 +130,17 @@ static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_
     return NULL;
 }
 
-int registry_add_instance(int schema_id, registry_instance_t* instance)
+int registry_add_instance(int schema_id, registry_instance_t *instance)
 {
     assert(instance != NULL);
 
     /* find schema with correct schema_id */
     clist_node_t *node = registry_schemas.next;
+
     do {
         node = node->next;
         registry_schema_t *schema = container_of(node, registry_schema_t, node);
-        
+
         /* check if schema has correct schema_id */
         if (schema->id == schema_id) {
             /* add instance to schema */
@@ -149,18 +158,21 @@ int registry_set_value(const int *path, int path_len, char *val_str)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
+
     if (!schema) {
         return -EINVAL;
     }
 
     /* lookup instance */
     registry_instance_t *instance = _instance_lookup(schema, path[1]);
+
     if (!instance) {
         return -EINVAL;
     }
 
     /* lookup parameter meta data */
     registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
+
     if (!param_meta) {
         return -EINVAL;
     }
@@ -168,7 +180,9 @@ int registry_set_value(const int *path, int path_len, char *val_str)
     /* convert string value to native value */
     int buf_len = REGISTRY_MAX_VAL_LEN;
     uint8_t buf[buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
-    registry_value_from_str(val_str, param_meta->value.parameter.type, &buf, _get_registry_parameter_data_len(param_meta->value.parameter.type));
+
+    registry_value_from_str(val_str, param_meta->value.parameter.type, &buf, _get_registry_parameter_data_len(
+                                param_meta->value.parameter.type));
 
     /* call handler to apply the new value to the correct parameter in the instance of the schema */
     schema->set(param_meta->id, instance, &buf, buf_len, schema->context);
@@ -180,18 +194,21 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
+
     if (!schema) {
         return NULL;
     }
 
     /* lookup instance */
     registry_instance_t *instance = _instance_lookup(schema, path[1]);
+
     if (!instance) {
         return NULL;
     }
 
     /* lookup parameter meta data */
     registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
+
     if (!param_meta) {
         return NULL;
     }
@@ -199,6 +216,7 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
     /* call handler to get the parameter value from the instance of the schema */
     int native_buf_len = REGISTRY_MAX_VAL_LEN;
     uint8_t native_buf[native_buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
+
     schema->get(param_meta->id, instance, native_buf, native_buf_len, schema->context);
 
     /* convert native value to string value */
@@ -250,7 +268,7 @@ int registry_commit(const int *path, int path_len)
 
         do {
             node = node->next;
-            registry_schema_t* schema = container_of(node, registry_schema_t, node);
+            registry_schema_t *schema = container_of(node, registry_schema_t, node);
 
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
                 registry_instance_t *instance = _instance_lookup(schema, i);
@@ -265,7 +283,9 @@ int registry_commit(const int *path, int path_len)
     }
 }
 
-static void _registry_export_recursive(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), const int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
+static void _registry_export_recursive(int (*export_func)(const int *path, int path_len,
+                                                          registry_schema_item_t *meta, char *val,
+                                                          void *context), const int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
 {
     for (int i = 0; i < schema_items_len; i++) {
         registry_schema_item_t schema_item = schema_items[i];
@@ -279,22 +299,25 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
 
         if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
             // Parameter found => Export
-            char val_buf[REGISTRY_MAX_VAL_LEN] = {0};
+            char val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
             registry_get_value(new_path, new_path_len, val_buf, ARRAY_SIZE(val_buf));
             export_func(new_path, new_path_len, &schema_item, val_buf, context);
-        } else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
+        }
+        else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
             // Group => search for parameters
             registry_group_t group = schema_item.value.group;
             for (int i = 0; i < group.items_len; i++) {
                 new_path[new_path_len - 1] = schema_item.id;
-                _registry_export_recursive(export_func, new_path, current_path_len + 1, group.items, group.items_len, context);
+                _registry_export_recursive(export_func, new_path, current_path_len + 1, group.items,
+                                           group.items_len, context);
             }
         }
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), const int *path, int path_len)
-{    
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
+                                       char *val, void *context), const int *path, int path_len)
+{
     assert(export_func != NULL);
     registry_schema_t *schema;
 
@@ -321,18 +344,22 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
             for (int j = 0; j < path_len; j++) {
                 new_path[j] = path[j];
             }
-            
-            _registry_export_recursive(export_func, new_path, new_path_len, schema_item, 1, schema->context);
+
+            _registry_export_recursive(export_func, new_path, new_path_len, schema_item, 1,
+                                       schema->context);
         }
         // Schema/Instance => Export all schema items with data of the given instance
         else if (path_len == 2) {
-            _registry_export_recursive(export_func, path, path_len, schema->items, schema->items_len, schema->context);
+            _registry_export_recursive(export_func, path, path_len, schema->items,
+                                       schema->items_len, schema->context);
         }
         // Schema => Export all schema items with data of all instances
         else if (path_len == 1) {
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
-                int new_path[] = {path[0], i};
-                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
+                int new_path[] = { path[0], i };
+                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
+                                               new_path), schema->items, schema->items_len,
+                                           schema->context);
             }
         }
     }
@@ -349,8 +376,10 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
             schema = container_of(node, registry_schema_t, node);
 
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
-                int new_path[] = {schema->id, i};
-                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(new_path), schema->items, schema->items_len, schema->context);
+                int new_path[] = { schema->id, i };
+                _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
+                                               new_path), schema->items, schema->items_len,
+                                           schema->context);
             }
         } while (node != registry_schemas.next);
     }

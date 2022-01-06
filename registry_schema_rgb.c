@@ -51,44 +51,46 @@ registry_schema_t registry_schema_rgb = {
     .set = set,
 };
 
-static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context) {
-    (void) buf_len;
-    (void) context;
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context)
+{
+    (void)buf_len;
+    (void)context;
 
-    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance->data;
+    registry_schema_rgb_t *_instance = (registry_schema_rgb_t *)instance->data;
 
     switch (param_id) {
-        case REGISTRY_SCHEMA_RGB_RED:
-            memcpy(buf, &_instance->r, sizeof(_instance->r));
-            break;
-        
-        case REGISTRY_SCHEMA_RGB_GREEN:
-            memcpy(buf, &_instance->g, sizeof(_instance->g));
-            break;
+    case REGISTRY_SCHEMA_RGB_RED:
+        memcpy(buf, &_instance->r, sizeof(_instance->r));
+        break;
 
-        case REGISTRY_SCHEMA_RGB_BLUE:
-            memcpy(buf, &_instance->b, sizeof(_instance->b));
-            break;
+    case REGISTRY_SCHEMA_RGB_GREEN:
+        memcpy(buf, &_instance->g, sizeof(_instance->g));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_BLUE:
+        memcpy(buf, &_instance->b, sizeof(_instance->b));
+        break;
     }
 }
 
-static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context) {
-    (void) val_len;
-    (void) context;
+static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context)
+{
+    (void)val_len;
+    (void)context;
 
-    registry_schema_rgb_t* _instance = (registry_schema_rgb_t*) instance->data;
+    registry_schema_rgb_t *_instance = (registry_schema_rgb_t *)instance->data;
 
     switch (param_id) {
-        case REGISTRY_SCHEMA_RGB_RED:
-            memcpy(&_instance->r, val , sizeof(_instance->r));
-            break;
-        
-        case REGISTRY_SCHEMA_RGB_GREEN:
-            memcpy(&_instance->g, val, sizeof(_instance->g));
-            break;
+    case REGISTRY_SCHEMA_RGB_RED:
+        memcpy(&_instance->r, val, sizeof(_instance->r));
+        break;
 
-        case REGISTRY_SCHEMA_RGB_BLUE:
-            memcpy(&_instance->b, val, sizeof(_instance->b));
-            break;
+    case REGISTRY_SCHEMA_RGB_GREEN:
+        memcpy(&_instance->g, val, sizeof(_instance->g));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_BLUE:
+        memcpy(&_instance->b, val, sizeof(_instance->b));
+        break;
     }
 }

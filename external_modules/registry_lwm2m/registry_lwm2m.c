@@ -46,7 +46,7 @@ void registry_lwm2m_cli_init(void)
     lwm2m_client_init(&client_data);
 
     /* add objects that will be registered */
-    obj_list = malloc(obj_list_counter * sizeof(lwm2m_object_t*));
+    obj_list = malloc(obj_list_counter * sizeof(lwm2m_object_t *));
     obj_list[0] = lwm2m_client_get_security_object(&client_data);
     obj_list[1] = lwm2m_client_get_server_object(&client_data);
     obj_list[2] = lwm2m_client_get_device_object(&client_data);
@@ -64,6 +64,7 @@ void registry_lwm2m_cli_init(void)
     }
 
     int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START;
+
     do {
         node = node->next;
         registry_schema_t *hndlr = container_of(node, registry_schema_t, node);
@@ -88,18 +89,19 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
     if (!strcmp(argv[1], "generate")) {
         /* TODO generate lwm2m server models */
         printf("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        printf("<LWM2M xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://openmobilealliance.org/tech/profiles/LWM2M.xsd\">\n");
+        printf(
+            "<LWM2M xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://openmobilealliance.org/tech/profiles/LWM2M.xsd\">\n");
 
         clist_node_t *node = registry_schemas.next;
 
-        do  {
+        do {
             node = node->next;
             registry_schema_t *hndlr = container_of(node, registry_schema_t, node);
             int obj_id = LWM2M_OBJECT_ID_PRIVATE_RANGE_START + hndlr->id;
-            
+
             printf("    <Object ObjectType=\"MODefinition\">\n");
             printf("        <Name>%s</Name>\n", hndlr->name);
-	        printf("        <Description1>%s</Description1>\n", hndlr->description);
+            printf("        <Description1>%s</Description1>\n", hndlr->description);
             printf("        <ObjectID>%d</ObjectID>\n", obj_id);
             printf("        <ObjectURN>urn:oma:lwm2m:x:%d</ObjectURN>\n", obj_id);
             printf("        <LWM2MVersion>1.0</LWM2MVersion>\n");
@@ -132,139 +134,139 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
 
                 printf("                <Type>");
                 switch (parameter.type) {
-                    case REGISTRY_TYPE_NONE:
-                        printf("String");
-                        break;
+                case REGISTRY_TYPE_NONE:
+                    printf("String");
+                    break;
 
-                    case REGISTRY_TYPE_STRING:
-                        printf("String");
-                        break;
+                case REGISTRY_TYPE_STRING:
+                    printf("String");
+                    break;
 
-                    case REGISTRY_TYPE_BOOL:
-                        printf("Boolean");
-                        break;
+                case REGISTRY_TYPE_BOOL:
+                    printf("Boolean");
+                    break;
 
-                    case REGISTRY_TYPE_UINT8:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_UINT8:
+                    printf("Integer");
+                    break;
 
-                    case REGISTRY_TYPE_UINT16:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_UINT16:
+                    printf("Integer");
+                    break;
 
-                    case REGISTRY_TYPE_UINT32:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_UINT32:
+                    printf("Integer");
+                    break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_UINT64:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_UINT64:
+                    printf("Integer");
+                    break;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-                    
-                    case REGISTRY_TYPE_INT8:
-                        printf("Integer");
-                        break;
 
-                    case REGISTRY_TYPE_INT16:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_INT8:
+                    printf("Integer");
+                    break;
 
-                    case REGISTRY_TYPE_INT32:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_INT16:
+                    printf("Integer");
+                    break;
+
+                case REGISTRY_TYPE_INT32:
+                    printf("Integer");
+                    break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_INT64:
-                        printf("Integer");
-                        break;
+                case REGISTRY_TYPE_INT64:
+                    printf("Integer");
+                    break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT32:
-                        printf("Float");
-                        break;
+                case REGISTRY_TYPE_FLOAT32:
+                    printf("Float");
+                    break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT64:
-                        printf("Float");
-                        break;
+                case REGISTRY_TYPE_FLOAT64:
+                    printf("Float");
+                    break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
-                    
-                    default:
-                        printf("String");
-                        break;
+
+                default:
+                    printf("String");
+                    break;
                 }
                 printf("</Type>\n");
 
                 printf("                <RangeEnumeration>");
                 switch (parameter.type) {
-                    case REGISTRY_TYPE_NONE: break;
+                case REGISTRY_TYPE_NONE: break;
 
-                    case REGISTRY_TYPE_STRING:
-                        printf("0-%d", REGISTRY_MAX_VAL_LEN);
-                        break;
+                case REGISTRY_TYPE_STRING:
+                    printf("0-%d", REGISTRY_MAX_VAL_LEN);
+                    break;
 
-                    case REGISTRY_TYPE_BOOL: break;
+                case REGISTRY_TYPE_BOOL: break;
 
-                    case REGISTRY_TYPE_UINT8:
-                        printf("0-%" PRIu8, UINT8_MAX);
-                        break;
+                case REGISTRY_TYPE_UINT8:
+                    printf("0-%" PRIu8, UINT8_MAX);
+                    break;
 
-                    case REGISTRY_TYPE_UINT16:
-                        printf("0-%" PRIu16, UINT16_MAX);
-                        break;
+                case REGISTRY_TYPE_UINT16:
+                    printf("0-%" PRIu16, UINT16_MAX);
+                    break;
 
-                    case REGISTRY_TYPE_UINT32:
-                        printf("0-%" PRIu32, (uint32_t)UINT32_MAX);
-                        break;
+                case REGISTRY_TYPE_UINT32:
+                    printf("0-%" PRIu32, (uint32_t)UINT32_MAX);
+                    break;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_UINT64:
-                        printf("0-%" PRIu64, UINT64_MAX);
-                        break;
+                case REGISTRY_TYPE_UINT64:
+                    printf("0-%" PRIu64, UINT64_MAX);
+                    break;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-                    case REGISTRY_TYPE_INT8:
-                        printf("%" PRIi8 "-%" PRIi8, INT8_MIN, INT8_MAX);
-                        break;
+                case REGISTRY_TYPE_INT8:
+                    printf("%" PRIi8 "-%" PRIi8, INT8_MIN, INT8_MAX);
+                    break;
 
-                    case REGISTRY_TYPE_INT16:
-                        printf("%" PRIi16 "-%" PRIi16, INT16_MIN, INT16_MAX);
-                        break;
+                case REGISTRY_TYPE_INT16:
+                    printf("%" PRIi16 "-%" PRIi16, INT16_MIN, INT16_MAX);
+                    break;
 
-                    case REGISTRY_TYPE_INT32:
-                        printf("%" PRIi32 "-%" PRIi32, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
-                        break;
+                case REGISTRY_TYPE_INT32:
+                    printf("%" PRIi32 "-%" PRIi32, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
+                    break;
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_INT64:
-                        printf("%" PRIi64 "-%" PRIi64, INT64_MIN, INT64_MAX);
-                        break;
+                case REGISTRY_TYPE_INT64:
+                    printf("%" PRIi64 "-%" PRIi64, INT64_MIN, INT64_MAX);
+                    break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT32:
-                        printf("-%f-%f", FLT_MAX, FLT_MAX);
-                        break;
+                case REGISTRY_TYPE_FLOAT32:
+                    printf("-%f-%f", FLT_MAX, FLT_MAX);
+                    break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-                    case REGISTRY_TYPE_FLOAT64:
-                        printf("-%lf-%lf", DBL_MAX, DBL_MAX);
-                        break;
+                case REGISTRY_TYPE_FLOAT64:
+                    printf("-%lf-%lf", DBL_MAX, DBL_MAX);
+                    break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
-                    
-                    default: break;
+
+                default: break;
                 }
                 printf("</RangeEnumeration>\n");
-                
+
                 printf("                <Units></Units>\n");
                 printf("                <Description>%s</Description>\n", schema.description);
                 printf("            </Item>\n");
             }
-            
+
             printf("        </Resources>\n");
             printf("        <Description2></Description2>\n");
             printf("    </Object>\n");
@@ -277,7 +279,7 @@ int registry_lwm2m_cli_cmd(int argc, char **argv)
         return 0;
     }
 
-    help_error:
+help_error:
     printf("usage: %s <generate>\n", argv[0]);
 
     return 1;
