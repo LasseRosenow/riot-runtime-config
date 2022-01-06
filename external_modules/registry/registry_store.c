@@ -20,7 +20,7 @@ void _debug_print_path(const int *path, int path_len) {
     }
 }
 
-static void _registry_load_cb(int *path, int path_len, char *val, void *cb_arg)
+static void _registry_load_cb(const int *path, int path_len, char *val, void *cb_arg)
 {
     (void)cb_arg;
     DEBUG("[registry_store] Setting ");
@@ -63,7 +63,7 @@ int registry_load(void)
     return 0;
 }
 
-static void _registry_dup_check_cb(int *path, int path_len, char *val, void *cb_arg)
+static void _registry_dup_check_cb(const int *path, int path_len, char *val, void *cb_arg)
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;

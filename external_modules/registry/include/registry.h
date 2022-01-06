@@ -179,7 +179,7 @@ struct _registry_schema_item_t {
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(int *path, int path_len, char *val, void *cb_arg);
+typedef void (*load_cb_t)(const int *path, int path_len, char *val, void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities
