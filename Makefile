@@ -51,7 +51,7 @@ USEMODULE += embunit
 # External modules
 USEMODULE += registry
 USEMODULE += registry_coap
-USEMODULE += registry_lwm2m
+#USEMODULE += registry_lwm2m
 EXTERNAL_MODULE_DIRS += external_modules
 # LwM2M logging
 CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1

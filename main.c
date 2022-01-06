@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "registry_coap.h"
-#include "registry_lwm2m.h"
 #include "registry.h"
 #include "registry_schema_rgb.h"
 #include "registry_schema_test.h"
@@ -18,7 +17,7 @@ static msg_t _shell_queue[SHELL_QUEUE_SIZE];
 
 static const shell_command_t shell_commands[] = {
     { "registry_coap", "Registry CoAP cli", registry_coap_cli_cmd },
-    { "registry_lwm2m", "Registry LwM2M cli", registry_lwm2m_cli_cmd },
+    // { "registry_lwm2m", "Registry LwM2M cli", registry_lwm2m_cli_cmd },
     { NULL, NULL, NULL }
 };
 

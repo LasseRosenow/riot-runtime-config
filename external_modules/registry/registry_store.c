@@ -7,10 +7,10 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-registry_store_t *save_dst;
-clist_node_t load_srcs;
+static registry_store_t *save_dst;
+static clist_node_t load_srcs;
 
-void _debug_print_path(const int *path, int path_len)
+static void _debug_print_path(const int *path, int path_len)
 {
     for (int i = 0; i < path_len; i++) {
         DEBUG("%d", path[i]);
@@ -86,8 +86,8 @@ static void _registry_dup_check_cb(const int *path, int path_len, char *val, voi
     }
 }
 
-int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta, char *value,
-                       void *context)
+static int _registry_save_one(const int *path, int path_len, registry_schema_item_t *meta,
+                              char *value, void *context)
 {
     (void)context;
     (void)meta;
