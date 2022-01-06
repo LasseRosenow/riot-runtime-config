@@ -256,7 +256,7 @@ typedef struct {
      * @param[in] context Context of the instance
      * @return 0 on success, non-zero on failure
      */
-    int (*commit_cb)(int *path, int path_len, void *context);
+    int (*commit_cb)(const int *path, int path_len, void *context);
 
     void *context; /**< Optional context used by the instance */
 } registry_instance_t;
@@ -363,7 +363,7 @@ int registry_add_instance(int schema_id, registry_instance_t *instance);
  * @return -EINVAL if schema could not be found, otherwise returns the
  *             value of the set schema function.
  */
-int registry_set_value(int *path, int path_len, char *val_str);
+int registry_set_value(const int *path, int path_len, char *val_str);
 
 /**
  * @brief Gets the current value of a parameter that belongs to a configuration
@@ -386,7 +386,7 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len);
  * @return 0 on success, -EINVAL if the group has not implemented the commit
  * function.
  */
-int registry_commit(int *path, int path_len);
+int registry_commit(const int *path, int path_len);
 
 /**
  * @brief Convenience function to parse a configuration parameter value from
@@ -482,7 +482,7 @@ int registry_save_one(const int *path, int path_len, void *context);
  * @return 0 on success, non-zero on failure
  */
 int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context),
-                    int *path, int path_len);
+                    const int *path, int path_len);
 
 #ifdef __cplusplus
 }

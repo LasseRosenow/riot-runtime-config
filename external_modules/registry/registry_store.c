@@ -55,7 +55,7 @@ int registry_load(void)
         return -ENOENT;
     }
 
-    do  {
+    do {
         registry_store_t *src;
         src = container_of(node, registry_store_t, node);
         src->itf->load(src, _registry_load_cb, NULL);
@@ -124,7 +124,7 @@ int registry_save_one(const int *path, int path_len, void *context)
 
 int registry_save(void)
 {
-    registry_schema_t *hndlr;
+    registry_schema_t *schema;
     clist_node_t *node = registry_schemas.next;
     int res = 0;
     int res2;
@@ -138,8 +138,8 @@ int registry_save(void)
     }
 
     do  {
-        hndlr = container_of(node, registry_schema_t, node);
-        res2 = registry_export(_registry_save_one, &hndlr->id, 1);
+        schema = container_of(node, registry_schema_t, node);
+        res2 = registry_export(_registry_save_one, &schema->id, 1);
         if (res == 0) {
             res = res2;
         }

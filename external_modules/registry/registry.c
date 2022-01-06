@@ -145,7 +145,7 @@ int registry_add_instance(int schema_id, registry_instance_t* instance)
     return -EINVAL;
 }
 
-int registry_set_value(int *path, int path_len, char *val_str)
+int registry_set_value(const int *path, int path_len, char *val_str)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
@@ -207,7 +207,7 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
     return buf;
 }
 
-int registry_commit(int *path, int path_len)
+int registry_commit(const int *path, int path_len)
 {
     int rc = 0;
 
@@ -265,7 +265,7 @@ int registry_commit(int *path, int path_len)
     }
 }
 
-static void _registry_export_recursive(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
+static void _registry_export_recursive(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), const int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
 {
     for (int i = 0; i < schema_items_len; i++) {
         registry_schema_item_t schema_item = schema_items[i];
@@ -293,7 +293,7 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), int *path, int path_len)
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, char* val, void *context), const int *path, int path_len)
 {    
     assert(export_func != NULL);
     registry_schema_t *schema;
