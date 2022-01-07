@@ -1,6 +1,7 @@
 #include "storage_facility_dummy.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #define DUMMY_STORE_CAPACITY 100
 
@@ -69,6 +70,7 @@ static int registry_dummy_save(registry_store_t *store, const int *path, int pat
                     else if (j == dummy_store[i].path_len - 1) {
                         // All ids within the path matched and this was the last one.
                         strcpy(dummy_store[i].val, value);
+                        return 0;
                     }
                 }
             }
@@ -86,5 +88,6 @@ static int registry_dummy_save(registry_store_t *store, const int *path, int pat
 
     memcpy(dummy_store[free_slot].path, path, path_len * sizeof(int));
     strcpy(dummy_store[free_slot].val, value);
+    dummy_store[free_slot].path_len = path_len;
     return 0;
 }

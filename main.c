@@ -83,6 +83,7 @@ int main(void)
     registry_register_schema(&registry_schema_rgb);
 
     /* register storage destination */
+    registry_register_storage_src(&dummy_store);
     registry_register_storage_dst(&dummy_store);
 
     /* add schema instances */
@@ -100,6 +101,7 @@ int main(void)
     registry_export(_export_func, path, ARRAY_SIZE(path));
 
     registry_save();
+    registry_load();
 
     /* test registry */
     tests_run();
