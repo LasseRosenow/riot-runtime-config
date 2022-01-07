@@ -1,0 +1,8 @@
+#ifndef RUNTIME_CONFIG_REGISTRY_STORAGE_FACILITY_DUMMY_H
+#define RUNTIME_CONFIG_REGISTRY_STORAGE_FACILITY_DUMMY_H
+
+#include <registry.h>
+
+extern registry_store_itf_t dummy_store_itf;
+
+#endif //RUNTIME_CONFIG_REGISTRY_STORAGE_FACILITY_DUMMY_H

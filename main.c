@@ -8,6 +8,7 @@
 #include "registry_schema_rgb.h"
 #include "registry_schema_test.h"
 #include "tests.h"
+#include "storage_facility_dummy.h"
 #include "cbor_example.h"
 
 #include "assert.h"
@@ -51,6 +52,11 @@ registry_instance_t rgb_instance_3 = {
     .data = &rgb_instance_3_data,
 };
 
+
+registry_store_t dummy_store = {
+    .itf = &dummy_store_itf,
+};
+
 int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char *val,
                  void *context)
 {
@@ -76,6 +82,9 @@ int main(void)
     /* add application registry schema */
     registry_register_schema(&registry_schema_rgb);
 
+    /* register storage destination */
+    registry_register_storage_dst(&dummy_store);
+
     /* add schema instances */
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_1);
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_2);
@@ -89,6 +98,8 @@ int main(void)
     int path[] = { registry_schema_rgb.id, 2, 1 };
 
     registry_export(_export_func, path, ARRAY_SIZE(path));
+
+    registry_save();
 
     /* test registry */
     tests_run();

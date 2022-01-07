@@ -137,6 +137,10 @@ int registry_save(void)
         return -1;
     }
 
+    if (!save_dst) {
+        return -ENOENT;
+    }
+
     if (save_dst->itf->save_start) {
         save_dst->itf->save_start(save_dst);
     }
