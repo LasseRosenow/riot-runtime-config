@@ -21,14 +21,14 @@ static void _debug_print_path(const int *path, int path_len)
     }
 }
 
-static void _registry_load_cb(const int *path, int path_len, char *val, void *cb_arg)
+static void _registry_load_cb(const int *path, int path_len, void *val, int val_len, void *cb_arg)
 {
     (void)cb_arg;
     DEBUG("[registry_store] Setting ");
     _debug_print_path(path, path_len);
-    DEBUG(" to %s\n", val);
+    // TODO DEBUG(" to %s\n", val);
 
-    registry_set_value(path, path_len, val);
+    registry_set_value(path, path_len, val, val_len);
 }
 
 void registry_store_init(void)
@@ -64,30 +64,29 @@ int registry_load(void)
     return 0;
 }
 
-static void _registry_dup_check_cb(const int *path, int path_len, char *val, void *cb_arg)
+static void _registry_dup_check_cb(const int *path, int path_len, void *val, int val_len,
+                                   void *cb_arg)
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
+
 
     for (int i = 0; i < path_len; i++) {
         if (path[i] != dup_arg->path[i]) {
             return;
         }
     }
-    if (!val) {
-        if (!dup_arg->val || dup_arg->val[0] == '\0') {
-            dup_arg->is_dup = 1;
-        }
-    }
-    else {
-        if (dup_arg->val && !strcmp(val, dup_arg->val)) {
-            dup_arg->is_dup = 1;
-        }
+
+
+
+    if (memcmp(val, dup_arg->val.buf, val_len) == 0) {
+        dup_arg->is_dup = true;
     }
 }
 
 static int _registry_save_one_export_func(const int *path, int path_len,
-                                          registry_schema_item_t *meta, char *value, void *context)
+                                          registry_schema_item_t *meta,
+                                          const registry_value_t value, void *context)
 {
     (void)context;
     (void)meta;
@@ -96,7 +95,7 @@ static int _registry_save_one_export_func(const int *path, int path_len,
 
     DEBUG("[registry_store] Saving: ");
     _debug_print_path(path, path_len);
-    DEBUG(" = %s\n", value);
+    // TODO DEBUG(" = %s\n", value);
 
     if (!dst) {
         return -ENOENT;
@@ -104,11 +103,11 @@ static int _registry_save_one_export_func(const int *path, int path_len,
 
     dup.path = path;
     dup.val = value;
-    dup.is_dup = 0;
+    dup.is_dup = false;
 
     save_dst->itf->load(save_dst, _registry_dup_check_cb, &dup);
 
-    if (dup.is_dup == 1) {
+    if (dup.is_dup) {
         return -EEXIST;
     }
 
@@ -120,10 +119,14 @@ int registry_save_one(const int *path, int path_len, void *context)
     (void)context;
 
     char buf[REGISTRY_MAX_VAL_LEN];
+    registry_value_t value = {
+        .buf = buf,
+        .buf_len = ARRAY_SIZE(buf),
+    };
 
-    registry_get_value(path, path_len, buf, sizeof(buf));
+    registry_get_value(path, path_len, &value);
 
-    return _registry_save_one_export_func(path, path_len, NULL, buf, context);
+    return _registry_save_one_export_func(path, path_len, NULL, value, context);
 }
 
 int registry_save(void)

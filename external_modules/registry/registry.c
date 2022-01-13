@@ -68,38 +68,39 @@ void registry_register_schema(registry_schema_t *schema)
     clist_rpush(&registry_schemas, &(schema->node));
 }
 
-static size_t _get_registry_parameter_data_len(registry_type_t type)
-{
-    switch (type) {
-    case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
-    case REGISTRY_TYPE_BOOL: return sizeof(bool);
-
-    case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
-    case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
-    case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-    case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
-#endif // CONFIG_REGISTRY_USE_UINT64
-
-    case REGISTRY_TYPE_INT8: return sizeof(int8_t);
-    case REGISTRY_TYPE_INT16: return sizeof(int16_t);
-    case REGISTRY_TYPE_INT32: return sizeof(int32_t);
-
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-    case REGISTRY_TYPE_INT64: return sizeof(int64_t);
-#endif // CONFIG_REGISTRY_USE_INT64
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-    case REGISTRY_TYPE_FLOAT32: return sizeof(float);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-    case REGISTRY_TYPE_FLOAT64: return sizeof(double);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-
-    default: return 0;
-    }
-}
+// TODO is this still necessary?
+// static size_t _get_registry_parameter_data_len(registry_type_t type)
+// {
+//     switch (type) {
+//     case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
+//     case REGISTRY_TYPE_BOOL: return sizeof(bool);
+//
+//     case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
+//     case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
+//     case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
+// #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+//     case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
+// #endif // CONFIG_REGISTRY_USE_UINT64
+//
+//     case REGISTRY_TYPE_INT8: return sizeof(int8_t);
+//     case REGISTRY_TYPE_INT16: return sizeof(int16_t);
+//     case REGISTRY_TYPE_INT32: return sizeof(int32_t);
+//
+// #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+//     case REGISTRY_TYPE_INT64: return sizeof(int64_t);
+// #endif // CONFIG_REGISTRY_USE_INT64
+//
+// #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+//     case REGISTRY_TYPE_FLOAT32: return sizeof(float);
+// #endif // CONFIG_REGISTRY_USE_FLOAT32
+//
+// #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+//     case REGISTRY_TYPE_FLOAT64: return sizeof(double);
+// #endif // CONFIG_REGISTRY_USE_FLOAT32
+//
+//     default: return 0;
+//     }
+// }
 
 static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len,
                                                       registry_schema_t *schema)
@@ -154,7 +155,7 @@ int registry_add_instance(int schema_id, registry_instance_t *instance)
     return -EINVAL;
 }
 
-int registry_set_value(const int *path, int path_len, char *val_str)
+int registry_set_value(const int *path, int path_len, const void *val, int val_len)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
@@ -177,20 +178,13 @@ int registry_set_value(const int *path, int path_len, char *val_str)
         return -EINVAL;
     }
 
-    /* convert string value to native value */
-    int buf_len = REGISTRY_MAX_VAL_LEN;
-    uint8_t buf[buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
-
-    registry_value_from_str(val_str, param_meta->value.parameter.type, &buf, _get_registry_parameter_data_len(
-                                param_meta->value.parameter.type));
-
     /* call handler to apply the new value to the correct parameter in the instance of the schema */
-    schema->set(param_meta->id, instance, &buf, buf_len, schema->context);
+    schema->set(param_meta->id, instance, val, val_len, schema->context);
 
     return 0;
 }
 
-char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
+registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
@@ -214,15 +208,14 @@ char *registry_get_value(const int *path, int path_len, char *buf, int buf_len)
     }
 
     /* call handler to get the parameter value from the instance of the schema */
-    int native_buf_len = REGISTRY_MAX_VAL_LEN;
-    uint8_t native_buf[native_buf_len]; /* max_val_len is the largest allowed size as a string => largest size in general */
+    uint8_t buf[REGISTRY_MAX_VAL_LEN]; /* max_val_len is the largest allowed size as a string => largest size in general */
 
-    schema->get(param_meta->id, instance, native_buf, native_buf_len, schema->context);
+    schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), schema->context);
 
     /* convert native value to string value */
-    registry_str_from_value(param_meta->value.parameter.type, &native_buf, buf, buf_len);
+    memcpy(value->buf, buf, value->buf_len);
 
-    return buf;
+    return value;
 }
 
 int registry_commit(const int *path, int path_len)
@@ -284,7 +277,8 @@ int registry_commit(const int *path, int path_len)
 }
 
 static void _registry_export_recursive(int (*export_func)(const int *path, int path_len,
-                                                          registry_schema_item_t *meta, char *val,
+                                                          registry_schema_item_t *meta,
+                                                          const registry_value_t value,
                                                           void *context), const int *current_path, int current_path_len, registry_schema_item_t *schema_items, int schema_items_len, void *context)
 {
     for (int i = 0; i < schema_items_len; i++) {
@@ -300,12 +294,16 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
         if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
             // Parameter found => Export
             char val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
-            registry_get_value(new_path, new_path_len, val_buf, ARRAY_SIZE(val_buf));
-            export_func(new_path, new_path_len, &schema_item, val_buf, context);
+            registry_value_t val = {
+                .buf = val_buf,
+                .buf_len = ARRAY_SIZE(val_buf),
+            };
+            registry_get_value(new_path, new_path_len, &val);
+            export_func(new_path, new_path_len, &schema_item, val, context);
         }
         else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
             // Group => search for parameters
-            registry_group_t group = schema_item.value.group;
+            registry_schema_group_t group = schema_item.value.group;
             for (int i = 0; i < group.items_len; i++) {
                 new_path[new_path_len - 1] = schema_item.id;
                 _registry_export_recursive(export_func, new_path, current_path_len + 1, group.items,
@@ -316,7 +314,8 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
 }
 
 int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
-                                       char *val, void *context), const int *path, int path_len)
+                                       const registry_value_t value,
+                                       void *context), const int *path, int path_len)
 {
     assert(export_func != NULL);
     registry_schema_t *schema;
@@ -386,3 +385,193 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
 
     return 0;
 }
+
+/* registry_set_value convenience functions */
+int registry_set_string(const int *path, int path_len, const char *val)
+{
+    return registry_set_value(path, path_len, val, strlen(val));
+}
+
+int registry_set_bool(const int *path, int path_len, bool val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(bool));
+}
+
+int registry_set_uint8(const int *path, int path_len, uint8_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(uint8_t));
+}
+
+int registry_set_uint16(const int *path, int path_len, uint16_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(uint16_t));
+}
+
+int registry_set_uint32(const int *path, int path_len, uint32_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(uint32_t));
+}
+
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+int registry_set_uint64(const int *path, int path_len, uint64_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(uint16_t));
+}
+
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+
+int registry_set_int8(const int *path, int path_len, int8_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(int8_t));
+}
+
+int registry_set_int16(const int *path, int path_len, int16_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(int16_t));
+}
+
+int registry_set_int32(const int *path, int path_len, int32_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(int32_t));
+}
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+int registry_set_int64(const int *path, int path_len, int64_t val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(int64_t));
+}
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+int registry_set_float32(const int *path, int path_len, float val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(float));
+}
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+int registry_set_float64(const int *path, int path_len, double val)
+{
+    return registry_set_value(path, path_len, &val, sizeof(double));
+}
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
+
+/* registry_get_value convenience functions */
+static void _registry_get_value_buf(const int *path, int path_len, void *buf, int buf_len)
+{
+    registry_value_t value = {
+        .buf = buf,
+        .buf_len = buf_len,
+    };
+
+    registry_get_value(path, path_len, &value);
+}
+char *registry_get_string(const int *path, int path_len, char *buf, int buf_len)
+{
+    _registry_get_value_buf(path, path_len, buf, buf_len);
+    return buf;
+}
+bool registry_get_bool(const int *path, int path_len)
+{
+    bool buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(bool));
+
+    return buf;
+}
+uint8_t registry_get_uint8(const int *path, int path_len)
+{
+    uint8_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(uint8_t));
+
+    return buf;
+}
+uint16_t registry_get_uint16(const int *path, int path_len)
+{
+    uint16_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(uint16_t));
+
+    return buf;
+}
+
+uint32_t registry_get_uint32(const int *path, int path_len)
+{
+    uint32_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(uint32_t));
+
+    return buf;
+}
+
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+uint64_t registry_get_uint64(const int *path, int path_len)
+{
+    uint64_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(uint64_t));
+
+    return buf;
+}
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+
+int8_t registry_get_int8(const int *path, int path_len)
+{
+    int8_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(int8_t));
+
+    return buf;
+}
+
+int16_t registry_get_int16(const int *path, int path_len)
+{
+    int16_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(int16_t));
+
+    return buf;
+}
+
+int32_t registry_get_int32(const int *path, int path_len)
+{
+    int32_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(int32_t));
+
+    return buf;
+}
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+int64_t registry_get_int64(const int *path, int path_len)
+{
+    int64_t buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(int64_t));
+
+    return buf;
+}
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+float registry_get_float32(const int *path, int path_len)
+{
+    float buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(float));
+
+    return buf;
+}
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+double registry_get_float64(const int *path, int path_len)
+{
+    double buf;
+
+    _registry_get_value_buf(path, path_len, &buf, sizeof(double));
+
+    return buf;
+}
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */

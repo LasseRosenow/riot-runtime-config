@@ -9,7 +9,8 @@
 #include "registry_schema_rgb.h"
 
 static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
-static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context);
+static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
+                void *context);
 
 static registry_schema_item_t schema_items[] = {
     {
@@ -73,7 +74,8 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
     }
 }
 
-static void set(int param_id, registry_instance_t *instance, void *val, int val_len, void *context)
+static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
+                void *context)
 {
     (void)val_len;
     (void)context;

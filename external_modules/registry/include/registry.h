@@ -142,12 +142,18 @@ typedef enum {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
 
+typedef struct {
+    registry_type_t type;
+    void *buf;
+    int buf_len;
+} registry_value_t;
+
 /**
  * @brief Parameter of a configuration group.
  */
 typedef struct {
     registry_type_t type; /**< Enum representing the type of the configuration parameter */
-} registry_parameter_t;
+} registry_schema_parameter_t;
 
 typedef struct _registry_schema_item_t registry_schema_item_t;
 
@@ -157,7 +163,7 @@ typedef struct _registry_schema_item_t registry_schema_item_t;
 typedef struct {
     registry_schema_item_t *items;
     int items_len;
-} registry_group_t;
+} registry_schema_group_t;
 
 typedef enum {
     REGISTRY_SCHEMA_TYPE_GROUP,
@@ -170,8 +176,8 @@ struct _registry_schema_item_t {
     char *description;  /**< String describing the configuration parameter with more details */
     registry_schema_type_t type;
     union {
-        registry_group_t group;
-        registry_parameter_t parameter;
+        registry_schema_group_t group;
+        registry_schema_parameter_t parameter;
     } value;
 };
 
@@ -179,15 +185,15 @@ struct _registry_schema_item_t {
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(const int *path, int path_len, char *val, void *cb_arg);
+typedef void (*load_cb_t)(const int *path, int path_len, void *val, int val_len, void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities
  */
 typedef struct {
-    const int *path;    /**< name of the parameter being checked */
-    char *val;          /**< value of the parameter being checked */
-    int is_dup;         /**< flag indicating if the parameter is duplicated or not */
+    const int *path;        /**< path of the parameter being checked */
+    registry_value_t val;   /**< value of the parameter being checked */
+    bool is_dup;            /**< flag indicating if the parameter is duplicated or not */
 } registry_dup_check_arg_t;
 
 /**
@@ -230,7 +236,8 @@ typedef struct registry_store_itf {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const int *path, int path_len, const char *value);
+    int (*save)(registry_store_t *store, const int *path, int path_len,
+                const registry_value_t value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -297,7 +304,7 @@ typedef struct {
      * @param[in] val_len Length of the buffer to store the current value
      * @param[in] context Context of the schema
      */
-    void (*set)(int param_id, registry_instance_t *instance, void *val,
+    void (*set)(int param_id, registry_instance_t *instance, const void *val,
                 int val_len, void *context);
 
     void *context; /**< Optional context used by the schemas */
@@ -363,7 +370,28 @@ int registry_add_instance(int schema_id, registry_instance_t *instance);
  * @return -EINVAL if schema could not be found, otherwise returns the
  *             value of the set schema function.
  */
-int registry_set_value(const int *path, int path_len, char *val_str);
+int registry_set_value(const int *path, int path_len, const void *val, int val_len);
+
+int registry_set_string(const int *path, int path_len, const char *val);
+int registry_set_bool(const int *path, int path_len, bool val);
+int registry_set_uint8(const int *path, int path_len, uint8_t val);
+int registry_set_uint16(const int *path, int path_len, uint16_t val);
+int registry_set_uint32(const int *path, int path_len, uint32_t val);
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+int registry_set_uint64(const int *path, int path_len, uint64_t val);
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+int registry_set_int8(const int *path, int path_len, int8_t val);
+int registry_set_int16(const int *path, int path_len, int16_t val);
+int registry_set_int32(const int *path, int path_len, int32_t val);
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+int registry_set_int64(const int *path, int path_len, int64_t val);
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+int registry_set_float32(const int *path, int path_len, float val);
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+int registry_set_float64(const int *path, int path_len, double val);
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
  * @brief Gets the current value of a parameter that belongs to a configuration
@@ -374,7 +402,28 @@ int registry_set_value(const int *path, int path_len, char *val_str);
  * @param[in] buf_len Length of the buffer to store the current value
  * @return Pointer to the beginning of the buffer
  */
-char *registry_get_value(const int *path, int path_len, char *buf, int buf_len);
+registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
+
+char *registry_get_string(const int *path, int path_len, char *buf, int buf_len);
+bool registry_get_bool(const int *path, int path_len);
+uint8_t registry_get_uint8(const int *path, int path_len);
+uint16_t registry_get_uint16(const int *path, int path_len);
+uint32_t registry_get_uint32(const int *path, int path_len);
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+uint64_t registry_get_uint64(const int *path, int path_len);
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
+int8_t registry_get_int8(const int *path, int path_len);
+int16_t registry_get_int16(const int *path, int path_len);
+int32_t registry_get_int32(const int *path, int path_len);
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+int64_t registry_get_int64(const int *path, int path_len);
+#endif /* CONFIG_REGISTRY_USE_INT64 */
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+float registry_get_float32(const int *path, int path_len);
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+double registry_get_float64(const int *path, int path_len);
+#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
  * @brief If a @p name is passed it calls the commit schema for that
@@ -482,8 +531,8 @@ int registry_save_one(const int *path, int path_len, void *context);
  * @return 0 on success, non-zero on failure
  */
 int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
-                                       char *val, void *context),
-                    const int *path, int path_len);
+                                       const registry_value_t value,
+                                       void *context), const int *path, int path_len);
 
 #ifdef __cplusplus
 }

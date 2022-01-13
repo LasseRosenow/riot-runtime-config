@@ -57,11 +57,12 @@ registry_store_t dummy_store = {
     .itf = &dummy_store_itf,
 };
 
-int _export_func(const int *path, int path_len, registry_schema_item_t *meta, char *val,
+int _export_func(const int *path, int path_len, registry_schema_item_t *meta, registry_value_t val,
                  void *context)
 {
     (void)meta;
     (void)context;
+    (void)val;
 
     printf("Exporting: ");
 
@@ -69,7 +70,7 @@ int _export_func(const int *path, int path_len, registry_schema_item_t *meta, ch
         printf("/%d", path[i]);
     }
 
-    printf(" - %s\n", val);
+    //printf(" - %s\n", val);
 
     return 0;
 }
