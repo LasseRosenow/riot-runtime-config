@@ -200,3 +200,57 @@ Figure 05 shows the above described processes.
 <p align="center">
 Figure 05 - Behavioral flow of the load and store calls
 </p>
+
+
+## 3.3. RIOT Registry API
+![Figure 06](./doc/images/api.svg "RIOT Registry API")
+
+```c
+# Base
+void registry_init(void);
+void registry_register_schema(registry_schema_t *schema);
+int registry_add_instance(int schema_id, registry_instance_t *instance);
+int registry_set_value(const int *path, int path_len, const void *val, int val_len);
+registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
+int registry_commit(const int *path, int path_len);
+int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, const registry_value_t value, void *context), const int *path, int path_len);
+
+
+# Store
+void registry_store_init(void);
+void registry_store_register_src(registry_store_t *src);
+void registry_store_register_dst(registry_store_t *dst);
+int registry_store_load(void);
+int registry_store_save(void);
+int registry_store_save_one(const int *path, int path_len, void *context);
+
+
+# Set convenience functions
+int registry_set_string(const int *path, int path_len, const char *val);
+int registry_set_bool(const int *path, int path_len, bool val);
+int registry_set_uint8(const int *path, int path_len, uint8_t val);
+int registry_set_uint16(const int *path, int path_len, uint16_t val);
+int registry_set_uint32(const int *path, int path_len, uint32_t val);
+int registry_set_uint64(const int *path, int path_len, uint64_t val);
+int registry_set_int8(const int *path, int path_len, int8_t val);
+int registry_set_int16(const int *path, int path_len, int16_t val);
+int registry_set_int32(const int *path, int path_len, int32_t val);
+int registry_set_int64(const int *path, int path_len, int64_t val);
+int registry_set_float32(const int *path, int path_len, float val);
+int registry_set_float64(const int *path, int path_len, double val);
+
+
+# Get convenience functions
+char *registry_get_string(const int *path, int path_len, char *buf, int buf_len);
+bool registry_get_bool(const int *path, int path_len);
+uint8_t registry_get_uint8(const int *path, int path_len);
+uint16_t registry_get_uint16(const int *path, int path_len);
+uint32_t registry_get_uint32(const int *path, int path_len);
+uint64_t registry_get_uint64(const int *path, int path_len);
+int8_t registry_get_int8(const int *path, int path_len);
+int16_t registry_get_int16(const int *path, int path_len);
+int32_t registry_get_int32(const int *path, int path_len);
+int64_t registry_get_int64(const int *path, int path_len);
+float registry_get_float32(const int *path, int path_len);
+double registry_get_float64(const int *path, int path_len);
+```
