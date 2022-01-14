@@ -87,7 +87,7 @@ the interfaces exposed by the Configuration Managers, via the RIOT Registry.
 A RIOT Application may interact with a Configuration Manager in order to
 modify access control rules or enable different exposed interfaces.
 
-![Figure 01](./doc/images/architecture.drawio.svg "Runtime Configuration Architecture")
+![Figure 01](./doc/images/architecture.svg "Runtime Configuration Architecture")
 <p align="center">
 Figure 01 - Runtime Configuration System architecture
 </p>
@@ -108,7 +108,7 @@ functionality of the RIOT Registry is independent of the functionality of the mo
 
 In Figure 02 can be seen an example of two configuration schemas `(My app, LED Strip)` The application `My app` uses the custom `My app` CS to expose custom configuration parameters to the RIOT Registry and the drivers `WS2812, SK6812 and UCS1903` contain instances of the `LED Strip` CS to expose common LED Strip configuration parameters. Also, there are two Storage Facilities available: EEPROM and FAT.
 
-![Figure 02](./doc/images/components.drawio.svg "The RIOT Registry components")
+![Figure 02](./doc/images/components.svg "The RIOT Registry components")
 <p align="center">
 Figure 02 - The RIOT Registry components
 </p>
@@ -164,7 +164,7 @@ A conceptual example of a SF can be found in the [Appendix](#Appendix).
 ### Registry Initialization
 As described in the flow in Figure 03, modules add their **Schema Instances (SI)** to pre defined **Configuration Schemas (CS)** or declare and register their own **CS** for configuration groups in the RIOT Registry. **Storage facilities (SF)** are registered as sources and/or destinations of configurations in the RIOT Registry.
 
-![Figure 03](./doc/images/boot.drawio.svg "Usage flow of the RIOT Registry")
+![Figure 03](./doc/images/boot_flow.svg "Usage flow of the RIOT Registry")
 <p align="center">
 Figure 03 - Usage flow of the RIOT Registry
 </p>
@@ -181,7 +181,7 @@ Note these functions don't interact with SF, so configuration changes are not re
 The following diagram shows the process of each function. It's assumed there
 are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) and an _Application_ configuration group with a `foo` configuration parameter.
 
-![Figure 04](./doc/images/basic_behavioral_flow.drawio.svg "Behavioral flow of the basic API of the RIOT Registry")
+![Figure 04](./doc/images/basic_behavioral_flow.svg "Behavioral flow of the basic API of the RIOT Registry")
 <p align="center">
 Figure 04 - Behavioral flow of the basic API of the RIOT Registry
 </p>

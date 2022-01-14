@@ -21,7 +21,8 @@ static void _debug_print_path(const int *path, int path_len)
     }
 }
 
-static void _registry_load_cb(const int *path, int path_len, void *val, int val_len, void *cb_arg)
+static void _registry_store_load_cb(const int *path, int path_len, void *val, int val_len,
+                                    void *cb_arg)
 {
     (void)cb_arg;
     DEBUG("[registry_store] Setting ");
@@ -36,19 +37,19 @@ void registry_store_init(void)
     load_srcs.next = NULL;
 }
 
-void registry_register_storage_src(registry_store_t *src)
+void registry_store_register_src(registry_store_t *src)
 {
     assert(src != NULL);
     clist_rpush(&load_srcs, &(src->node));
 }
 
-void registry_register_storage_dst(registry_store_t *dst)
+void registry_store_register_dst(registry_store_t *dst)
 {
     assert(dst != NULL);
     save_dst = dst;
 }
 
-int registry_load(void)
+int registry_store_load(void)
 {
     clist_node_t *node = load_srcs.next;
 
@@ -59,13 +60,13 @@ int registry_load(void)
     do {
         registry_store_t *src;
         src = container_of(node, registry_store_t, node);
-        src->itf->load(src, _registry_load_cb, NULL);
+        src->itf->load(src, _registry_store_load_cb, NULL);
     } while (node != load_srcs.next);
     return 0;
 }
 
-static void _registry_dup_check_cb(const int *path, int path_len, void *val, int val_len,
-                                   void *cb_arg)
+static void _registry_store_dup_check_cb(const int *path, int path_len, void *val, int val_len,
+                                         void *cb_arg)
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
@@ -84,9 +85,9 @@ static void _registry_dup_check_cb(const int *path, int path_len, void *val, int
     }
 }
 
-static int _registry_save_one_export_func(const int *path, int path_len,
-                                          registry_schema_item_t *meta,
-                                          const registry_value_t value, void *context)
+static int _registry_store_save_one_export_func(const int *path, int path_len,
+                                                registry_schema_item_t *meta,
+                                                const registry_value_t value, void *context)
 {
     (void)context;
     (void)meta;
@@ -105,7 +106,7 @@ static int _registry_save_one_export_func(const int *path, int path_len,
     dup.val = value;
     dup.is_dup = false;
 
-    save_dst->itf->load(save_dst, _registry_dup_check_cb, &dup);
+    save_dst->itf->load(save_dst, _registry_store_dup_check_cb, &dup);
 
     if (dup.is_dup) {
         return -EEXIST;
@@ -114,7 +115,7 @@ static int _registry_save_one_export_func(const int *path, int path_len,
     return dst->itf->save(dst, path, path_len, value);
 }
 
-int registry_save_one(const int *path, int path_len, void *context)
+int registry_store_save_one(const int *path, int path_len, void *context)
 {
     (void)context;
 
@@ -126,10 +127,10 @@ int registry_save_one(const int *path, int path_len, void *context)
 
     registry_get_value(path, path_len, &value);
 
-    return _registry_save_one_export_func(path, path_len, NULL, value, context);
+    return _registry_store_save_one_export_func(path, path_len, NULL, value, context);
 }
 
-int registry_save(void)
+int registry_store_save(void)
 {
     registry_schema_t *schema;
     clist_node_t *node = registry_schemas.next;
@@ -150,7 +151,7 @@ int registry_save(void)
 
     do {
         schema = container_of(node, registry_schema_t, node);
-        res2 = registry_export(_registry_save_one_export_func, &schema->id, 1);
+        res2 = registry_export(_registry_store_save_one_export_func, &schema->id, 1);
         if (res == 0) {
             res = res2;
         }

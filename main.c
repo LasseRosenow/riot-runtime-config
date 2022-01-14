@@ -83,9 +83,9 @@ int main(void)
     /* add application registry schema */
     registry_register_schema(&registry_schema_rgb);
 
-    /* register storage destination */
-    registry_register_storage_src(&dummy_store);
-    registry_register_storage_dst(&dummy_store);
+    /* register store source and destination */
+    registry_store_register_src(&dummy_store);
+    registry_store_register_dst(&dummy_store);
 
     /* add schema instances */
     registry_add_instance(registry_schema_rgb.id, &rgb_instance_1);
@@ -101,8 +101,8 @@ int main(void)
 
     registry_export(_export_func, path, ARRAY_SIZE(path));
 
-    registry_save();
-    registry_load();
+    registry_store_save();
+    registry_store_load();
 
     /* test registry */
     tests_run();

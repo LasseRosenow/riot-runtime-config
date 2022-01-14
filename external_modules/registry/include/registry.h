@@ -341,7 +341,7 @@ void registry_register_schema(registry_schema_t *schema);
  *
  * @param[in] src Pointer to the storage to register as source.
  */
-void registry_register_storage_src(registry_store_t *src);
+void registry_store_register_src(registry_store_t *src);
 
 /**
  * @brief Registers a new storage as a destination for saving configurations.
@@ -352,7 +352,7 @@ void registry_register_storage_src(registry_store_t *src);
  *
  * @param[in] dst Pointer to the storage to register
  */
-void registry_register_storage_dst(registry_store_t *dst);
+void registry_store_register_dst(registry_store_t *dst);
 
 /**
  * @brief Adds a new instance of a schema.
@@ -450,8 +450,8 @@ int registry_commit(const int *path, int path_len);
  * parameter is string.
  * @return 0 on success, non-zero on failure
  */
-int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
-                            int maxlen);
+int registry_convert_value_from_str(char *val_str, registry_type_t type, void *vp,
+                                    int maxlen);
 
 /**
  * @brief Convenience function to parse a configuration parameter value of
@@ -462,7 +462,7 @@ int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
  * @param len Length of the output buffer
  * @return 0 on success, non-zero on failure
  */
-int registry_bytes_from_str(char *val_str, void *vp, int *len);
+int registry_convert_bytes_from_str(char *val_str, void *vp, int *len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value into
@@ -476,8 +476,8 @@ int registry_bytes_from_str(char *val_str, void *vp, int *len);
  * @param[in] buf_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
-                              int buf_len);
+char *registry_convert_str_from_value(registry_type_t type, void *vp, char *buf,
+                                      int buf_len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value of
@@ -490,7 +490,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
  * @param[in] buf_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len);
+char *registry_convert_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len);
 
 /**
  * @brief Load all configuration parameters from the registered storage
@@ -500,7 +500,7 @@ char *registry_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len);
  *
  * @return 0 on success, non-zero on failure
  */
-int registry_load(void);
+int registry_store_load(void);
 
 /**
  * @brief Save all configuration parameters of every configuration group to the
@@ -508,7 +508,7 @@ int registry_load(void);
  *
  * @return 0 on success, non-zero on failure
  */
-int registry_save(void);
+int registry_store_save(void);
 
 /**
  * @brief Save a specific configuration paramter to the registered storage
@@ -518,7 +518,7 @@ int registry_save(void);
  * @param[in] val Struct representing the value of the configuration parameter
  * @return 0 on success, non-zero on failure
  */
-int registry_save_one(const int *path, int path_len, void *context);
+int registry_store_save_one(const int *path, int path_len, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
