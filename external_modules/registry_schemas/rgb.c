@@ -1,12 +1,13 @@
+#ifdef CONFIG_REGISTRY_ENABLE_SCHEMA_RGB
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "kernel_defines.h"
-
 #include "registry.h"
-
-#include "registry_schema_rgb.h"
+#include "registry_schemas.h"
 
 static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
 static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
@@ -43,7 +44,7 @@ static registry_schema_item_t schema_items[] = {
 };
 
 registry_schema_t registry_schema_rgb = {
-    .id = 0,
+    .id = REGISTRY_SCHEMA_RGB,
     .name = "rgb",
     .description = "Representation of a rgb color.",
     .items = schema_items,
@@ -61,15 +62,15 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
 
     switch (param_id) {
     case REGISTRY_SCHEMA_RGB_RED:
-        memcpy(buf, &_instance->r, sizeof(_instance->r));
+        memcpy(buf, &_instance->red, sizeof(_instance->red));
         break;
 
     case REGISTRY_SCHEMA_RGB_GREEN:
-        memcpy(buf, &_instance->g, sizeof(_instance->g));
+        memcpy(buf, &_instance->green, sizeof(_instance->green));
         break;
 
     case REGISTRY_SCHEMA_RGB_BLUE:
-        memcpy(buf, &_instance->b, sizeof(_instance->b));
+        memcpy(buf, &_instance->blue, sizeof(_instance->blue));
         break;
     }
 }
@@ -84,15 +85,17 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
 
     switch (param_id) {
     case REGISTRY_SCHEMA_RGB_RED:
-        memcpy(&_instance->r, val, sizeof(_instance->r));
+        memcpy(&_instance->red, val, sizeof(_instance->red));
         break;
 
     case REGISTRY_SCHEMA_RGB_GREEN:
-        memcpy(&_instance->g, val, sizeof(_instance->g));
+        memcpy(&_instance->green, val, sizeof(_instance->green));
         break;
 
     case REGISTRY_SCHEMA_RGB_BLUE:
-        memcpy(&_instance->b, val, sizeof(_instance->b));
+        memcpy(&_instance->blue, val, sizeof(_instance->blue));
         break;
     }
 }
+
+#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_RGB */

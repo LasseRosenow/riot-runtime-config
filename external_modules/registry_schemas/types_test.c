@@ -1,12 +1,13 @@
+#ifdef CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "kernel_defines.h"
-
 #include "registry.h"
-
-#include "registry_schema_test.h"
+#include "registry_schemas.h"
 
 static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
 static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
@@ -138,7 +139,7 @@ static registry_schema_item_t schema_items[] = {
 };
 
 registry_schema_t registry_schema_test = {
-    .id = 1,
+    .id = REGISTRY_SCHEMA_TYPES_TEST,
     .name = "test",
     .description = "Test schema containing all possible types for testing purposes.",
     .items = schema_items,
@@ -281,3 +282,5 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
 
     }
 }
+
+#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST */

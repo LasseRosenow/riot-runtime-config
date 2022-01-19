@@ -5,8 +5,7 @@
 
 #include "registry_coap.h"
 #include "registry.h"
-#include "registry_schema_rgb.h"
-#include "registry_schema_test.h"
+#include "registry_schemas.h"
 #include "tests.h"
 #include "storage_facility_dummy.h"
 #include "cbor_example.h"
@@ -23,9 +22,9 @@ static const shell_command_t shell_commands[] = {
 };
 
 registry_schema_rgb_t rgb_instance_1_data = {
-    .r = 0,
-    .g = 255,
-    .b = 70,
+    .red = 0,
+    .green = 255,
+    .blue = 70,
 };
 registry_instance_t rgb_instance_1 = {
     .name = "rgb-1",
@@ -33,9 +32,9 @@ registry_instance_t rgb_instance_1 = {
 };
 
 registry_schema_rgb_t rgb_instance_2_data = {
-    .r = 90,
-    .g = 4,
-    .b = 0,
+    .red = 90,
+    .green = 4,
+    .blue = 0,
 };
 registry_instance_t rgb_instance_2 = {
     .name = "rgb-2",
@@ -43,9 +42,9 @@ registry_instance_t rgb_instance_2 = {
 };
 
 registry_schema_rgb_t rgb_instance_3_data = {
-    .r = 7,
-    .g = 8,
-    .b = 9,
+    .red = 7,
+    .green = 8,
+    .blue = 9,
 };
 registry_instance_t rgb_instance_3 = {
     .name = "rgb-3",

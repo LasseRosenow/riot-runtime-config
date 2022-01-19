@@ -2,16 +2,14 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <float.h>
-#include "embUnit.h"
 #include <inttypes.h>
-
-#include "registry.h"
-#include "registry_schema_test.h"
-
+#include "embUnit.h"
+#include "fmt.h"
 #include "assert.h"
+#include "registry.h"
+#include "registry_schemas.h"
 
 #include "tests.h"
-#include <fmt.h>
 
 registry_schema_test_t test_instance_1_data = {
     .string = "hallo",

@@ -1,6 +1,18 @@
-#ifndef RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H
-#define RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H
+#ifndef REGISTRY_REGISTRY_SCHEMAS_H
+#define REGISTRY_REGISTRY_SCHEMAS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Schema IDs */
+typedef enum {
+    REGISTRY_SCHEMA_TYPES_TEST,
+    REGISTRY_SCHEMA_RGB,
+} registry_schema_id_t;
+
+/* Types-Test */
+#if defined(CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST) || defined(DOXYGEN)
 extern registry_schema_t registry_schema_test;
 
 typedef struct {
@@ -64,5 +76,28 @@ typedef enum {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 } registry_schema_test_indices_t;
+#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST */
 
-#endif //RUNTIME_CONFIG_REGISTRY_SCHEMA_TEST_H
+/* RGB-LED */
+#if defined(CONFIG_REGISTRY_ENABLE_SCHEMA_RGB) || defined(DOXYGEN)
+extern registry_schema_t registry_schema_rgb;
+
+typedef struct {
+    clist_node_t node;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} registry_schema_rgb_t;
+
+typedef enum {
+    REGISTRY_SCHEMA_RGB_RED,
+    REGISTRY_SCHEMA_RGB_GREEN,
+    REGISTRY_SCHEMA_RGB_BLUE,
+} registry_schema_rgb_indices_t;
+#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_RGB */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* REGISTRY_REGISTRY_SCHEMAS_H */

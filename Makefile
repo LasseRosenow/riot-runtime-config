@@ -48,8 +48,13 @@ CFLAGS += -DCONFIG_REGISTRY_USE_INT64=1
 CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT32=1
 CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT64=1
 
+# Enable registry schemas
+CFLAGS += -DCONFIG_REGISTRY_ENABLE_SCHEMA_RGB=1
+CFLAGS += -DCONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST=1
+
 # External modules
 USEMODULE += registry
+USEMODULE += registry_schemas
 USEMODULE += registry_coap
 #USEMODULE += registry_lwm2m
 EXTERNAL_MODULE_DIRS += external_modules
@@ -62,9 +67,6 @@ endif
 ifndef CONFIG_LWM2M_DEVICE_NAME
   CFLAGS += -DCONFIG_LWM2M_DEVICE_NAME='"riot-device"'
 endif
-
-
-
 
 
 
