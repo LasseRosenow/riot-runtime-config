@@ -9,7 +9,6 @@
 #include "tests.h"
 #include "storage_facility_dummy.h"
 #include "cbor_example.h"
-
 #include "assert.h"
 
 #define SHELL_QUEUE_SIZE (8)

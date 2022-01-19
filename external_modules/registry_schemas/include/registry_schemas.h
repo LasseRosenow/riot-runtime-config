@@ -5,15 +5,17 @@
 extern "C" {
 #endif
 
+void registry_schema_init(void);
+
 /* Schema IDs */
 typedef enum {
-    REGISTRY_SCHEMA_TYPES_TEST,
-    REGISTRY_SCHEMA_RGB,
+    REGISTRY_SCHEMA_TYPES_TEST  = 0,
+    REGISTRY_SCHEMA_RGB         = 1,
 } registry_schema_id_t;
 
 /* Types-Test */
 #if defined(CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST) || defined(DOXYGEN)
-extern registry_schema_t registry_schema_test;
+extern registry_schema_t registry_schema_types_test;
 
 typedef struct {
     clist_node_t node;
@@ -45,37 +47,37 @@ typedef struct {
     double f64;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
-} registry_schema_test_t;
+} registry_schema_types_test_t;
 
 typedef enum {
-    REGISTRY_SCHEMA_TEST_BOOL,
-    REGISTRY_SCHEMA_TEST_STRING,
+    REGISTRY_SCHEMA_TYPES_TEST_BOOL,
+    REGISTRY_SCHEMA_TYPES_TEST_STRING,
 
-    REGISTRY_SCHEMA_TEST_U8,
-    REGISTRY_SCHEMA_TEST_U16,
-    REGISTRY_SCHEMA_TEST_U32,
+    REGISTRY_SCHEMA_TYPES_TEST_U8,
+    REGISTRY_SCHEMA_TYPES_TEST_U16,
+    REGISTRY_SCHEMA_TYPES_TEST_U32,
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-    REGISTRY_SCHEMA_TEST_U64,
+    REGISTRY_SCHEMA_TYPES_TEST_U64,
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-    REGISTRY_SCHEMA_TEST_I8,
-    REGISTRY_SCHEMA_TEST_I16,
-    REGISTRY_SCHEMA_TEST_I32,
+    REGISTRY_SCHEMA_TYPES_TEST_I8,
+    REGISTRY_SCHEMA_TYPES_TEST_I16,
+    REGISTRY_SCHEMA_TYPES_TEST_I32,
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-    REGISTRY_SCHEMA_TEST_I64,
+    REGISTRY_SCHEMA_TYPES_TEST_I64,
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-    REGISTRY_SCHEMA_TEST_F32,
+    REGISTRY_SCHEMA_TYPES_TEST_F32,
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-    REGISTRY_SCHEMA_TEST_F64,
+    REGISTRY_SCHEMA_TYPES_TEST_F64,
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
-} registry_schema_test_indices_t;
+} registry_schema_types_test_indices_t;
 #endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST */
 
 /* RGB-LED */
