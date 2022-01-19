@@ -206,7 +206,7 @@ Figure 05 - Behavioral flow of the load and store calls
 ![Figure 06](./doc/images/api.svg "RIOT Registry API")
 
 ```c
-# Base
+/* Base */
 void registry_init(void);
 void registry_register_schema(registry_schema_t *schema);
 int registry_add_instance(int schema_id, registry_instance_t *instance);
@@ -216,7 +216,7 @@ int registry_commit(const int *path, int path_len);
 int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, const registry_value_t value, void *context), const int *path, int path_len);
 
 
-# Store
+/* Store */
 void registry_store_init(void);
 void registry_store_register_src(registry_store_t *src);
 void registry_store_register_dst(registry_store_t *dst);
@@ -225,7 +225,7 @@ int registry_store_save(void);
 int registry_store_save_one(const int *path, int path_len, void *context);
 
 
-# Set convenience functions
+/* Set convenience functions */
 int registry_set_string(const int *path, int path_len, const char *val);
 int registry_set_bool(const int *path, int path_len, bool val);
 int registry_set_uint8(const int *path, int path_len, uint8_t val);
@@ -240,7 +240,7 @@ int registry_set_float32(const int *path, int path_len, float val);
 int registry_set_float64(const int *path, int path_len, double val);
 
 
-# Get convenience functions
+/* Get convenience functions */
 char *registry_get_string(const int *path, int path_len, char *buf, int buf_len);
 bool registry_get_bool(const int *path, int path_len);
 uint8_t registry_get_uint8(const int *path, int path_len);
