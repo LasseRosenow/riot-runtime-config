@@ -138,7 +138,7 @@ static registry_schema_item_t schema_items[] = {
 
 };
 
-registry_schema_t registry_schema_test = {
+registry_schema_t registry_schema_types_test = {
     .id = REGISTRY_SCHEMA_TYPES_TEST,
     .name = "test",
     .description = "Test schema containing all possible types for testing purposes.",
