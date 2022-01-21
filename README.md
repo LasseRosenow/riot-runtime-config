@@ -186,19 +186,17 @@ are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Re
 Figure 04 - Behavioral flow of the basic API of the RIOT Registry
 </p>
 
-TODO
--------------------------------------------
 
-### Load and store configurations
-At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_load` function) or _store_ them in the SF destination (`registry_store` function).
+### Load and save configurations from / to  storage
+At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_store_load` function) or _store_ them in the SF destination (`registry_store_save` function).
 
-As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store` will navigate through all RH and call their _export_ function with the SF _store_ handler as callback.
+As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will navigate through all RH and call their _export_ function with the SF _store_ handler as callback.
 
 Figure 05 shows the above described processes.
 
-<img src="./files/rdm-draft-alamos-lanzieri-runtime-configuration-architecture/registry-storage.svg" />
+![Figure 05](./doc/images/store_behavioral_flow.svg "Behavioral flow of the store_load and store_save calls")
 <p align="center">
-Figure 05 - Behavioral flow of the load and store calls
+Figure 05 - Behavioral flow of the store_load and store_save calls
 </p>
 
 
