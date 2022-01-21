@@ -43,9 +43,7 @@ static void test_registry_setup(void)
 {
     /* init registry */
     registry_init();
-
-    /* add application registry schema */
-    registry_register_schema(&registry_schema_types_test);
+    registry_schemas_init();
 
     /* add schema instances */
     registry_add_instance(registry_schema_types_test.id, &test_instance_1);

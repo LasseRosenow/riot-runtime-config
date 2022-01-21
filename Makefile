@@ -27,22 +27,23 @@ USEMODULE += fmt
 USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += ps
-USEMODULE += saul_default
 
-USEMODULE += tinycbor_float
-USEMODULE += xtimer
-
-USEMODULE += periph_uart
-
+# Unit tests
 USEMODULE += embunit
 
+# Cbor
+USEPKG += tinycbor
+USEMODULE += tinycbor_float
 
 
 
 
 
 
-# Riot registry enable int64 and float support
+
+
+# Riot registry config
+# Enable int64 and float support
 CFLAGS += -DCONFIG_REGISTRY_USE_UINT64=1
 CFLAGS += -DCONFIG_REGISTRY_USE_INT64=1
 CFLAGS += -DCONFIG_REGISTRY_USE_FLOAT32=1
@@ -58,7 +59,15 @@ USEMODULE += registry_schemas
 USEMODULE += registry_coap
 #USEMODULE += registry_lwm2m
 EXTERNAL_MODULE_DIRS += external_modules
-# LwM2M logging
+
+
+
+
+
+
+
+
+# LwM2M config
 CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1
 # Specific the server URI  address (NOTE: Domain names not supported yet)
 ifndef CONFIG_LWM2M_SERVER_URI
@@ -73,13 +82,6 @@ endif
 
 
 
-
-
-
-
-USEPKG += tinycbor
-USEPKG += minmea
-
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
 # development process:
@@ -89,20 +91,3 @@ DEVELHELP ?= 1
 QUIET ?= 1
 
 include $(RIOTBASE)/Makefile.include
-
-# For now this goes after the inclusion of Makefile.include so Kconfig symbols
-# are available. Only set configuration via CFLAGS if Kconfig is not being used
-# for this module.
-ifndef CONFIG_KCONFIG_MODULE_GCOAP
-## Uncomment to redefine port, for example use 61616 for RFC 6282 UDP compression.
-#GCOAP_PORT = 5683
-#CFLAGS += -DCONFIG_GCOAP_PORT=$(GCOAP_PORT)
-
-## Uncomment to redefine request token length, max 8.
-#GCOAP_TOKENLEN = 2
-#CFLAGS += -DCONFIG_GCOAP_TOKENLEN=$(GCOAP_TOKENLEN)
-
-# Increase from default for confirmable block2 follow-on requests
-GCOAP_RESEND_BUFS_MAX ?= 2
-CFLAGS += -DCONFIG_GCOAP_RESEND_BUFS_MAX=$(GCOAP_RESEND_BUFS_MAX)
-endif

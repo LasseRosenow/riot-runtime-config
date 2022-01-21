@@ -6,10 +6,7 @@
 #include <od.h>
 #include <fmt.h>
 #include <phydat.h>
-#include <saul_reg.h>
-#include <xtimer.h>
 
-#include "cbor_util.h"
 #include "registry_coap.h"
 
 #define ENABLE_DEBUG (0)
@@ -25,7 +22,6 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
                           const sock_udp_ep_t *remote);
 static ssize_t _stats_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx);
 static ssize_t _riot_board_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx);
-static ssize_t _temp_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx);
 
 uint8_t test;
 
@@ -33,7 +29,6 @@ uint8_t test;
 static const coap_resource_t _resources[] = {
     { "/cli/stats", COAP_GET | COAP_PUT, _stats_handler,      NULL },
     { "/riot/board", COAP_GET,           _riot_board_handler, NULL },
-    { "/sens/temp", COAP_GET, _temp_handler, NULL }
 };
 
 static const char *_link_params[] = {
@@ -82,34 +77,6 @@ static ssize_t _encode_link(const coap_resource_t *resource, char *buf,
     }
 
     return res;
-}
-
-static ssize_t _temp_handler(coap_pkt_t *pdu, uint8_t *buf, size_t len, void *ctx)
-{
-    (void)ctx;
-    xtimer_msleep(100);
-    phydat_t res;
-    saul_reg_t *dev = saul_reg;
-
-    if (dev == NULL) {
-        //puts("No SAUL devices present");
-        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
-    }
-    dev = saul_reg_find_type(SAUL_SENSE_TEMP);
-    if (dev == NULL) {
-        //puts("No Temperature Sensor devices present");
-        return gcoap_response(pdu, buf, len, COAP_CODE_INTERNAL_SERVER_ERROR);
-    }
-
-    gcoap_resp_init(pdu, buf, len, COAP_CODE_CONTENT);
-    coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
-    size_t resp_len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
-
-    //Read temperature sensor here and write buffer with sensor value
-
-    saul_reg_read(dev, &res);
-    resp_len += fmt_u16_dec((char *)pdu->payload, res.val[0]);
-    return resp_len;
 }
 
 /*

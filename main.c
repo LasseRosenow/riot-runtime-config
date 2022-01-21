@@ -77,9 +77,7 @@ int main(void)
 {
     /* init registry */
     registry_init();
-
-    /* add application registry schema */
-    registry_register_schema(&registry_schema_rgb);
+    registry_schemas_init();
 
     /* register store source and destination */
     registry_store_register_src(&dummy_store);
@@ -94,7 +92,7 @@ int main(void)
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
 
-    /* Test some exports */
+    /* test some exports */
     int path[] = { registry_schema_rgb.id, 2, 1 };
 
     registry_export(_export_func, path, ARRAY_SIZE(path));

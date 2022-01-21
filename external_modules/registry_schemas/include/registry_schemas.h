@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void registry_schema_init(void);
+void registry_schemas_init(void);
 
 /* Schema IDs */
 typedef enum {

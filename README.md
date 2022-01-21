@@ -202,7 +202,7 @@ Figure 05 - Behavioral flow of the load and store calls
 </p>
 
 
-## 3.3. RIOT Registry API
+## 3.4. RIOT Registry API
 ![Figure 06](./doc/images/api.svg "RIOT Registry API")
 
 ```c
@@ -223,6 +223,10 @@ void registry_store_register_dst(registry_store_t *dst);
 int registry_store_load(void);
 int registry_store_save(void);
 int registry_store_save_one(const int *path, int path_len, void *context);
+
+
+/* Schemas */
+void registry_schemas_init(void);
 
 
 /* Set convenience functions */
