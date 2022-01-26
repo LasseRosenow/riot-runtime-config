@@ -211,7 +211,10 @@ int registry_add_instance(int schema_id, registry_instance_t *instance);
 int registry_set_value(const int *path, int path_len, const void *val, int val_len);
 registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
 int registry_commit(const int *path, int path_len);
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta, const registry_value_t value, void *context), const int *path, int path_len);
+int registry_export(int (*export_func)(
+    const int *path, int path_len, registry_schema_item_t *meta, 
+    const registry_value_t value, void *context
+  ), const int *path, int path_len);
 
 
 /* Store */
