@@ -60,6 +60,10 @@ USEMODULE += registry_coap
 USEMODULE += registry_lwm2m
 EXTERNAL_MODULE_DIRS += external_modules
 
+# Enable lwM2M objects
+CFLAGS += -DCONFIG_REGISTRY_LWM2M_ENABLE_OBJECT_3420=1
+
+
 
 
 

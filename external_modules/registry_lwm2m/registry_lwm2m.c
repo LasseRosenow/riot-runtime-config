@@ -1,34 +1,21 @@
-/*
- * Copyright (C) 2019 HAW Hamburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- */
-
-/**
- * @ingroup     examples
- * @{
- *
- * @file
- * @brief       Wakaama LwM2M Client CLI support
- *
- * @author      Leandro Lanzieri <leandro.lanzieri@haw-hamburg.de>
- * @}
- */
-
 #include "kernel_defines.h"
 #include "lwm2m_client.h"
 #include "lwm2m_client_objects.h"
 #include "lwm2m_platform.h"
 #include "object.h"
-
-//#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
 #include "float.h"
-//#endif /* CONFIG_REGISTRY_USE_FLOAT32 || CONFIG_REGISTRY_USE_FLOAT64 */
+#include "assert.h"
 
 #include "registry_lwm2m.h"
 #include "registry.h"
+
+clist_node_t registry_lwm2m_objects;
+
+void registry_lwm2m_register_object(registry_lwm2m_object_t *object)
+{
+    assert(object != NULL);
+    clist_rpush(&registry_lwm2m_objects, &(object->node));
+}
 
 // #define LWM2M_OBJECT_ID_PRIVATE_RANGE_START 32769
 // #define LWM2M_OBJECT_ID_PRIVATE_RANGE_END 42768

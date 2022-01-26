@@ -24,7 +24,7 @@ static int _get_1(int instance, void *buf, int buf_len)
     return 0;
 }
 
-registry_lwm2m_object_property properties[] = {
+static registry_lwm2m_object_property_t properties[] = {
     {
         .id = 1,
         .type = LWM2M_TYPE_STRING,
@@ -32,10 +32,8 @@ registry_lwm2m_object_property properties[] = {
     }
 };
 
-registry_lwm2m_object registry_lwm2m_objects[] = {
-    {
-        .id = 3420,
-        .properties = properties,
-        .properties_len = ARRAY_SIZE(properties),
-    }
+registry_lwm2m_object_t registry_lwm2m_object_3420 = {
+    .id = 3420,
+    .properties = properties,
+    .properties_len = ARRAY_SIZE(properties),
 };
