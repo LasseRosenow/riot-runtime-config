@@ -20,34 +20,34 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
-registry_schema_rgb_t rgb_instance_1_data = {
+registry_schema_rgb_led_t rgb_led_instance_1_data = {
     .red = 0,
     .green = 255,
     .blue = 70,
 };
-registry_instance_t rgb_instance_1 = {
+registry_instance_t rgb_led_instance_1 = {
     .name = "rgb-1",
-    .data = &rgb_instance_1_data,
+    .data = &rgb_led_instance_1_data,
 };
 
-registry_schema_rgb_t rgb_instance_2_data = {
+registry_schema_rgb_led_t rgb_led_instance_2_data = {
     .red = 90,
     .green = 4,
     .blue = 0,
 };
-registry_instance_t rgb_instance_2 = {
+registry_instance_t rgb_led_instance_2 = {
     .name = "rgb-2",
-    .data = &rgb_instance_2_data,
+    .data = &rgb_led_instance_2_data,
 };
 
-registry_schema_rgb_t rgb_instance_3_data = {
+registry_schema_rgb_led_t rgb_led_instance_3_data = {
     .red = 7,
     .green = 8,
     .blue = 9,
 };
-registry_instance_t rgb_instance_3 = {
+registry_instance_t rgb_led_instance_3 = {
     .name = "rgb-3",
-    .data = &rgb_instance_3_data,
+    .data = &rgb_led_instance_3_data,
 };
 
 
@@ -84,16 +84,16 @@ int main(void)
     registry_store_register_dst(&dummy_store);
 
     /* add schema instances */
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_1);
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_2);
-    registry_add_instance(registry_schema_rgb.id, &rgb_instance_3);
+    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_1);
+    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_2);
+    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_3);
 
     /* for the thread running the shell */
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
 
     /* test some exports */
-    int path[] = { registry_schema_rgb.id, 2, 1 };
+    int path[] = { registry_schema_rgb_led.id, 2, 1 };
 
     registry_export(_export_func, path, ARRAY_SIZE(path));
 

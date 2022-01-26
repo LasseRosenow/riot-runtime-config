@@ -5,12 +5,14 @@
 extern "C" {
 #endif
 
+#include "registry.h"
+
 void registry_schemas_init(void);
 
 /* Schema IDs */
 typedef enum {
     REGISTRY_SCHEMA_TYPES_TEST  = 0,
-    REGISTRY_SCHEMA_RGB         = 1,
+    REGISTRY_SCHEMA_RGB_LED     = 1,
 } registry_schema_id_t;
 
 /* Types-Test */
@@ -81,22 +83,22 @@ typedef enum {
 #endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST */
 
 /* RGB-LED */
-#if defined(CONFIG_REGISTRY_ENABLE_SCHEMA_RGB) || defined(DOXYGEN)
-extern registry_schema_t registry_schema_rgb;
+#if defined(CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED) || defined(DOXYGEN)
+extern registry_schema_t registry_schema_rgb_led;
 
 typedef struct {
     clist_node_t node;
     uint8_t red;
     uint8_t green;
     uint8_t blue;
-} registry_schema_rgb_t;
+} registry_schema_rgb_led_t;
 
 typedef enum {
-    REGISTRY_SCHEMA_RGB_RED,
-    REGISTRY_SCHEMA_RGB_GREEN,
-    REGISTRY_SCHEMA_RGB_BLUE,
-} registry_schema_rgb_indices_t;
-#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_RGB */
+    REGISTRY_SCHEMA_RGB_LED_RED,
+    REGISTRY_SCHEMA_RGB_LED_GREEN,
+    REGISTRY_SCHEMA_RGB_LED_BLUE,
+} registry_schema_rgb_led_indices_t;
+#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED */
 
 #ifdef __cplusplus
 }
