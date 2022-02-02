@@ -57,7 +57,8 @@ CFLAGS += -DCONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST=1
 USEMODULE += registry
 USEMODULE += registry_schemas
 USEMODULE += registry_coap
-USEMODULE += lwm2m_objects
+#USEMODULE += lwm2m_objects
+USEMODULE += lwm2m_objects_abstract
 EXTERNAL_MODULE_DIRS += external_modules
 
 # Enable lwM2M objects

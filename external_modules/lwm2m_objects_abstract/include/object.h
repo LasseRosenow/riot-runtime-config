@@ -17,8 +17,8 @@
  * @author      Leandro Lanzieri <leandro.lanzieri@haw-hamburg.de>
  */
 
-#ifndef OBJECTS_REGISTRY_H
-#define OBJECTS_REGISTRY_H
+#ifndef LWM2M_OBJECTS_ABSTRACT_OBJECT_H
+#define LWM2M_OBJECTS_ABSTRACT_OBJECT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,23 +32,6 @@ extern "C" {
 #include "lwm2m_client_config.h"
 #include "lwm2m_client.h"
 #include "registry.h"
-
-/**
- * @brief Error codes for the
- * @ref lwm2m_registry_resources::LWM2M_RES_ERROR_CODE "Error" resource in the
- * registry object of LwM2M
- */
-enum lwm2m_registry_error_codes {
-    LWM2M_REGISTRY_ERR_NO_ERR       = 0,    /**< No error */
-    LWM2M_REGISTRY_ERR_LOW_BATT     = 1,    /**< Low battery power */
-    LWM2M_REGISTRY_ERR_EXT_OFF      = 2,    /**< External power supply off */
-    LWM2M_REGISTRY_ERR_GPS_ERR      = 3,    /**< GPS module failure */
-    LWM2M_REGISTRY_ERR_LOW_SIGNAL   = 4,    /**< Low received signal strength */
-    LWM2M_REGISTRY_ERR_NO_MEM       = 5,    /**< Out of memory */
-    LWM2M_REGISTRY_ERR_SMS_ERR      = 6,    /**< SMS failure */
-    LWM2M_REGISTRY_ERR_IP_ERR       = 7,    /**< IP connectivity failure */
-    LWM2M_REGISTRY_ERR_PERIPH_ERR   = 8     /**< Peripheral malfunction */
-};
 
 lwm2m_object_t *lwm2m_get_object_registry(registry_schema_t *hndlr, int obj_id);
 
@@ -75,5 +58,5 @@ bool lwm2m_registry_reboot_requested(void);
 }
 #endif
 
-#endif /* OBJECTS_REGISTRY_H */
+#endif /* LWM2M_OBJECTS_ABSTRACT_OBJECT_H */
 /** @} */
