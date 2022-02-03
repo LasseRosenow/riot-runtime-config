@@ -531,8 +531,8 @@ int registry_store_save_one(const int *path, int path_len, void *context);
  * @return 0 on success, non-zero on failure
  */
 int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
-                                       const registry_value_t value,
-                                       void *context), const int *path, int path_len);
+                                       const registry_value_t *value,
+                                       void *context), const int *path, int path_len, int recursion_depth);
 
 #ifdef __cplusplus
 }
