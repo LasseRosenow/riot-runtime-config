@@ -355,12 +355,18 @@ int registry_export(int (*export_func)(const int *path, int path_len,
             return -EINVAL;
         }
 
+        /* Export schema */
+        export_func(path, path_len, schema, NULL, NULL, NULL, context);
+
         /* Get instance, if in path */
         if (path_len >= 2) {
             instance = _instance_lookup(schema, path[1]);
             if (!instance) {
                 return -EINVAL;
             }
+
+            /* Export instance */
+            export_func(path, path_len, schema, instance, NULL, NULL, context);
 
             /* Schema/Instance/Item => Export concrete schema item with data of the given instance */
             if (path_len >= 3) {
@@ -379,9 +385,6 @@ int registry_export(int (*export_func)(const int *path, int path_len,
             }
             /* Schema/Instance => Export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
             else if (path_len == 2) {
-                /* Export instance */
-                export_func(path, path_len, schema, instance, NULL, NULL, context);
-
                 /* Export instance parameters (recursion_depth == 1 means only the exact path, which would only be a specific instance in this case) */
                 if (recursion_depth != 1) {
                     if (recursion_depth != 0) {
@@ -389,16 +392,13 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                     }
 
                     _registry_export_recursive(export_func, path, path_len, schema, instance,
-                                               schema->items, recursion_depth, schema->items_len,
+                                               schema->items, schema->items_len, recursion_depth,
                                                context);
                 }
             }
         }
         /* Schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
         else if (path_len == 1) {
-            /* Export schema */
-            export_func(path, path_len, schema, NULL, NULL, NULL, context);
-
             /* Export instances (recursion_depth == 1 means only the exact path, which would only be a specific schema in this case) */
             if (recursion_depth != 1) {
                 if (recursion_depth != 0) {
