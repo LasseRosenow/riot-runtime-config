@@ -73,12 +73,12 @@ int _export_func(const int *path, int path_len, const registry_schema_t *schema,
         }
         else {
             /* Instance */
-            printf("├── %d %s\n", 0, instance->name);
+            printf("   %d %s\n", 0, instance->name);
         }
     }
     else {
-        /* Param / Group */
-        printf("    ├── %d %s\n", meta->id, meta->name);
+        /* Param or Group */
+        printf("      %d %s\n", meta->id, meta->name);
     }
 
     return 0;
@@ -104,7 +104,7 @@ int main(void)
     //registry_lwm2m_cli_init();
 
     /* test some exports */
-    int path[] = { registry_schema_rgb_led.id, 2 };
+    int path[] = { registry_schema_rgb_led.id };
 
     registry_export(_export_func, path, ARRAY_SIZE(path), 10, NULL);
 
