@@ -54,13 +54,15 @@ registry_instance_t rgb_led_instance_3 = {
 registry_store_t dummy_store = {
     .itf = &dummy_store_itf,
 };
-
-int _export_func(const int *path, int path_len, registry_schema_item_t *meta, registry_value_t val,
-                 void *context)
+int _export_func(const int *path, int path_len, const registry_schema_t *schema,
+                 const registry_instance_t *instance, const registry_schema_item_t *meta,
+                 const registry_value_t *value, void *context)
 {
+    (void)schema;
+    (void)instance;
     (void)meta;
+    (void)value;
     (void)context;
-    (void)val;
 
     printf("Exporting: ");
 
@@ -95,10 +97,10 @@ int main(void)
     /* test some exports */
     int path[] = { registry_schema_rgb_led.id, 2, 1 };
 
-    registry_export(_export_func, path, ARRAY_SIZE(path));
+    registry_export(_export_func, path, ARRAY_SIZE(path), 2, NULL);
 
-    registry_store_save();
-    registry_store_load();
+    //registry_store_save();
+    //registry_store_load();
 
     /* test registry */
     tests_run();

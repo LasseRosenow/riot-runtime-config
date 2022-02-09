@@ -179,7 +179,7 @@ int registry_set_value(const int *path, int path_len, const void *val, int val_l
     }
 
     /* call handler to apply the new value to the correct parameter in the instance of the schema */
-    schema->set(param_meta->id, instance, val, val_len, schema->context);
+    schema->set(param_meta->id, instance, val, val_len, instance->context);
 
     return 0;
 }
@@ -210,7 +210,7 @@ registry_value_t *registry_get_value(const int *path, int path_len, registry_val
     /* call handler to get the parameter value from the instance of the schema */
     uint8_t buf[REGISTRY_MAX_VAL_LEN]; /* max_val_len is the largest allowed size as a string => largest size in general */
 
-    schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), schema->context);
+    schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), instance->context);
 
     /* convert native value to string value */
     memcpy(value->buf, buf, value->buf_len);
@@ -277,10 +277,13 @@ int registry_commit(const int *path, int path_len)
 }
 
 static void _registry_export_recursive(int (*export_func)(const int *path, int path_len,
-                                                          registry_schema_item_t *meta,
+                                                          const registry_schema_t *schema,
+                                                          const registry_instance_t *instance,
+                                                          const registry_schema_item_t *meta,
                                                           const registry_value_t *value,
                                                           void *context),
-                                       const int *current_path, int current_path_len, registry_schema_item_t *schema_items,
+                                       const int *current_path, int current_path_len, registry_schema_t *schema,
+                                       registry_instance_t *instance, registry_schema_item_t *schema_items,
                                        int schema_items_len, int recursion_depth, void *context)
 {
     for (int i = 0; i < schema_items_len; i++) {
@@ -301,34 +304,43 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
                 .buf_len = ARRAY_SIZE(val_buf),
             };
             registry_get_value(new_path, new_path_len, &val);
-            export_func(new_path, new_path_len, &schema_item, &val, context);
+            export_func(new_path, new_path_len, schema, instance, &schema_item, &val, context);
         }
         else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
             /* Group => search for parameters */
             registry_schema_group_t group = schema_item.value.group;
 
-            /* If recursion_depth is 0 then only the group itself will be exported */
-            if (recursion_depth > 0) {
+            /* If recursion_depth is 1 then only the group itself will be exported */
+            if (recursion_depth != 1) {
+                if (recursion_depth != 0) {
+                    recursion_depth--;
+                }
+
                 for (int i = 0; i < group.items_len; i++) {
                     new_path[new_path_len - 1] = schema_item.id;
                     _registry_export_recursive(export_func, new_path, current_path_len + 1,
-                                               group.items,
-                                               group.items_len, recursion_depth - 1, context);
+                                               NULL, NULL, group.items,
+                                               group.items_len, recursion_depth, context);
                 }
             }
             else {
-                export_func(new_path, new_path_len, &schema_item, NULL, context);
+                export_func(new_path, new_path_len, schema, instance, &schema_item, NULL, context);
             }
         }
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
+int registry_export(int (*export_func)(const int *path, int path_len,
+                                       const registry_schema_t *schema,
+                                       const registry_instance_t *instance,
+                                       const registry_schema_item_t *meta,
                                        const registry_value_t *value,
-                                       void *context), const int *path, int path_len, int recursion_depth)
+                                       void *context),
+                    const int *path, int path_len, int recursion_depth, void *context)
 {
     assert(export_func != NULL);
     registry_schema_t *schema;
+    registry_instance_t *instance;
 
     DEBUG("[registry export] exporting all in ");
     for (int i = 0; i < path_len; i++) {
@@ -343,83 +355,152 @@ int registry_export(int (*export_func)(const int *path, int path_len, registry_s
             return -EINVAL;
         }
 
-        /* Schema/Instance/Item => Export concrete schema item with data of the given instance */
-        if (path_len >= 3) {
-            registry_schema_item_t *schema_item = _parameter_meta_lookup(path, path_len, schema);
-
-            /* Create a new path which does not include the last value, because _registry_export_recursive will add it inside */
-            int new_path_len = path_len - 1;
-            int new_path[new_path_len];
-            for (int j = 0; j < path_len; j++) {
-                new_path[j] = path[j];
+        /* Get instance, if in path */
+        if (path_len >= 2) {
+            instance = _instance_lookup(schema, path[1]);
+            if (!instance) {
+                return -EINVAL;
             }
 
-            _registry_export_recursive(export_func, new_path, new_path_len, schema_item, 1,
-                                       recursion_depth, schema->context);
-        }
-        /* Schema/Instance => Export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
-        else if (path_len == 2) {
-            /* Export instance TODO export function is not capable */
-            export_func(path, path_len, NULL, NULL, schema->context);
+            /* Schema/Instance/Item => Export concrete schema item with data of the given instance */
+            if (path_len >= 3) {
+                registry_schema_item_t *schema_item =
+                    _parameter_meta_lookup(path, path_len, schema);
 
-            /* Export instance parameters */
-            if (recursion_depth > 0) {
-                _registry_export_recursive(export_func, path, path_len, schema->items,
-                                           recursion_depth, schema->items_len, schema->context);
+                /* Create a new path which does not include the last value, because _registry_export_recursive will add it inside */
+                int new_path_len = path_len - 1;
+                int new_path[new_path_len];
+                for (int j = 0; j < path_len; j++) {
+                    new_path[j] = path[j];
+                }
+
+                _registry_export_recursive(export_func, new_path, new_path_len, schema, instance,
+                                           schema_item, 1, recursion_depth, context);
+            }
+            /* Schema/Instance => Export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
+            else if (path_len == 2) {
+                /* Export instance */
+                export_func(path, path_len, schema, instance, NULL, NULL, context);
+
+                /* Export instance parameters (recursion_depth == 1 means only the exact path, which would only be a specific instance in this case) */
+                if (recursion_depth != 1) {
+                    if (recursion_depth != 0) {
+                        recursion_depth--;
+                    }
+
+                    _registry_export_recursive(export_func, path, path_len, schema, instance,
+                                               schema->items, recursion_depth, schema->items_len,
+                                               context);
+                }
             }
         }
         /* Schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
         else if (path_len == 1) {
-            /* Export schema TODO export function is not capable */
-            export_func(path, path_len, NULL, NULL, schema->context);
-            if (recursion_depth > 0) {
-                for (size_t i = 0; i < clist_count(&schema->instances); i++) {
-                    int new_path[] = { path[0], i };
-                    /* Export instance TODO export function is not capable */
-                    export_func(new_path, ARRAY_SIZE(new_path), NULL, NULL, schema->context);
+            /* Export schema */
+            export_func(path, path_len, schema, NULL, NULL, NULL, context);
 
-                    /* Export instance parameters */
-                    if (recursion_depth > 1) {
-                        _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
-                                                       new_path), schema->items, schema->items_len,
-                                                   recursion_depth, schema->context);
+            /* Export instances (recursion_depth == 1 means only the exact path, which would only be a specific schema in this case) */
+            if (recursion_depth != 1) {
+                if (recursion_depth != 0) {
+                    recursion_depth--;
+                }
+
+                clist_node_t *instance_node = schema->instances.next;
+
+                if (!instance_node) {
+                    return -EINVAL;
+                }
+
+                int instance_id = 0;
+
+                do {
+                    instance_node = instance_node->next;
+                    instance = container_of(instance_node, registry_instance_t, node);
+
+                    if (!instance) {
+                        return -EINVAL;
                     }
 
-                }
+                    int new_path[] = { path[0], instance_id };
+                    /* Export instance */
+                    export_func(new_path, ARRAY_SIZE(
+                                    new_path), schema, instance, NULL, NULL, context);
+
+                    /* Export instance parameters (recursion_depth == 1 at this point means only the exact path + 1 */
+                    if (recursion_depth != 1) {
+                        if (recursion_depth != 0) {
+                            recursion_depth--;
+                        }
+
+                        _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
+                                                       new_path), schema, instance,
+                                                   schema->items, schema->items_len,
+                                                   recursion_depth, context);
+                    }
+
+                    instance_id++;
+                } while (instance_node != schema->instances.next);
             }
         }
     }
-    /* Empty path => Export everything depending on recursion_depth (0 = nothing, 1 = all schemas, 2 = all schemas and all their instances etc.) */
+    /* Empty path => Export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
     else if (path_len == 0) {
-        clist_node_t *node = registry_schemas.next;
+        clist_node_t *schema_node = registry_schemas.next;
 
-        if (!node) {
-            return -1;
+        if (!schema_node) {
+            return -EINVAL;
         }
 
-        if (recursion_depth > 0) {
+        if (recursion_depth != 1) {
+            if (recursion_depth != 0) {
+                recursion_depth--;
+            }
+
             do {
-                node = node->next;
-                schema = container_of(node, registry_schema_t, node);
+                schema_node = schema_node->next;
+                schema = container_of(schema_node, registry_schema_t, node);
 
-                /* Export schema TODO export function is not capable */
-                export_func(path, path_len, NULL, NULL, schema->context);
+                /* Export schema */
+                export_func(path, path_len, schema, NULL, NULL, NULL, context);
 
-                if (recursion_depth > 1) {
-                    for (size_t i = 0; i < clist_count(&schema->instances); i++) {
-                        int new_path[] = { schema->id, i };
-                        /* Export instance TODO export function is not capable */
-                        export_func(new_path, ARRAY_SIZE(new_path), NULL, NULL, schema->context);
+                if (recursion_depth != 1) {
+                    if (recursion_depth != 0) {
+                        recursion_depth--;
+                    }
+
+                    clist_node_t *instance_node = schema->instances.next;
+
+                    if (!instance_node) {
+                        return -EINVAL;
+                    }
+
+                    int instance_id = 0;
+
+                    do {
+                        instance_node = instance_node->next;
+                        instance = container_of(instance_node, registry_instance_t, node);
+
+                        int new_path[] = { schema->id, instance_id };
+                        /* Export instance */
+                        export_func(new_path, ARRAY_SIZE(
+                                        new_path), schema, instance, NULL, NULL, context);
 
                         /* Export instance parameters */
-                        if (recursion_depth > 2) {
+                        if (recursion_depth != 1) {
+                            if (recursion_depth != 0) {
+                                recursion_depth--;
+                            }
+
                             _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
-                                                           new_path), schema->items, schema->items_len,
-                                                       recursion_depth, schema->context);
+                                                           new_path), schema, instance,
+                                                       schema->items, schema->items_len,
+                                                       recursion_depth, context);
                         }
-                    }
+
+                        instance_id++;
+                    } while (instance_node != schema->instances.next);
                 }
-            } while (node != registry_schemas.next);
+            } while (schema_node != registry_schemas.next);
         }
     }
 

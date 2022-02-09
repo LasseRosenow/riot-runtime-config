@@ -86,11 +86,15 @@ static void _registry_store_dup_check_cb(const int *path, int path_len, void *va
 }
 
 static int _registry_store_save_one_export_func(const int *path, int path_len,
-                                                registry_schema_item_t *meta,
-                                                const registry_value_t value, void *context)
+                                                const registry_schema_t *schema,
+                                                const registry_instance_t *instance,
+                                                const registry_schema_item_t *meta,
+                                                const registry_value_t *value, void *context)
 {
     (void)context;
+    (void)schema;
     (void)meta;
+    (void)instance;
     registry_store_t *dst = save_dst;
     registry_dup_check_arg_t dup;
 
@@ -103,7 +107,7 @@ static int _registry_store_save_one_export_func(const int *path, int path_len,
     }
 
     dup.path = path;
-    dup.val = value;
+    dup.val = *value;
     dup.is_dup = false;
 
     save_dst->itf->load(save_dst, _registry_store_dup_check_cb, &dup);
@@ -112,7 +116,7 @@ static int _registry_store_save_one_export_func(const int *path, int path_len,
         return -EEXIST;
     }
 
-    return dst->itf->save(dst, path, path_len, value);
+    return dst->itf->save(dst, path, path_len, *value);
 }
 
 int registry_store_save_one(const int *path, int path_len, void *context)
@@ -127,7 +131,7 @@ int registry_store_save_one(const int *path, int path_len, void *context)
 
     registry_get_value(path, path_len, &value);
 
-    return _registry_store_save_one_export_func(path, path_len, NULL, value, context);
+    return _registry_store_save_one_export_func(path, path_len, NULL, NULL, NULL, &value, context);
 }
 
 int registry_store_save(void)
@@ -151,7 +155,7 @@ int registry_store_save(void)
 
     do {
         schema = container_of(node, registry_schema_t, node);
-        res2 = registry_export(_registry_store_save_one_export_func, &schema->id, 1);
+        res2 = registry_export(_registry_store_save_one_export_func, &schema->id, 1, 0, NULL);
         if (res == 0) {
             res = res2;
         }

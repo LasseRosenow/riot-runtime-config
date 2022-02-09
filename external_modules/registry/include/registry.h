@@ -306,8 +306,6 @@ typedef struct {
      */
     void (*set)(int param_id, registry_instance_t *instance, const void *val,
                 int val_len, void *context);
-
-    void *context; /**< Optional context used by the schemas */
 } registry_schema_t;
 
 /**
@@ -528,11 +526,16 @@ int registry_store_save_one(const int *path, int path_len, void *context);
  * @param[in] export_func Exporting function call with the name and current
  * value of an specific or all configuration parameters
  * @param[in] name String representing the configuration parameter. Can be NULL.
+ * @param[in] recursion_depth Defines how deeply nested child groups / parameters will be shown. (0 to show all children, 1 to only show the exact match, 2 - n to show the exact match plus its children ... plus n levels of children )
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const int *path, int path_len, registry_schema_item_t *meta,
+int registry_export(int (*export_func)(const int *path, int path_len,
+                                       const registry_schema_t *schema,
+                                       const registry_instance_t *instance,
+                                       const registry_schema_item_t *meta,
                                        const registry_value_t *value,
-                                       void *context), const int *path, int path_len, int recursion_depth);
+                                       void *context),
+                    const int *path, int path_len, int recursion_depth, void *context);
 
 #ifdef __cplusplus
 }
