@@ -153,6 +153,24 @@ err:
     return -EINVAL;
 }
 
+int registry_convert_value_from_value(const void *val_in, registry_type_t val_in_type,
+                                      void *val_out, int val_out_len, registry_type_t val_out_type)
+{
+    char string[REGISTRY_MAX_VAL_LEN];
+
+    char *new_string =
+        registry_convert_str_from_value(val_in_type, val_in, string, ARRAY_SIZE(string));
+
+    if (new_string == NULL) {
+        return -EINVAL;
+    }
+
+    int new_value_success = registry_convert_value_from_str(string, val_out_type, val_out,
+                                                            val_out_len);
+
+    return new_value_success;
+}
+
 int registry_convert_bytes_from_str(char *val_str, void *vp, int *len)
 {
     assert(vp != NULL);

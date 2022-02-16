@@ -180,16 +180,11 @@ static int _registry_set(const int *path, int path_len, const void *val, int val
 
     /* check if val_type is compatible with param_meta->value.parameter.type */
     if (val_type != param_meta->value.parameter.type) {
-        /* convert value to string as an intermediate type to simplify the process */
-        char val_string[REGISTRY_MAX_VAL_LEN];
-        registry_convert_str_from_value(val_type, val, val_string, ARRAY_SIZE(val_string));
-
-        /* convert value to its requested type and see if it overflows or not */
-        int new_val_len = _get_registry_parameter_data_len(param_meta->value.parameter.type);
+        int new_val_len = _get_registry_parameter_data_len(val_type);
         uint8_t new_val[new_val_len];
-        int conversion_error_code = registry_convert_value_from_str(val_string,
-                                                                    param_meta->value.parameter.type, new_val,
-                                                                    new_val_len);
+        int conversion_error_code = registry_convert_value_from_value(val, val_type,
+                                                                      new_val, new_val_len,
+                                                                      param_meta->value.parameter.type);
         if (conversion_error_code == 0) {
             /* call handler to apply the new value to the correct parameter in the instance of the schema */
             schema->set(param_meta->id, instance, new_val, new_val_len, instance->context);
@@ -237,17 +232,12 @@ static int _registry_get(const int *path, int path_len, registry_value_t *val,
 
     /* check if val_type is compatible with param_meta->value.parameter.type */
     if (val_type != param_meta->value.parameter.type) {
-        /* convert buf to string as an intermediate type to simplify the process */
-        char buf_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-        registry_convert_str_from_value(param_meta->value.parameter.type, buf, buf_string, ARRAY_SIZE(
-                                            buf_string));
-
-        /* convert value to its requested type and see if it overflows or not */
         int new_buf_len = _get_registry_parameter_data_len(val_type);
         uint8_t new_buf[new_buf_len];
-        int conversion_error_code = registry_convert_value_from_str(buf_string,
-                                                                    val_type, new_buf,
-                                                                    new_buf_len);
+        int conversion_error_code = registry_convert_value_from_value(buf,
+                                                                      param_meta->value.parameter.type,
+                                                                      new_buf, new_buf_len,
+                                                                      val_type);
 
         if (conversion_error_code == 0) {
             /* call handler to apply the new value to the correct parameter in the instance of the schema */

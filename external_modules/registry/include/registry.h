@@ -452,6 +452,20 @@ int registry_convert_value_from_str(char *val_str, registry_type_t type, void *v
                                     int maxlen);
 
 /**
+ * @brief Convenience function to parse a configuration parameter value from
+ * another value. The type of the parameter must be known.
+ *
+ * @param[in] val_str Pointer of the string containing the value
+ * @param[in] type Type of the parameter to be parsed
+ * @param[out] vp Pointer to store the parsed value
+ * @param[in] maxlen Maximum length of the output buffer when the type of the
+ * parameter is string.
+ * @return 0 on success, non-zero on failure
+ */
+int registry_convert_value_from_value(const void *val_in, registry_type_t val_in_type,
+                                      void *val_out, int val_out_len, registry_type_t val_out_type);
+
+/**
  * @brief Convenience function to parse a configuration parameter value of
  * `bytes` type from a string.
  *
