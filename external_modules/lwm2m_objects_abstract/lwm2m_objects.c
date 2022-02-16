@@ -265,7 +265,7 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //    }
 //
 //help_error:
-//    printf("usage: %s <generate>\n", argv[0]);
+//    printf("usage: %s {generate}\n", argv[0]);
 //
 //    return 1;
 //}

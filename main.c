@@ -6,6 +6,7 @@
 #include "registry_coap.h"
 #include "registry.h"
 #include "registry_schemas.h"
+#include "registry_cli.h"
 #include "tests.h"
 #include "storage_facility_dummy.h"
 #include "cbor_example.h"
@@ -16,6 +17,7 @@ static msg_t _shell_queue[SHELL_QUEUE_SIZE];
 
 static const shell_command_t shell_commands[] = {
     { "registry_coap", "Registry CoAP cli", registry_coap_cli_cmd },
+    { "registry", "Registry cli", registry_cli_cmd },
     // { "registry_lwm2m", "Registry LwM2M cli", registry_lwm2m_cli_cmd },
     { NULL, NULL, NULL }
 };
@@ -54,35 +56,6 @@ registry_instance_t rgb_led_instance_3 = {
 registry_store_t dummy_store = {
     .itf = &dummy_store_itf,
 };
-int _export_func(const int *path, int path_len, const registry_schema_t *schema,
-                 const registry_instance_t *instance, const registry_schema_item_t *meta,
-                 const registry_value_t *value, void *context)
-{
-    (void)path;
-    (void)path_len;
-    (void)schema;
-    (void)instance;
-    (void)meta;
-    (void)value;
-    (void)context;
-
-    if (meta == NULL) {
-        if (instance == NULL) {
-            /* Schema */
-            printf("%d %s\n", schema->id, schema->name);
-        }
-        else {
-            /* Instance */
-            printf("   %d %s\n", 0, instance->name);
-        }
-    }
-    else {
-        /* Param or Group */
-        printf("      %d %s\n", meta->id, meta->name);
-    }
-
-    return 0;
-}
 
 int main(void)
 {
@@ -102,11 +75,6 @@ int main(void)
     /* for the thread running the shell */
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
-
-    /* test some exports */
-    int path[] = { registry_schema_rgb_led.id };
-
-    registry_export(_export_func, path, ARRAY_SIZE(path), 10, NULL);
 
     //registry_store_save();
     //registry_store_load();

@@ -448,7 +448,7 @@ int registry_coap_cli_cmd(int argc, char **argv)
         return 0;
     }
     else {
-        printf("usage: %s <get|post|put> [-c] <addr>[%%iface] <port> <path> [data]\n",
+        printf("usage: %s {get|post|put} [-c] <addr>[%%iface] <port> <path> [data]\n",
                argv[0]);
         printf("       %s ping <addr>[%%iface] <port>\n", argv[0]);
         printf("Options\n");
@@ -457,7 +457,7 @@ int registry_coap_cli_cmd(int argc, char **argv)
     }
 
 end:
-    printf("usage: %s <get|post|put|ping|proxy|info>\n", argv[0]);
+    printf("usage: %s {get|post|put|ping|proxy|info}\n", argv[0]);
     return 1;
 }
 
