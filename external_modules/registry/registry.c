@@ -19,6 +19,39 @@ static int _registry_cmp_schema_id(clist_node_t *current, void *id)
     return !(schema->id - *(int *)id);
 }
 
+static size_t _get_registry_parameter_data_len(registry_type_t type)
+{
+    switch (type) {
+    case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
+    case REGISTRY_TYPE_BOOL: return sizeof(bool);
+
+    case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
+    case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
+    case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
+#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+    case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
+#endif // CONFIG_REGISTRY_USE_UINT64
+
+    case REGISTRY_TYPE_INT8: return sizeof(int8_t);
+    case REGISTRY_TYPE_INT16: return sizeof(int16_t);
+    case REGISTRY_TYPE_INT32: return sizeof(int32_t);
+
+#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+    case REGISTRY_TYPE_INT64: return sizeof(int64_t);
+#endif // CONFIG_REGISTRY_USE_INT64
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+    case REGISTRY_TYPE_FLOAT32: return sizeof(float);
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+    case REGISTRY_TYPE_FLOAT64: return sizeof(double);
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+
+    default: return 0;
+    }
+}
+
 static registry_schema_t *_schema_lookup(int id)
 {
     clist_node_t *node;
@@ -67,40 +100,6 @@ void registry_register_schema(registry_schema_t *schema)
     assert(schema != NULL);
     clist_rpush(&registry_schemas, &(schema->node));
 }
-
-// TODO is this still necessary?
-// static size_t _get_registry_parameter_data_len(registry_type_t type)
-// {
-//     switch (type) {
-//     case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
-//     case REGISTRY_TYPE_BOOL: return sizeof(bool);
-//
-//     case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
-//     case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
-//     case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
-// #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-//     case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
-// #endif // CONFIG_REGISTRY_USE_UINT64
-//
-//     case REGISTRY_TYPE_INT8: return sizeof(int8_t);
-//     case REGISTRY_TYPE_INT16: return sizeof(int16_t);
-//     case REGISTRY_TYPE_INT32: return sizeof(int32_t);
-//
-// #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-//     case REGISTRY_TYPE_INT64: return sizeof(int64_t);
-// #endif // CONFIG_REGISTRY_USE_INT64
-//
-// #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-//     case REGISTRY_TYPE_FLOAT32: return sizeof(float);
-// #endif // CONFIG_REGISTRY_USE_FLOAT32
-//
-// #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-//     case REGISTRY_TYPE_FLOAT64: return sizeof(double);
-// #endif // CONFIG_REGISTRY_USE_FLOAT32
-//
-//     default: return 0;
-//     }
-// }
 
 static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len,
                                                       registry_schema_t *schema)
@@ -155,7 +154,8 @@ int registry_add_instance(int schema_id, registry_instance_t *instance)
     return -EINVAL;
 }
 
-int registry_set_value(const int *path, int path_len, const void *val, int val_len)
+static int _registry_set(const int *path, int path_len, const void *val, int val_len,
+                         registry_type_t val_type)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
@@ -178,33 +178,56 @@ int registry_set_value(const int *path, int path_len, const void *val, int val_l
         return -EINVAL;
     }
 
-    /* call handler to apply the new value to the correct parameter in the instance of the schema */
-    schema->set(param_meta->id, instance, val, val_len, instance->context);
+    /* check if val_type is compatible with param_meta->value.parameter.type */
+    if (val_type != param_meta->value.parameter.type) {
+        /* convert value to string as an intermediate type to simplify the process */
+        char val_string[REGISTRY_MAX_VAL_LEN];
+        registry_convert_str_from_value(val_type, val, val_string, ARRAY_SIZE(val_string));
+
+        /* convert value to its requested type and see if it overflows or not */
+        int new_val_len = _get_registry_parameter_data_len(param_meta->value.parameter.type);
+        uint8_t new_val[new_val_len];
+        int conversion_error_code = registry_convert_value_from_str(val_string,
+                                                                    param_meta->value.parameter.type, new_val,
+                                                                    new_val_len);
+        if (conversion_error_code == 0) {
+            /* call handler to apply the new value to the correct parameter in the instance of the schema */
+            schema->set(param_meta->id, instance, new_val, new_val_len, instance->context);
+        }
+        else {
+            return conversion_error_code;
+        }
+    }
+    else {
+        /* call handler to apply the new value to the correct parameter in the instance of the schema */
+        schema->set(param_meta->id, instance, val, val_len, instance->context);
+    }
 
     return 0;
 }
 
-registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value)
+static int _registry_get(const int *path, int path_len, registry_value_t *val,
+                         registry_type_t val_type)
 {
     /* lookup schema */
     registry_schema_t *schema = _schema_lookup(path[0]);
 
     if (!schema) {
-        return NULL;
+        return -EINVAL;
     }
 
     /* lookup instance */
     registry_instance_t *instance = _instance_lookup(schema, path[1]);
 
     if (!instance) {
-        return NULL;
+        return -EINVAL;
     }
 
     /* lookup parameter meta data */
     registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
 
     if (!param_meta) {
-        return NULL;
+        return -EINVAL;
     }
 
     /* call handler to get the parameter value from the instance of the schema */
@@ -212,17 +235,39 @@ registry_value_t *registry_get_value(const int *path, int path_len, registry_val
 
     schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), instance->context);
 
-    /* convert native value to string value */
-    memcpy(value->buf, buf, value->buf_len);
+    /* check if val_type is compatible with param_meta->value.parameter.type */
+    if (val_type != param_meta->value.parameter.type) {
+        /* convert buf to string as an intermediate type to simplify the process */
+        char buf_string[REGISTRY_MAX_VAL_LEN];
+        registry_convert_str_from_value(val_type, val, buf_string, ARRAY_SIZE(buf_string));
 
-    return value;
+        /* convert value to its requested type and see if it overflows or not */
+        int new_buf_len = _get_registry_parameter_data_len(param_meta->value.parameter.type);
+        uint8_t new_buf[new_buf_len];
+        int conversion_error_code = registry_convert_value_from_str(buf_string,
+                                                                    param_meta->value.parameter.type, new_buf,
+                                                                    new_buf_len);
+        if (conversion_error_code == 0) {
+            /* call handler to apply the new value to the correct parameter in the instance of the schema */
+            memcpy(val->buf, new_buf, new_buf_len);
+        }
+        else {
+            return conversion_error_code;
+        }
+    }
+    else {
+        /* convert native value to string value */
+        memcpy(val->buf, buf, val->buf_len);
+    }
+
+    return 0;
 }
 
 int registry_commit(const int *path, int path_len)
 {
     int rc = 0;
 
-    /* Schema/? */
+    /* schema/? */
     if (path_len >= 1) {
         /* lookup schema */
         registry_schema_t *schema = _schema_lookup(path[0]);
@@ -230,7 +275,7 @@ int registry_commit(const int *path, int path_len)
             return -EINVAL;
         }
 
-        /* Schema/Instance */
+        /* schema/Instance */
         if (path_len >= 2) {
             /* lookup instance */
             registry_instance_t *instance = _instance_lookup(schema, path[1]);
@@ -239,7 +284,7 @@ int registry_commit(const int *path, int path_len)
             }
             return instance->commit_cb(path, path_len, instance->context);
         }
-        /* Only Schema */
+        /* only Schema */
         else {
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
                 registry_instance_t *instance = _instance_lookup(schema, i);
@@ -251,7 +296,7 @@ int registry_commit(const int *path, int path_len)
             return rc;
         }
     }
-    /* No schema => call all */
+    /* no schema => call all */
     else {
         clist_node_t *node = registry_schemas.next;
 
@@ -507,96 +552,109 @@ int registry_export(int (*export_func)(const int *path, int path_len,
     return 0;
 }
 
-/* registry_set_value convenience functions */
+/* registry_set functions */
+int registry_set_value(const int *path, int path_len, const void *val, int val_len)
+{
+    return _registry_set(path, path_len, val, val_len, REGISTRY_TYPE_NONE);
+}
+
 int registry_set_string(const int *path, int path_len, const char *val)
 {
-    return registry_set_value(path, path_len, val, strlen(val));
+    return _registry_set(path, path_len, val, strlen(val), REGISTRY_TYPE_STRING);
 }
 
 int registry_set_bool(const int *path, int path_len, bool val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(bool));
+    return _registry_set(path, path_len, &val, sizeof(bool), REGISTRY_TYPE_BOOL);
 }
 
 int registry_set_uint8(const int *path, int path_len, uint8_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(uint8_t));
+    return _registry_set(path, path_len, &val, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
 }
 
 int registry_set_uint16(const int *path, int path_len, uint16_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(uint16_t));
+    return _registry_set(path, path_len, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
 }
 
 int registry_set_uint32(const int *path, int path_len, uint32_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(uint32_t));
+    return _registry_set(path, path_len, &val, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 }
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
 int registry_set_uint64(const int *path, int path_len, uint64_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(uint16_t));
+    return _registry_set(path, path_len, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT64);
 }
 
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
 int registry_set_int8(const int *path, int path_len, int8_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(int8_t));
+    return _registry_set(path, path_len, &val, sizeof(int8_t), REGISTRY_TYPE_INT8);
 }
 
 int registry_set_int16(const int *path, int path_len, int16_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(int16_t));
+    return _registry_set(path, path_len, &val, sizeof(int16_t), REGISTRY_TYPE_INT16);
 }
 
 int registry_set_int32(const int *path, int path_len, int32_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(int32_t));
+    return _registry_set(path, path_len, &val, sizeof(int32_t), REGISTRY_TYPE_INT32);
 }
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
 int registry_set_int64(const int *path, int path_len, int64_t val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(int64_t));
+    return _registry_set(path, path_len, &val, sizeof(int64_t), REGISTRY_TYPE_INT64);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
 int registry_set_float32(const int *path, int path_len, float val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(float));
+    return _registry_set(path, path_len, &val, sizeof(float), REGISTRY_TYPE_FLOAT32);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
 int registry_set_float64(const int *path, int path_len, double val)
 {
-    return registry_set_value(path, path_len, &val, sizeof(double));
+    return _registry_set(path, path_len, &val, sizeof(double), REGISTRY_TYPE_FLOAT64);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
-/* registry_get_value convenience functions */
-static void _registry_get_value_buf(const int *path, int path_len, void *buf, int buf_len)
+/* registry_get functions */
+registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value)
+{
+    _registry_get(path, path_len, value, REGISTRY_TYPE_NONE);
+
+    return value;
+}
+
+static void _registry_get_buf(const int *path, int path_len, void *buf, int buf_len,
+                              registry_type_t type)
 {
     registry_value_t value = {
         .buf = buf,
         .buf_len = buf_len,
     };
 
-    registry_get_value(path, path_len, &value);
+    _registry_get(path, path_len, &value, type);
 }
 char *registry_get_string(const int *path, int path_len, char *buf, int buf_len)
 {
-    _registry_get_value_buf(path, path_len, buf, buf_len);
+    _registry_get_buf(path, path_len, buf, buf_len, REGISTRY_TYPE_STRING);
     return buf;
 }
 bool registry_get_bool(const int *path, int path_len)
 {
     bool buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(bool));
+    _registry_get_buf(path, path_len, &buf, sizeof(bool), REGISTRY_TYPE_BOOL);
 
     return buf;
 }
@@ -604,7 +662,7 @@ uint8_t registry_get_uint8(const int *path, int path_len)
 {
     uint8_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(uint8_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
 
     return buf;
 }
@@ -612,7 +670,7 @@ uint16_t registry_get_uint16(const int *path, int path_len)
 {
     uint16_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(uint16_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
 
     return buf;
 }
@@ -621,7 +679,7 @@ uint32_t registry_get_uint32(const int *path, int path_len)
 {
     uint32_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(uint32_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 
     return buf;
 }
@@ -631,7 +689,7 @@ uint64_t registry_get_uint64(const int *path, int path_len)
 {
     uint64_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(uint64_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(uint64_t), REGISTRY_TYPE_UINT64);
 
     return buf;
 }
@@ -641,7 +699,7 @@ int8_t registry_get_int8(const int *path, int path_len)
 {
     int8_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(int8_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(int8_t), REGISTRY_TYPE_INT8);
 
     return buf;
 }
@@ -650,7 +708,7 @@ int16_t registry_get_int16(const int *path, int path_len)
 {
     int16_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(int16_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(int16_t), REGISTRY_TYPE_INT16);
 
     return buf;
 }
@@ -659,7 +717,7 @@ int32_t registry_get_int32(const int *path, int path_len)
 {
     int32_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(int32_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(int32_t), REGISTRY_TYPE_INT32);
 
     return buf;
 }
@@ -669,7 +727,7 @@ int64_t registry_get_int64(const int *path, int path_len)
 {
     int64_t buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(int64_t));
+    _registry_get_buf(path, path_len, &buf, sizeof(int64_t), REGISTRY_TYPE_INT64);
 
     return buf;
 }
@@ -680,7 +738,7 @@ float registry_get_float32(const int *path, int path_len)
 {
     float buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(float));
+    _registry_get_buf(path, path_len, &buf, sizeof(float), REGISTRY_TYPE_FLOAT32);
 
     return buf;
 }
@@ -691,7 +749,7 @@ double registry_get_float64(const int *path, int path_len)
 {
     double buf;
 
-    _registry_get_value_buf(path, path_len, &buf, sizeof(double));
+    _registry_get_buf(path, path_len, &buf, sizeof(double), REGISTRY_TYPE_FLOAT64);
 
     return buf;
 }

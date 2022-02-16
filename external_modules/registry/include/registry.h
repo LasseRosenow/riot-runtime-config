@@ -474,7 +474,7 @@ int registry_convert_bytes_from_str(char *val_str, void *vp, int *len);
  * @param[in] buf_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_convert_str_from_value(registry_type_t type, void *vp, char *buf,
+char *registry_convert_str_from_value(registry_type_t type, const void *vp, char *buf,
                                       int buf_len);
 
 /**

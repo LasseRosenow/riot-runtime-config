@@ -75,39 +75,39 @@ int registry_cli_cmd(int argc, char **argv)
         goto help_error;
     }
 
-    bool error = false;
+    bool invalid_path = false;
 
     int path[REGISTRY_MAX_DIR_DEPTH];
     int path_len = 0;
 
     if (argc > 2) {
         if (_parse_string_path(argv[2], path, &path_len) < 0) {
-            error = true;
+            invalid_path = true;
         }
     }
 
     if (strcmp(argv[1], "get") == 0) {
-        if (error) {
+        if (invalid_path) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
 
-        // char buf[REGISTRY_MAX_VAL_LEN];
-        // registry_get_string(path, path_len, buf, ARRAY_SIZE(buf)); DOES NOT WORK YET... :( String needs to convert stuff
-        // printf("%s\n", buf);
+        char buf[REGISTRY_MAX_VAL_LEN];
+        registry_get_string(path, path_len, buf, ARRAY_SIZE(buf));
+        printf("%s\n", buf);
         return 0;
     }
     else if (strcmp(argv[1], "set") == 0) {
-        if (error) {
+        if (invalid_path) {
             printf("usage: %s %s <path> <value>\n", argv[0], argv[1]);
             return 1;
         }
 
-        // registry_set_string(path, path_len, argv[3]); DOES NOT WORK YET... :( String needs to convert stuff
+        registry_set_string(path, path_len, argv[3]);
         return 0;
     }
     else if (strcmp(argv[1], "commit") == 0) {
-        if (error) {
+        if (invalid_path) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
@@ -116,13 +116,15 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "export") == 0) {
-        if (error && strcmp(argv[2], "-r") != 0) {
+        /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
+        if (invalid_path && strcmp(argv[2], "-r") != 0) {
             printf("usage: %s %s <path> [-r <recursion depth>]\n", argv[0], argv[1]);
             return 1;
         }
 
+        /* The argv index of -r varies depending on if a path was specified or not */
         int recursion_level = 0;
-        if (error && argc > 3 && strcmp(argv[2], "-r") == 0) {
+        if (invalid_path && argc > 3 && strcmp(argv[2], "-r") == 0) {
             recursion_level = atoi(argv[3]);
         }
         else if (argc > 4 && strcmp(argv[3], "-r") == 0) {

@@ -14,8 +14,8 @@
 #include <fmt.h>
 #endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_UINT64 */
 
-int registry_value_from_str(char *val_str, registry_type_t type, void *vp,
-                            int maxlen)
+int registry_convert_value_from_str(char *val_str, registry_type_t type, void *vp,
+                                    int maxlen)
 {
     assert(vp != NULL);
 #if defined(CONFIG_REGISTRY_USE_INT64)
@@ -153,7 +153,7 @@ err:
     return -EINVAL;
 }
 
-int registry_bytes_from_str(char *val_str, void *vp, int *len)
+int registry_convert_bytes_from_str(char *val_str, void *vp, int *len)
 {
     assert(vp != NULL);
     char buf[base64_estimate_decode_size(REGISTRY_MAX_VAL_LEN)];
@@ -181,8 +181,8 @@ int registry_bytes_from_str(char *val_str, void *vp, int *len)
     return 0;
 }
 
-char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
-                              int buf_len)
+char *registry_convert_str_from_value(registry_type_t type, const void *vp, char *buf,
+                                      int buf_len)
 {
     assert(vp != NULL);
 
@@ -300,7 +300,7 @@ char *registry_str_from_value(registry_type_t type, void *vp, char *buf,
     return buf;
 }
 
-char *registry_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len)
+char *registry_convert_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len)
 {
     assert(vp != NULL);
     int res;
