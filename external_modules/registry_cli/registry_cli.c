@@ -116,12 +116,20 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "export") == 0) {
-        if (error) {
+        if (error && strcmp(argv[2], "-r") != 0) {
             printf("usage: %s %s <path> [-r <recursion depth>]\n", argv[0], argv[1]);
             return 1;
         }
 
-        registry_export(_export_func, path, path_len, 0, NULL);
+        int recursion_level = 0;
+        if (error && argc > 3 && strcmp(argv[2], "-r") == 0) {
+            recursion_level = atoi(argv[3]);
+        }
+        else if (argc > 4 && strcmp(argv[3], "-r") == 0) {
+            recursion_level = atoi(argv[4]);
+        }
+
+        registry_export(_export_func, path, path_len, recursion_level, NULL);
         return 0;
     }
 
