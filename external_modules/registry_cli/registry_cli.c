@@ -50,19 +50,21 @@ static int _export_func(const int *path, int path_len, const registry_schema_t *
     (void)value;
     (void)context;
 
+    printf("%*c\b", ((path_len - 1) * 3) + 1, ' ');
+
     if (meta == NULL) {
         if (instance == NULL) {
             /* Schema */
-            printf("%d %s\n", schema->id, schema->name);
+            printf("%d %s\n", path[0], schema->name);
         }
         else {
             /* Instance */
-            printf("   %d %s\n", 0, instance->name);
+            printf("%d %s\n", path[1], instance->name);
         }
     }
     else {
         /* Param or Group */
-        printf("      %d %s\n", meta->id, meta->name);
+        printf("%d %s\n", meta->id, meta->name);
     }
 
     return 0;

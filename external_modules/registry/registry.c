@@ -499,8 +499,9 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                 schema_node = schema_node->next;
                 schema = container_of(schema_node, registry_schema_t, node);
 
+                int new_path[] = { schema->id };
                 /* Export schema */
-                export_func(path, path_len, schema, NULL, NULL, NULL, context);
+                export_func(new_path, ARRAY_SIZE(new_path), schema, NULL, NULL, NULL, context);
 
                 if (recursion_depth != 1) {
                     int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
