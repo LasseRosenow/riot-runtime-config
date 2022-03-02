@@ -230,8 +230,8 @@ static int _registry_get(const int *path, int path_len, registry_value_t *val,
 
     schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), instance->context);
 
-    /* check if val_type is compatible with param_meta->value.parameter.type */
-    if (val_type != param_meta->value.parameter.type) {
+    /* check if val_type is requested and compatible with param_meta->value.parameter.type */
+    if (val_type != REGISTRY_TYPE_NONE && val_type != param_meta->value.parameter.type) {
         int new_buf_len = _get_registry_parameter_data_len(val_type);
         uint8_t new_buf[new_buf_len];
         int conversion_error_code = registry_convert_value_from_value(buf,
@@ -349,15 +349,16 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
 
             /* If recursion_depth is 1 then only the group itself will be exported */
             if (recursion_depth != 1) {
+                int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
                 if (recursion_depth != 0) {
-                    recursion_depth--;
+                    new_recursion_depth = recursion_depth - 1;
                 }
 
                 for (int i = 0; i < group.items_len; i++) {
                     new_path[new_path_len - 1] = schema_item.id;
                     _registry_export_recursive(export_func, new_path, current_path_len + 1,
                                                NULL, NULL, group.items,
-                                               group.items_len, recursion_depth, context);
+                                               group.items_len, new_recursion_depth, context);
                 }
             }
             else {
@@ -465,14 +466,15 @@ int registry_export(int (*export_func)(const int *path, int path_len,
 
                     /* Export instance parameters (recursion_depth == 1 at this point means only the exact path + 1 */
                     if (recursion_depth != 1) {
+                        int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
                         if (recursion_depth != 0) {
-                            recursion_depth--;
+                            new_recursion_depth = recursion_depth - 1;
                         }
 
                         _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
                                                        new_path), schema, instance,
                                                    schema->items, schema->items_len,
-                                                   recursion_depth, context);
+                                                   new_recursion_depth, context);
                     }
 
                     instance_id++;
@@ -501,8 +503,9 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                 export_func(path, path_len, schema, NULL, NULL, NULL, context);
 
                 if (recursion_depth != 1) {
+                    int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
                     if (recursion_depth != 0) {
-                        recursion_depth--;
+                        new_recursion_depth = recursion_depth - 1;
                     }
 
                     clist_node_t *instance_node = schema->instances.next;
@@ -523,15 +526,16 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                                         new_path), schema, instance, NULL, NULL, context);
 
                         /* Export instance parameters */
-                        if (recursion_depth != 1) {
-                            if (recursion_depth != 0) {
-                                recursion_depth--;
+                        if (new_recursion_depth != 1) {
+                            int new_new_recursion_depth = 0; // Create a new variable, because new_recursion_depth would otherwise be decreased in each cycle of the for loop
+                            if (new_recursion_depth != 0) {
+                                new_new_recursion_depth = new_recursion_depth - 1;
                             }
 
                             _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
                                                            new_path), schema, instance,
                                                        schema->items, schema->items_len,
-                                                       recursion_depth, context);
+                                                       new_new_recursion_depth, context);
                         }
 
                         instance_id++;
