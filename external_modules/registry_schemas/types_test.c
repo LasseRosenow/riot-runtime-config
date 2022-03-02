@@ -60,7 +60,7 @@ static registry_schema_item_t schema_items[] = {
         },
     },
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
     {
         .id = REGISTRY_SCHEMA_TYPES_TEST_U64,
         .name = "u64",
@@ -100,7 +100,7 @@ static registry_schema_item_t schema_items[] = {
         },
     },
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
     {
         .id = REGISTRY_SCHEMA_TYPES_TEST_I64,
         .name = "i64",
@@ -112,7 +112,7 @@ static registry_schema_item_t schema_items[] = {
     },
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
     {
         .id = REGISTRY_SCHEMA_TYPES_TEST_F32,
         .name = "f32",
@@ -124,7 +124,7 @@ static registry_schema_item_t schema_items[] = {
     },
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
     {
         .id = REGISTRY_SCHEMA_TYPES_TEST_F64,
         .name = "f64",
@@ -176,7 +176,7 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
         memcpy(buf, &_instance->u32, sizeof(_instance->u32));
         break;
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_SCHEMA_TYPES_TEST_U64:
         memcpy(buf, &_instance->u64, sizeof(_instance->u64));
         break;
@@ -194,19 +194,19 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
         memcpy(buf, &_instance->i32, sizeof(_instance->i32));
         break;
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_SCHEMA_TYPES_TEST_I64:
         memcpy(buf, &_instance->i64, sizeof(_instance->i64));
         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_SCHEMA_TYPES_TEST_F32:
         memcpy(buf, &_instance->f32, sizeof(_instance->f32));
         break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_SCHEMA_TYPES_TEST_F64:
         memcpy(buf, &_instance->f64, sizeof(_instance->f64));
         break;
@@ -244,7 +244,7 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
         memcpy(&_instance->u32, val, sizeof(_instance->u32));
         break;
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_SCHEMA_TYPES_TEST_U64:
         memcpy(&_instance->u64, val, sizeof(_instance->u64));
         break;
@@ -262,19 +262,19 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
         memcpy(&_instance->i32, val, sizeof(_instance->i32));
         break;
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_SCHEMA_TYPES_TEST_I64:
         memcpy(&_instance->i64, val, sizeof(_instance->i64));
         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_SCHEMA_TYPES_TEST_F32:
         memcpy(&_instance->f32, val, sizeof(_instance->f32));
         break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_SCHEMA_TYPES_TEST_F64:
         memcpy(&_instance->f64, val, sizeof(_instance->f64));
         break;

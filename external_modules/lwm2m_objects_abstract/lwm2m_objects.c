@@ -143,7 +143,7 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //                    printf("Integer");
 //                    break;
 //
-//#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_UINT64)
 //                case REGISTRY_TYPE_UINT64:
 //                    printf("Integer");
 //                    break;
@@ -161,19 +161,19 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //                    printf("Integer");
 //                    break;
 //
-//#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_INT64)
 //                case REGISTRY_TYPE_INT64:
 //                    printf("Integer");
 //                    break;
 //#endif /* CONFIG_REGISTRY_USE_INT64 */
 //
-//#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_FLOAT32)
 //                case REGISTRY_TYPE_FLOAT32:
 //                    printf("Float");
 //                    break;
 //#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 //
-//#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_FLOAT64)
 //                case REGISTRY_TYPE_FLOAT64:
 //                    printf("Float");
 //                    break;
@@ -207,7 +207,7 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //                    printf("0-%" PRIu32, (uint32_t)UINT32_MAX);
 //                    break;
 //
-//#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_UINT64)
 //                case REGISTRY_TYPE_UINT64:
 //                    printf("0-%" PRIu64, UINT64_MAX);
 //                    break;
@@ -225,19 +225,19 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //                    printf("%" PRIi32 "-%" PRIi32, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
 //                    break;
 //
-//#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_INT64)
 //                case REGISTRY_TYPE_INT64:
 //                    printf("%" PRIi64 "-%" PRIi64, INT64_MIN, INT64_MAX);
 //                    break;
 //#endif /* CONFIG_REGISTRY_USE_INT64 */
 //
-//#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_FLOAT32)
 //                case REGISTRY_TYPE_FLOAT32:
 //                    printf("-%f-%f", FLT_MAX, FLT_MAX);
 //                    break;
 //#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 //
-//#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+//#if defined(CONFIG_REGISTRY_USE_FLOAT64)
 //                case REGISTRY_TYPE_FLOAT64:
 //                    printf("-%lf-%lf", DBL_MAX, DBL_MAX);
 //                    break;

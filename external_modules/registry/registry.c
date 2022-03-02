@@ -28,7 +28,7 @@ static size_t _get_registry_parameter_data_len(registry_type_t type)
     case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
     case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
     case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
 #endif // CONFIG_REGISTRY_USE_UINT64
 
@@ -36,15 +36,15 @@ static size_t _get_registry_parameter_data_len(registry_type_t type)
     case REGISTRY_TYPE_INT16: return sizeof(int16_t);
     case REGISTRY_TYPE_INT32: return sizeof(int32_t);
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64: return sizeof(int64_t);
 #endif // CONFIG_REGISTRY_USE_INT64
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32: return sizeof(float);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64: return sizeof(double);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
 
@@ -575,7 +575,7 @@ int registry_set_uint32(const int *path, int path_len, uint32_t val)
     return _registry_set(path, path_len, &val, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 }
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
 int registry_set_uint64(const int *path, int path_len, uint64_t val)
 {
     return _registry_set(path, path_len, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT64);
@@ -598,21 +598,21 @@ int registry_set_int32(const int *path, int path_len, int32_t val)
     return _registry_set(path, path_len, &val, sizeof(int32_t), REGISTRY_TYPE_INT32);
 }
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
 int registry_set_int64(const int *path, int path_len, int64_t val)
 {
     return _registry_set(path, path_len, &val, sizeof(int64_t), REGISTRY_TYPE_INT64);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
 int registry_set_float32(const int *path, int path_len, float val)
 {
     return _registry_set(path, path_len, &val, sizeof(float), REGISTRY_TYPE_FLOAT32);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
 int registry_set_float64(const int *path, int path_len, double val)
 {
     return _registry_set(path, path_len, &val, sizeof(double), REGISTRY_TYPE_FLOAT64);
@@ -676,7 +676,7 @@ uint32_t registry_get_uint32(const int *path, int path_len)
     return buf;
 }
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_UINT64)
 uint64_t registry_get_uint64(const int *path, int path_len)
 {
     uint64_t buf;
@@ -714,7 +714,7 @@ int32_t registry_get_int32(const int *path, int path_len)
     return buf;
 }
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_INT64)
 int64_t registry_get_int64(const int *path, int path_len)
 {
     int64_t buf;
@@ -725,7 +725,7 @@ int64_t registry_get_int64(const int *path, int path_len)
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
 float registry_get_float32(const int *path, int path_len)
 {
     float buf;
@@ -736,7 +736,7 @@ float registry_get_float32(const int *path, int path_len)
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
 double registry_get_float64(const int *path, int path_len)
 {
     double buf;
