@@ -142,48 +142,67 @@ extern "C" {
         }, \
     },
 
+#if defined(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD) && \
+    defined(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
+/* no name and no description */
+# define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
+    REGISTRY_PARAMETER(_id, "", "", _type)
+#elif defined(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD)
+/* no name */
+# define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
+    REGISTRY_PARAMETER(_id, "", _description, _type)
+#elif defined(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
+/* no description */
+# define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
+    REGISTRY_PARAMETER(_id, _name, "", _type)
+#else
+/* keep name and description */
+# define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
+    REGISTRY_PARAMETER(_id, _name, _description, _type)
+#endif
+
 #define REGISTRY_PARAMETER_STRING(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_STRING)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_STRING)
 #define REGISTRY_PARAMETER_BOOL(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_BOOL)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_BOOL)
 #define REGISTRY_PARAMETER_UINT8(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT8)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT8)
 #define REGISTRY_PARAMETER_UINT16(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT16)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT16)
 #define REGISTRY_PARAMETER_UINT32(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT32)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT32)
 
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
 # define REGISTRY_PARAMETER_UINT64(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT64)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT64)
 #else
 # define REGISTRY_PARAMETER_UINT64(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
 #define REGISTRY_PARAMETER_INT8(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT8)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT8)
 #define REGISTRY_PARAMETER_INT16(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT16)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT16)
 #define REGISTRY_PARAMETER_INT32(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT32)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT32)
 
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
 # define REGISTRY_PARAMETER_INT64(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT64)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT64)
 #else
 # define REGISTRY_PARAMETER_INT64(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
 # define REGISTRY_PARAMETER_FLOAT32(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT32)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT32)
 #else
 # define REGISTRY_PARAMETER_FLOAT32(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
 # define REGISTRY_PARAMETER_FLOAT64(_id, _name, _description) \
-    REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT64)
+    _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT64)
 #else
 # define REGISTRY_PARAMETER_FLOAT64(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
