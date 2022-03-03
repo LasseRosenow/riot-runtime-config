@@ -13,140 +13,61 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
 static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
                 void *context);
 
-static registry_schema_item_t schema_items[] = {
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_BOOL,
-        .name = "bool",
-        .description = "Example bool description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_BOOL,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_STRING,
-        .name = "string",
-        .description = "Example string description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_STRING,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_U8,
-        .name = "u8",
-        .description = "Example u8 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT8,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_U16,
-        .name = "u16",
-        .description = "Example u16 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT16,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_U32,
-        .name = "u32",
-        .description = "Example u32 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT32,
-        },
-    },
+REGISTRY_SCHEMA(
+    registry_schema_types_test,
+    REGISTRY_SCHEMA_TYPES_TEST,
+    "test", "Test schema containing all possible types for testing purposes.",
+    get, set,
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_U64,
-        .name = "u64",
-        .description = "Example u64 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT64,
-        },
-    },
-#endif /* CONFIG_REGISTRY_USE_UINT64 */
+    REGISTRY_PARAMETER_STRING(
+        REGISTRY_SCHEMA_TYPES_TEST_STRING,
+        "string", "Example string description.")
 
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_I8,
-        .name = "i8",
-        .description = "Example i8 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_INT8,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_I16,
-        .name = "i16",
-        .description = "Example i16 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_INT16,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_I32,
-        .name = "i32",
-        .description = "Example i32 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_INT32,
-        },
-    },
+    REGISTRY_PARAMETER_BOOL(
+        REGISTRY_SCHEMA_TYPES_TEST_BOOL,
+        "bool", "Example bool description.")
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_I64,
-        .name = "i64",
-        .description = "Example i64 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_INT64,
-        },
-    },
-#endif /* CONFIG_REGISTRY_USE_INT64 */
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_TYPES_TEST_U8,
+        "u8", "Example u8 description.")
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_F32,
-        .name = "f32",
-        .description = "Example f32 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_FLOAT32,
-        },
-    },
-#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
+    REGISTRY_PARAMETER_UINT16(
+        REGISTRY_SCHEMA_TYPES_TEST_U16,
+        "u16", "Example u16 description.")
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    {
-        .id = REGISTRY_SCHEMA_TYPES_TEST_F64,
-        .name = "f64",
-        .description = "Example f64 description.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_FLOAT64,
-        },
-    },
-#endif /* CONFIG_REGISTRY_USE_FLOAT64 */
+    REGISTRY_PARAMETER_UINT32(
+        REGISTRY_SCHEMA_TYPES_TEST_U32,
+        "u32", "Example u32 description.")
 
-};
+    REGISTRY_PARAMETER_UINT64(
+        REGISTRY_SCHEMA_TYPES_TEST_U64,
+        "u64", "Example u64 description.")
 
-registry_schema_t registry_schema_types_test = {
-    .id = REGISTRY_SCHEMA_TYPES_TEST,
-    .name = "test",
-    .description = "Test schema containing all possible types for testing purposes.",
-    .items = schema_items,
-    .items_len = ARRAY_SIZE(schema_items),
-    .get = get,
-    .set = set,
-};
+    REGISTRY_PARAMETER_INT8(
+        REGISTRY_SCHEMA_TYPES_TEST_I8,
+        "i8", "Example i8 description.")
+
+    REGISTRY_PARAMETER_INT16(
+        REGISTRY_SCHEMA_TYPES_TEST_I16,
+        "i16", "Example i16 description.")
+
+    REGISTRY_PARAMETER_INT32(
+        REGISTRY_SCHEMA_TYPES_TEST_I32,
+        "i32", "Example i32 description.")
+
+    REGISTRY_PARAMETER_INT64(
+        REGISTRY_SCHEMA_TYPES_TEST_I64,
+        "i64", "Example i64 description.")
+
+    REGISTRY_PARAMETER_FLOAT32(
+        REGISTRY_SCHEMA_TYPES_TEST_F32,
+        "f32", "Example f32 description.")
+
+    REGISTRY_PARAMETER_FLOAT64(
+        REGISTRY_SCHEMA_TYPES_TEST_F64,
+        "f64", "Example f64 description.")
+
+    );
 
 static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context)
 {
@@ -156,12 +77,12 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
     registry_schema_types_test_t *_instance = (registry_schema_types_test_t *)instance->data;
 
     switch (param_id) {
-    case REGISTRY_SCHEMA_TYPES_TEST_BOOL:
-        memcpy(buf, &_instance->boolean, sizeof(_instance->boolean));
-        break;
-
     case REGISTRY_SCHEMA_TYPES_TEST_STRING:
         strcpy(buf, _instance->string);
+        break;
+
+    case REGISTRY_SCHEMA_TYPES_TEST_BOOL:
+        memcpy(buf, &_instance->boolean, sizeof(_instance->boolean));
         break;
 
     case REGISTRY_SCHEMA_TYPES_TEST_U8:
@@ -224,12 +145,12 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
     registry_schema_types_test_t *_instance = (registry_schema_types_test_t *)instance->data;
 
     switch (param_id) {
-    case REGISTRY_SCHEMA_TYPES_TEST_BOOL:
-        memcpy(&_instance->boolean, val, sizeof(_instance->boolean));
-        break;
-
     case REGISTRY_SCHEMA_TYPES_TEST_STRING:
         strcpy(_instance->string, val);
+        break;
+
+    case REGISTRY_SCHEMA_TYPES_TEST_BOOL:
+        memcpy(&_instance->boolean, val, sizeof(_instance->boolean));
         break;
 
     case REGISTRY_SCHEMA_TYPES_TEST_U8:

@@ -13,47 +13,28 @@ static void get(int param_id, registry_instance_t *instance, void *buf, int buf_
 static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
                 void *context);
 
-static registry_schema_item_t schema_items[] = {
-    {
-        .id = REGISTRY_SCHEMA_RGB_LED_RED,
-        .name = "red",
-        .description = "Intensity of the red color of the rgb lamp.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT8,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_RGB_LED_GREEN,
-        .name = "green",
-        .description = "Intensity of the green color of the rgb lamp.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT8,
-        },
-    },
-    {
-        .id = REGISTRY_SCHEMA_RGB_LED_BLUE,
-        .name = "blue",
-        .description = "Intensity of the blue color of the rgb lamp.",
-        .type = REGISTRY_SCHEMA_TYPE_PARAMETER,
-        .value.parameter = {
-            .type = REGISTRY_TYPE_UINT8,
-        },
-    },
-};
+REGISTRY_SCHEMA(
+    registry_schema_rgb_led,
+    REGISTRY_SCHEMA_RGB_LED,
+    "rgb", "Representation of an rgb color.",
+    get, set,
 
-registry_schema_t registry_schema_rgb_led = {
-    .id = REGISTRY_SCHEMA_RGB_LED,
-    .name = "rgb",
-    .description = "Representation of a rgb color.",
-    .items = schema_items,
-    .items_len = ARRAY_SIZE(schema_items),
-    .get = get,
-    .set = set,
-};
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_RED,
+        "red", "Intensity of the red color of the rgb lamp.")
 
-static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context)
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_GREEN,
+        "green", "Intensity of the green color of the rgb lamp.")
+
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_BLUE,
+        "blue", "Intensity of the blue color of the rgb lamp.")
+
+    );
+
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len,
+                void *context)
 {
     (void)buf_len;
     (void)context;

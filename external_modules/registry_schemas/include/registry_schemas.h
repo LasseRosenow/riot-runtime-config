@@ -22,8 +22,8 @@ extern registry_schema_t registry_schema_types_test;
 typedef struct {
     clist_node_t node;
 
-    bool boolean;
     char string[REGISTRY_MAX_VAL_LEN];
+    bool boolean;
 
     uint8_t u8;
     uint16_t u16;
@@ -52,8 +52,8 @@ typedef struct {
 } registry_schema_types_test_t;
 
 typedef enum {
-    REGISTRY_SCHEMA_TYPES_TEST_BOOL,
     REGISTRY_SCHEMA_TYPES_TEST_STRING,
+    REGISTRY_SCHEMA_TYPES_TEST_BOOL,
 
     REGISTRY_SCHEMA_TYPES_TEST_U8,
     REGISTRY_SCHEMA_TYPES_TEST_U16,
