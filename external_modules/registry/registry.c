@@ -9,7 +9,8 @@
 
 #include "registry.h"
 
-clist_node_t registry_schemas;
+clist_node_t registry_schemas_sys;
+clist_node_t registry_schemas_app;
 
 static int _registry_cmp_schema_id(clist_node_t *current, void *id)
 {
@@ -57,7 +58,7 @@ static registry_schema_t *_schema_lookup(int id)
     clist_node_t *node;
     registry_schema_t *schema = NULL;
 
-    node = clist_foreach(&registry_schemas, _registry_cmp_schema_id, &id);
+    node = clist_foreach(&registry_schemas_sys, _registry_cmp_schema_id, &id);
 
     if (node != NULL) {
         schema = container_of(node, registry_schema_t, node);
@@ -91,30 +92,30 @@ static registry_instance_t *_instance_lookup(registry_schema_t *schema, int inst
 
 void registry_init(void)
 {
-    registry_schemas.next = NULL;
+    registry_schemas_sys.next = NULL;
     registry_store_init();
 }
 
 void registry_register_schema(registry_schema_t *schema)
 {
     assert(schema != NULL);
-    clist_rpush(&registry_schemas, &(schema->node));
+    clist_rpush(&registry_schemas_sys, &(schema->node));
 }
 
-static registry_schema_item_t *_parameter_meta_lookup(const int *path, int path_len,
+static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path,
                                                       registry_schema_t *schema)
 {
     registry_schema_item_t *schema_item;
     registry_schema_item_t *schema_items = schema->items;
     int schema_items_len = schema->items_len;
 
-    for (int path_index = 0; path_index < path_len; path_index++) {
+    for (int path_index = 0; path_index < path.path_len; path_index++) {
         for (int i = 0; i < schema_items_len; i++) {
             schema_item = &schema->items[i];
 
-            if (schema_item->id == path[path_index]) {
+            if (schema_item->id == path.path[path_index]) {
                 if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER &&
-                    path_index == path_len - 1) {
+                    path_index == path.path_len - 1) {
                     // If this is the last path segment and it is a parameter => return the parameter
                     return schema_item;
                 }
@@ -135,7 +136,7 @@ int registry_add_instance(int schema_id, registry_instance_t *instance)
     assert(instance != NULL);
 
     /* find schema with correct schema_id */
-    clist_node_t *node = registry_schemas.next;
+    clist_node_t *node = registry_schemas_sys.next;
 
     do {
         node = node->next;
@@ -149,30 +150,30 @@ int registry_add_instance(int schema_id, registry_instance_t *instance)
             /* count instance index */
             return clist_count(&schema->instances) - 1;
         }
-    } while (node != registry_schemas.next);
+    } while (node != registry_schemas_sys.next);
 
     return -EINVAL;
 }
 
-static int _registry_set(const int *path, int path_len, const void *val, int val_len,
+static int _registry_set(const registry_path_t path, const void *val, int val_len,
                          registry_type_t val_type)
 {
     /* lookup schema */
-    registry_schema_t *schema = _schema_lookup(path[0]);
+    registry_schema_t *schema = _schema_lookup(path.schema_id);
 
     if (!schema) {
         return -EINVAL;
     }
 
     /* lookup instance */
-    registry_instance_t *instance = _instance_lookup(schema, path[1]);
+    registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
 
     if (!instance) {
         return -EINVAL;
     }
 
     /* lookup parameter meta data */
-    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
+    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, schema);
 
     if (!param_meta) {
         return -EINVAL;
@@ -201,25 +202,25 @@ static int _registry_set(const int *path, int path_len, const void *val, int val
     return 0;
 }
 
-static int _registry_get(const int *path, int path_len, registry_value_t *val,
+static int _registry_get(const registry_path_t path, registry_value_t *val,
                          registry_type_t val_type)
 {
     /* lookup schema */
-    registry_schema_t *schema = _schema_lookup(path[0]);
+    registry_schema_t *schema = _schema_lookup(path.schema_id);
 
     if (!schema) {
         return -EINVAL;
     }
 
     /* lookup instance */
-    registry_instance_t *instance = _instance_lookup(schema, path[1]);
+    registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
 
     if (!instance) {
         return -EINVAL;
     }
 
     /* lookup parameter meta data */
-    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, path_len, schema);
+    registry_schema_item_t *param_meta = _parameter_meta_lookup(path, schema);
 
     if (!param_meta) {
         return -EINVAL;
@@ -255,32 +256,32 @@ static int _registry_get(const int *path, int path_len, registry_value_t *val,
     return 0;
 }
 
-int registry_commit(const int *path, int path_len)
+int registry_commit(const registry_path_t path)
 {
     int rc = 0;
 
     /* schema/? */
-    if (path_len >= 1) {
+    if (path.schema_id != NULL) {
         /* lookup schema */
-        registry_schema_t *schema = _schema_lookup(path[0]);
+        registry_schema_t *schema = _schema_lookup(path.schema_id);
         if (!schema) {
             return -EINVAL;
         }
 
         /* schema/Instance */
-        if (path_len >= 2) {
+        if (path.instance_id != NULL) {
             /* lookup instance */
-            registry_instance_t *instance = _instance_lookup(schema, path[1]);
+            registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
             if (!instance) {
                 return -EINVAL;
             }
-            return instance->commit_cb(path, path_len, instance->context);
+            return instance->commit_cb(path, instance->context);
         }
         /* only Schema */
         else {
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
                 registry_instance_t *instance = _instance_lookup(schema, i);
-                int _rc = instance->commit_cb(path, path_len, instance->context);
+                int _rc = instance->commit_cb(path, instance->context);
                 if (!_rc) {
                     rc = _rc;
                 }
@@ -290,7 +291,7 @@ int registry_commit(const int *path, int path_len)
     }
     /* no schema => call all */
     else {
-        clist_node_t *node = registry_schemas.next;
+        clist_node_t *node = registry_schemas_sys.next;
 
         if (!node) {
             return -EINVAL;
@@ -302,37 +303,45 @@ int registry_commit(const int *path, int path_len)
 
             for (size_t i = 0; i < clist_count(&schema->instances); i++) {
                 registry_instance_t *instance = _instance_lookup(schema, i);
-                int _rc = instance->commit_cb(path, path_len, instance->context);
+                int _rc = instance->commit_cb(path, instance->context);
                 if (!_rc) {
                     rc = _rc;
                 }
             }
-        } while (node != registry_schemas.next);
+        } while (node != registry_schemas_sys.next);
 
         return rc;
     }
 }
 
-static void _registry_export_recursive(int (*export_func)(const int *path, int path_len,
+static void _registry_export_recursive(int (*export_func)(const registry_path_t path,
                                                           const registry_schema_t *schema,
                                                           const registry_instance_t *instance,
                                                           const registry_schema_item_t *meta,
                                                           const registry_value_t *value,
                                                           void *context),
-                                       const int *current_path, int current_path_len, registry_schema_t *schema,
+                                       const registry_path_t current_path, registry_schema_t *schema,
                                        registry_instance_t *instance, registry_schema_item_t *schema_items,
                                        int schema_items_len, int recursion_depth, void *context)
 {
     for (int i = 0; i < schema_items_len; i++) {
         registry_schema_item_t schema_item = schema_items[i];
 
-        int new_path_len = current_path_len + 1;
-        int new_path[new_path_len];
-        for (int j = 0; j < current_path_len; j++) {
-            new_path[j] = current_path[j];
+        /* Create new path including the current schema_item */
+        int _new_path_path[current_path.path_len + 1];
+        for (int j = 0; j < current_path.path_len; j++) {
+            _new_path_path[j] = current_path.path[j];
         }
-        new_path[new_path_len - 1] = schema_item.id;
+        _new_path_path[ARRAY_SIZE(_new_path_path) - 1] = schema_item.id;
+        registry_path_t new_path = {
+            .root_group = current_path.root_group,
+            .schema_id = current_path.schema_id,
+            .instance_id = current_path.instance_id,
+            .path = _new_path_path,
+            .path_len = ARRAY_SIZE(_new_path_path),
+        };
 
+        /* Check if the current schema_item is a group or a parameter */
         if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
             /* Parameter found => Export */
             char val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
@@ -340,103 +349,102 @@ static void _registry_export_recursive(int (*export_func)(const int *path, int p
                 .buf = val_buf,
                 .buf_len = ARRAY_SIZE(val_buf),
             };
-            registry_get_value(new_path, new_path_len, &val);
-            export_func(new_path, new_path_len, schema, instance, &schema_item, &val, context);
+            registry_get_value(new_path, &val);
+            export_func(new_path, schema, instance, &schema_item, &val, context);
         }
         else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
             /* Group => search for parameters */
             registry_schema_group_t group = schema_item.value.group;
 
-            /* If recursion_depth is 1 then only the group itself will be exported */
+            export_func(new_path, schema, instance, &schema_item, NULL, context);
+
+            /* If recursion_depth is not 1 then not only the group itself will be exported, but also its children depending on recursion_depth */
             if (recursion_depth != 1) {
                 int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
                 if (recursion_depth != 0) {
                     new_recursion_depth = recursion_depth - 1;
                 }
 
-                for (int i = 0; i < group.items_len; i++) {
-                    new_path[new_path_len - 1] = schema_item.id;
-                    _registry_export_recursive(export_func, new_path, current_path_len + 1,
-                                               NULL, NULL, group.items,
-                                               group.items_len, new_recursion_depth, context);
-                }
-            }
-            else {
-                export_func(new_path, new_path_len, schema, instance, &schema_item, NULL, context);
+                _registry_export_recursive(export_func, new_path, NULL, NULL, group.items,
+                                           group.items_len, new_recursion_depth, context);
             }
         }
     }
 }
 
-int registry_export(int (*export_func)(const int *path, int path_len,
+int registry_export(int (*export_func)(const registry_path_t path,
                                        const registry_schema_t *schema,
                                        const registry_instance_t *instance,
                                        const registry_schema_item_t *meta,
                                        const registry_value_t *value,
                                        void *context),
-                    const int *path, int path_len, int recursion_depth, void *context)
+                    const registry_path_t path, int recursion_depth, void *context)
 {
     assert(export_func != NULL);
     registry_schema_t *schema;
     registry_instance_t *instance;
 
     DEBUG("[registry export] exporting all in ");
-    for (int i = 0; i < path_len; i++) {
+    for (int i = 0; i < path.path_len; i++) {
         DEBUG("/%d", path[i]);
     }
     DEBUG("\n");
 
     /* Get schema, if in path */
-    if (path_len >= 1) {
-        schema = _schema_lookup(path[0]);
+    if (path.schema_id != NULL) {
+        schema = _schema_lookup(path.schema_id);
         if (!schema) {
             return -EINVAL;
         }
 
         /* Export schema */
-        export_func(path, path_len, schema, NULL, NULL, NULL, context);
+        export_func(path, schema, NULL, NULL, NULL, context);
 
         /* Get instance, if in path */
-        if (path_len >= 2) {
-            instance = _instance_lookup(schema, path[1]);
+        if (path.instance_id != NULL) {
+            instance = _instance_lookup(schema, path.instance_id);
             if (!instance) {
                 return -EINVAL;
             }
 
             /* Export instance */
-            export_func(path, path_len, schema, instance, NULL, NULL, context);
+            export_func(path, schema, instance, NULL, NULL, context);
 
             /* Schema/Instance/Item => Export concrete schema item with data of the given instance */
-            if (path_len >= 3) {
-                registry_schema_item_t *schema_item =
-                    _parameter_meta_lookup(path, path_len, schema);
+            if (path.path_len > 0) {
+                registry_schema_item_t *schema_item = _parameter_meta_lookup(path, schema);
 
                 /* Create a new path which does not include the last value, because _registry_export_recursive will add it inside */
-                int new_path_len = path_len - 1;
-                int new_path[new_path_len];
-                for (int j = 0; j < path_len; j++) {
-                    new_path[j] = path[j];
+                int _new_path_path[path.path_len - 1];
+                for (int j = 0; j < path.path_len; j++) {
+                    _new_path_path[j] = path.path[j];
                 }
+                registry_path_t new_path = {
+                    .root_group = path.root_group,
+                    .schema_id = path.schema_id,
+                    .instance_id = path.instance_id,
+                    .path = _new_path_path,
+                    .path_len = ARRAY_SIZE(_new_path_path),
+                };
 
-                _registry_export_recursive(export_func, new_path, new_path_len, schema, instance,
+                _registry_export_recursive(export_func, new_path, schema, instance,
                                            schema_item, 1, recursion_depth, context);
             }
             /* Schema/Instance => Export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
-            else if (path_len == 2) {
+            else if (path.path_len == 0) {
                 /* Export instance parameters (recursion_depth == 1 means only the exact path, which would only be a specific instance in this case) */
                 if (recursion_depth != 1) {
                     if (recursion_depth != 0) {
                         recursion_depth--;
                     }
 
-                    _registry_export_recursive(export_func, path, path_len, schema, instance,
-                                               schema->items, schema->items_len, recursion_depth,
-                                               context);
+                    _registry_export_recursive(export_func, path, schema, instance, schema->items,
+                                               schema->items_len, recursion_depth, context);
                 }
             }
         }
         /* Schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
-        else if (path_len == 1) {
+        else {
             /* Export instances (recursion_depth == 1 means only the exact path, which would only be a specific schema in this case) */
             if (recursion_depth != 1) {
                 if (recursion_depth != 0) {
@@ -459,10 +467,17 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                         return -EINVAL;
                     }
 
-                    int new_path[] = { path[0], instance_id };
+                    /* Create new path that includes the new instance_id */
+                    registry_path_t new_path = {
+                        .root_group = path.root_group,
+                        .schema_id = path.schema_id,
+                        .instance_id = instance_id,
+                        .path = NULL,
+                        .path_len = 0,
+                    };
+
                     /* Export instance */
-                    export_func(new_path, ARRAY_SIZE(
-                                    new_path), schema, instance, NULL, NULL, context);
+                    export_func(new_path, schema, instance, NULL, NULL, context);
 
                     /* Export instance parameters (recursion_depth == 1 at this point means only the exact path + 1 */
                     if (recursion_depth != 1) {
@@ -471,8 +486,7 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                             new_recursion_depth = recursion_depth - 1;
                         }
 
-                        _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
-                                                       new_path), schema, instance,
+                        _registry_export_recursive(export_func, new_path, schema, instance,
                                                    schema->items, schema->items_len,
                                                    new_recursion_depth, context);
                     }
@@ -483,8 +497,8 @@ int registry_export(int (*export_func)(const int *path, int path_len,
         }
     }
     /* Empty path => Export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
-    else if (path_len == 0) {
-        clist_node_t *schema_node = registry_schemas.next;
+    else {
+        clist_node_t *schema_node = registry_schemas_sys.next;
 
         if (!schema_node) {
             return -EINVAL;
@@ -499,9 +513,17 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                 schema_node = schema_node->next;
                 schema = container_of(schema_node, registry_schema_t, node);
 
-                int new_path[] = { schema->id };
+                /* Create new path that includes the new schema_id */
+                registry_path_t new_path = {
+                    .root_group = path.root_group,
+                    .schema_id = schema->id,
+                    .instance_id = NULL,
+                    .path = NULL,
+                    .path_len = 0,
+                };
+
                 /* Export schema */
-                export_func(new_path, ARRAY_SIZE(new_path), schema, NULL, NULL, NULL, context);
+                export_func(new_path, schema, NULL, NULL, NULL, context);
 
                 if (recursion_depth != 1) {
                     int new_recursion_depth = 0; // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
@@ -521,10 +543,17 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                         instance_node = instance_node->next;
                         instance = container_of(instance_node, registry_instance_t, node);
 
-                        int new_path[] = { schema->id, instance_id };
+                        /* Create new path that includes the new schema_id and instance_id */
+                        registry_path_t new_path = {
+                            .root_group = path.root_group,
+                            .schema_id = instance_id,
+                            .instance_id = NULL,
+                            .path = NULL,
+                            .path_len = 0,
+                        };
+
                         /* Export instance */
-                        export_func(new_path, ARRAY_SIZE(
-                                        new_path), schema, instance, NULL, NULL, context);
+                        export_func(new_path, schema, instance, NULL, NULL, context);
 
                         /* Export instance parameters */
                         if (new_recursion_depth != 1) {
@@ -533,8 +562,7 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                                 new_new_recursion_depth = new_recursion_depth - 1;
                             }
 
-                            _registry_export_recursive(export_func, new_path, ARRAY_SIZE(
-                                                           new_path), schema, instance,
+                            _registry_export_recursive(export_func, new_path, schema, instance,
                                                        schema->items, schema->items_len,
                                                        new_new_recursion_depth, context);
                         }
@@ -542,7 +570,7 @@ int registry_export(int (*export_func)(const int *path, int path_len,
                         instance_id++;
                     } while (instance_node != schema->instances.next);
                 }
-            } while (schema_node != registry_schemas.next);
+            } while (schema_node != registry_schemas_sys.next);
         }
     }
 
@@ -550,89 +578,89 @@ int registry_export(int (*export_func)(const int *path, int path_len,
 }
 
 /* registry_set functions */
-int registry_set_value(const int *path, int path_len, const void *val, int val_len)
+int registry_set_value(const registry_path_t path, const void *val, int val_len)
 {
-    return _registry_set(path, path_len, val, val_len, REGISTRY_TYPE_NONE);
+    return _registry_set(path, val, val_len, REGISTRY_TYPE_NONE);
 }
 
-int registry_set_string(const int *path, int path_len, const char *val)
+int registry_set_string(const registry_path_t path, const char *val)
 {
-    return _registry_set(path, path_len, val, strlen(val), REGISTRY_TYPE_STRING);
+    return _registry_set(path, val, strlen(val), REGISTRY_TYPE_STRING);
 }
 
-int registry_set_bool(const int *path, int path_len, bool val)
+int registry_set_bool(const registry_path_t path, bool val)
 {
-    return _registry_set(path, path_len, &val, sizeof(bool), REGISTRY_TYPE_BOOL);
+    return _registry_set(path, &val, sizeof(bool), REGISTRY_TYPE_BOOL);
 }
 
-int registry_set_uint8(const int *path, int path_len, uint8_t val)
+int registry_set_uint8(const registry_path_t path, uint8_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
+    return _registry_set(path, &val, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
 }
 
-int registry_set_uint16(const int *path, int path_len, uint16_t val)
+int registry_set_uint16(const registry_path_t path, uint16_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
+    return _registry_set(path, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
 }
 
-int registry_set_uint32(const int *path, int path_len, uint32_t val)
+int registry_set_uint32(const registry_path_t path, uint32_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
+    return _registry_set(path, &val, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 }
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-int registry_set_uint64(const int *path, int path_len, uint64_t val)
+int registry_set_uint64(const registry_path_t path, uint64_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT64);
+    return _registry_set(path, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT64);
 }
 
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-int registry_set_int8(const int *path, int path_len, int8_t val)
+int registry_set_int8(const registry_path_t path, int8_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(int8_t), REGISTRY_TYPE_INT8);
+    return _registry_set(path, &val, sizeof(int8_t), REGISTRY_TYPE_INT8);
 }
 
-int registry_set_int16(const int *path, int path_len, int16_t val)
+int registry_set_int16(const registry_path_t path, int16_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(int16_t), REGISTRY_TYPE_INT16);
+    return _registry_set(path, &val, sizeof(int16_t), REGISTRY_TYPE_INT16);
 }
 
-int registry_set_int32(const int *path, int path_len, int32_t val)
+int registry_set_int32(const registry_path_t path, int32_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(int32_t), REGISTRY_TYPE_INT32);
+    return _registry_set(path, &val, sizeof(int32_t), REGISTRY_TYPE_INT32);
 }
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
-int registry_set_int64(const int *path, int path_len, int64_t val)
+int registry_set_int64(const registry_path_t path, int64_t val)
 {
-    return _registry_set(path, path_len, &val, sizeof(int64_t), REGISTRY_TYPE_INT64);
+    return _registry_set(path, &val, sizeof(int64_t), REGISTRY_TYPE_INT64);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-int registry_set_float32(const int *path, int path_len, float val)
+int registry_set_float32(const registry_path_t path, float val)
 {
-    return _registry_set(path, path_len, &val, sizeof(float), REGISTRY_TYPE_FLOAT32);
+    return _registry_set(path, &val, sizeof(float), REGISTRY_TYPE_FLOAT32);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-int registry_set_float64(const int *path, int path_len, double val)
+int registry_set_float64(const registry_path_t path, double val)
 {
-    return _registry_set(path, path_len, &val, sizeof(double), REGISTRY_TYPE_FLOAT64);
+    return _registry_set(path, &val, sizeof(double), REGISTRY_TYPE_FLOAT64);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /* registry_get functions */
-registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value)
+registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value)
 {
-    _registry_get(path, path_len, value, REGISTRY_TYPE_NONE);
+    _registry_get(path, value, REGISTRY_TYPE_NONE);
 
     return value;
 }
 
-static void _registry_get_buf(const int *path, int path_len, void *buf, int buf_len,
+static void _registry_get_buf(const registry_path_t path, void *buf, int buf_len,
                               registry_type_t type)
 {
     registry_value_t value = {
@@ -640,113 +668,113 @@ static void _registry_get_buf(const int *path, int path_len, void *buf, int buf_
         .buf_len = buf_len,
     };
 
-    _registry_get(path, path_len, &value, type);
+    _registry_get(path, &value, type);
 }
-char *registry_get_string(const int *path, int path_len, char *buf, int buf_len)
+char *registry_get_string(const registry_path_t path, char *buf, int buf_len)
 {
-    _registry_get_buf(path, path_len, buf, buf_len, REGISTRY_TYPE_STRING);
+    _registry_get_buf(path, buf, buf_len, REGISTRY_TYPE_STRING);
     return buf;
 }
-bool registry_get_bool(const int *path, int path_len)
+bool registry_get_bool(const registry_path_t path)
 {
     bool buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(bool), REGISTRY_TYPE_BOOL);
+    _registry_get_buf(path, &buf, sizeof(bool), REGISTRY_TYPE_BOOL);
 
     return buf;
 }
-uint8_t registry_get_uint8(const int *path, int path_len)
+uint8_t registry_get_uint8(const registry_path_t path)
 {
     uint8_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
+    _registry_get_buf(path, &buf, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
 
     return buf;
 }
-uint16_t registry_get_uint16(const int *path, int path_len)
+uint16_t registry_get_uint16(const registry_path_t path)
 {
     uint16_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
+    _registry_get_buf(path, &buf, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
 
     return buf;
 }
 
-uint32_t registry_get_uint32(const int *path, int path_len)
+uint32_t registry_get_uint32(const registry_path_t path)
 {
     uint32_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
+    _registry_get_buf(path, &buf, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 
     return buf;
 }
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-uint64_t registry_get_uint64(const int *path, int path_len)
+uint64_t registry_get_uint64(const registry_path_t path)
 {
     uint64_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(uint64_t), REGISTRY_TYPE_UINT64);
+    _registry_get_buf(path, &buf, sizeof(uint64_t), REGISTRY_TYPE_UINT64);
 
     return buf;
 }
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-int8_t registry_get_int8(const int *path, int path_len)
+int8_t registry_get_int8(const registry_path_t path)
 {
     int8_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(int8_t), REGISTRY_TYPE_INT8);
+    _registry_get_buf(path, &buf, sizeof(int8_t), REGISTRY_TYPE_INT8);
 
     return buf;
 }
 
-int16_t registry_get_int16(const int *path, int path_len)
+int16_t registry_get_int16(const registry_path_t path)
 {
     int16_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(int16_t), REGISTRY_TYPE_INT16);
+    _registry_get_buf(path, &buf, sizeof(int16_t), REGISTRY_TYPE_INT16);
 
     return buf;
 }
 
-int32_t registry_get_int32(const int *path, int path_len)
+int32_t registry_get_int32(const registry_path_t path)
 {
     int32_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(int32_t), REGISTRY_TYPE_INT32);
+    _registry_get_buf(path, &buf, sizeof(int32_t), REGISTRY_TYPE_INT32);
 
     return buf;
 }
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
-int64_t registry_get_int64(const int *path, int path_len)
+int64_t registry_get_int64(const registry_path_t path)
 {
     int64_t buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(int64_t), REGISTRY_TYPE_INT64);
+    _registry_get_buf(path, &buf, sizeof(int64_t), REGISTRY_TYPE_INT64);
 
     return buf;
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-float registry_get_float32(const int *path, int path_len)
+float registry_get_float32(const registry_path_t path)
 {
     float buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(float), REGISTRY_TYPE_FLOAT32);
+    _registry_get_buf(path, &buf, sizeof(float), REGISTRY_TYPE_FLOAT32);
 
     return buf;
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-double registry_get_float64(const int *path, int path_len)
+double registry_get_float64(const registry_path_t path)
 {
     double buf;
 
-    _registry_get_buf(path, path_len, &buf, sizeof(double), REGISTRY_TYPE_FLOAT64);
+    _registry_get_buf(path, &buf, sizeof(double), REGISTRY_TYPE_FLOAT64);
 
     return buf;
 }

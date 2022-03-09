@@ -109,8 +109,8 @@ extern "C" {
  * @brief Calculates the size of an @ref registry_schema_item_t array.
  *
  */
-#define REGISTRY_NUMARGS(...)  (sizeof((registry_schema_item_t[]){ __VA_ARGS__ }) / \
-                                sizeof(registry_schema_item_t))
+#define _REGISTRY_SCHEMA_ITEM_NUMARGS(...)  (sizeof((registry_schema_item_t[]){ __VA_ARGS__ }) / \
+                                             sizeof(registry_schema_item_t))
 
 /**
  * @brief Creates and initializes a @ref registry_schema_t struct.
@@ -124,7 +124,7 @@ extern "C" {
         .get = _get, \
         .set = _set, \
         .items = (registry_schema_item_t[]) { __VA_ARGS__ }, \
-        .items_len = REGISTRY_NUMARGS(__VA_ARGS__), \
+        .items_len = _REGISTRY_SCHEMA_ITEM_NUMARGS(__VA_ARGS__), \
     }
 
 /**
@@ -139,7 +139,7 @@ extern "C" {
         .type = REGISTRY_SCHEMA_TYPE_GROUP, \
         .value.group = { \
             .items = (registry_schema_item_t[]) { __VA_ARGS__ }, \
-            .items_len = REGISTRY_NUMARGS(__VA_ARGS__), \
+            .items_len = _REGISTRY_SCHEMA_ITEM_NUMARGS(__VA_ARGS__), \
         }, \
     },
 
@@ -260,6 +260,38 @@ typedef enum {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
 
+
+
+
+
+typedef enum {
+    REGISTRY_ROOT_GROUP_SYS,
+    REGISTRY_ROOT_GROUP_APP,
+} registry_root_group_t;
+
+typedef struct {
+    registry_root_group_t root_group;
+    int *schema_id;
+    int *instance_id;
+    const int *path;
+    int path_len;
+} registry_path_t;
+
+#define _REGISTRY_PATH_NUMARGS(...)  (sizeof((int[]){ __VA_ARGS__ }) / \
+                                      sizeof(int))
+
+#define REGISTRY_PATH_SYS(_schema_id, _instance_id, ...) \
+    (registry_path_t) { \
+        .root_group = REGISTRY_ROOT_GROUP_SYS, \
+        .schema_id = _schema_id, \
+        .instance_id = _instance_id, \
+        .path = (int[]) { __VA_ARGS__ }, \
+        .path_len = _REGISTRY_PATH_NUMARGS(__VA_ARGS__), \
+    }
+
+
+
+
 /**
  * @brief Basic representation of a registry parameter, containing information about its type and its value.
  */
@@ -306,15 +338,15 @@ struct _registry_schema_item_t {
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(const int *path, int path_len, void *val, int val_len, void *cb_arg);
+typedef void (*load_cb_t)(const registry_path_t path, void *val, int val_len, void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities
  */
 typedef struct {
-    const int *path;        /**< path of the parameter being checked */
-    registry_value_t val;   /**< value of the parameter being checked */
-    bool is_dup;            /**< flag indicating if the parameter is duplicated or not */
+    const registry_path_t path; /**< path of the parameter being checked */
+    const registry_value_t val; /**< value of the parameter being checked */
+    bool is_dup;                /**< flag indicating if the parameter is duplicated or not */
 } registry_dup_check_arg_t;
 
 /**
@@ -354,12 +386,10 @@ typedef struct registry_store_itf {
      *
      * @param[in] store Storage facility descriptor
      * @param[in] path Path of the parameter
-     * @param[in] path_len Length of @p path
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const int *path, int path_len,
-                const registry_value_t value);
+    int (*save)(registry_store_t *store, const registry_path_t path, const registry_value_t value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -383,11 +413,10 @@ typedef struct {
      * @brief Will be called after @ref registry_commit() was called on this instance.
      *
      * @param[in] path Path of the parameter to commit changes to
-     * @param[in] path_len Length of @p path
      * @param[in] context Context of the instance
      * @return 0 on success, non-zero on failure
      */
-    int (*commit_cb)(const int *path, int path_len, void *context);
+    int (*commit_cb)(const registry_path_t path, void *context);
 
     void *context; /**< Optional context used by the instance */
 } registry_instance_t;
@@ -416,8 +445,7 @@ typedef struct {
      * @param[in] buf_len Length of the buffer to store the current value
      * @param[in] context Context of the schema instance
      */
-    void (*get)(int param_id, registry_instance_t *instance, void *buf,
-                int buf_len, void *context);
+    void (*get)(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
 
     /**
      * @brief Handler to set a the value of a configuration parameter.
@@ -428,14 +456,19 @@ typedef struct {
      * @param[in] val_len Length of the buffer to store the current value
      * @param[in] context Context of the schema instance
      */
-    void (*set)(int param_id, registry_instance_t *instance, const void *val,
-                int val_len, void *context);
+    void (*set)(int param_id, registry_instance_t *instance, const void *val, int val_len,
+                void *context);
 } registry_schema_t;
 
 /**
- * @brief List of registered schemas
+ * @brief List of registered sys schemas
  */
-extern clist_node_t registry_schemas;
+extern clist_node_t registry_schemas_sys;
+
+/**
+ * @brief List of registered app schemas
+ */
+extern clist_node_t registry_schemas_app;
 
 /**
  * @brief Initializes the RIOT Registry and the store modules.
@@ -488,64 +521,62 @@ int registry_add_instance(int schema_id, registry_instance_t *instance);
  * @brief Sets the value of a parameter that belongs to a configuration group.
  *
  * @param[in] path Path of the parameter to be set
- * @param[in] path_len Length of @p path
  * @param[in] val New value for the parameter (must have the correct type => use registry_set_<type>() instead!)
  * @param[in] val Length of @p val
  * @return -EINVAL if schema could not be found, otherwise returns the
  *             value of the set schema function.
  */
-int registry_set_value(const int *path, int path_len, const void *val, int val_len);
+int registry_set_value(const registry_path_t path, const void *val, int val_len);
 
-int registry_set_string(const int *path, int path_len, const char *val);
-int registry_set_bool(const int *path, int path_len, bool val);
-int registry_set_uint8(const int *path, int path_len, uint8_t val);
-int registry_set_uint16(const int *path, int path_len, uint16_t val);
-int registry_set_uint32(const int *path, int path_len, uint32_t val);
+int registry_set_string(const registry_path_t path, const char *val);
+int registry_set_bool(const registry_path_t path, bool val);
+int registry_set_uint8(const registry_path_t path, uint8_t val);
+int registry_set_uint16(const registry_path_t path, uint16_t val);
+int registry_set_uint32(const registry_path_t path, uint32_t val);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-int registry_set_uint64(const int *path, int path_len, uint64_t val);
+int registry_set_uint64(const registry_path_t path, uint64_t val);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-int registry_set_int8(const int *path, int path_len, int8_t val);
-int registry_set_int16(const int *path, int path_len, int16_t val);
-int registry_set_int32(const int *path, int path_len, int32_t val);
+int registry_set_int8(const registry_path_t path, int8_t val);
+int registry_set_int16(const registry_path_t path, int16_t val);
+int registry_set_int32(const registry_path_t path, int32_t val);
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-int registry_set_int64(const int *path, int path_len, int64_t val);
+int registry_set_int64(const registry_path_t path, int64_t val);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-int registry_set_float32(const int *path, int path_len, float val);
+int registry_set_float32(const registry_path_t path, float val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-int registry_set_float64(const int *path, int path_len, double val);
+int registry_set_float64(const registry_path_t path, double val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
  * @brief Gets the current value of a parameter that belongs to a configuration
  *        group, identified by @p path.
  * @param[in] path Path of the parameter to get the value of
- * @param[in] path_len Length of @p path
  * @param[out] value Pointer to a uninitialized @ref registry_value_t struct
  * @return @p value. Use registry_get_<type>() to get values as a concrete type
  */
-registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
+registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
 
-char *registry_get_string(const int *path, int path_len, char *buf, int buf_len);
-bool registry_get_bool(const int *path, int path_len);
-uint8_t registry_get_uint8(const int *path, int path_len);
-uint16_t registry_get_uint16(const int *path, int path_len);
-uint32_t registry_get_uint32(const int *path, int path_len);
+char *registry_get_string(const registry_path_t path, char *buf, int buf_len);
+bool registry_get_bool(const registry_path_t path);
+uint8_t registry_get_uint8(const registry_path_t path);
+uint16_t registry_get_uint16(const registry_path_t path);
+uint32_t registry_get_uint32(const registry_path_t path);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-uint64_t registry_get_uint64(const int *path, int path_len);
+uint64_t registry_get_uint64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-int8_t registry_get_int8(const int *path, int path_len);
-int16_t registry_get_int16(const int *path, int path_len);
-int32_t registry_get_int32(const int *path, int path_len);
+int8_t registry_get_int8(const registry_path_t path);
+int16_t registry_get_int16(const registry_path_t path);
+int32_t registry_get_int32(const registry_path_t path);
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-int64_t registry_get_int64(const int *path, int path_len);
+int64_t registry_get_int64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-float registry_get_float32(const int *path, int path_len);
+float registry_get_float32(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-double registry_get_float64(const int *path, int path_len);
+double registry_get_float64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
@@ -555,11 +586,10 @@ double registry_get_float64(const int *path, int path_len);
  *
  * @param[in] path Path of the configuration group to commit the changes (can
  * be NULL).
- * @param[in] path_len Length of @p path
  * @return 0 on success, -EINVAL if the group has not implemented the commit
  * function.
  */
-int registry_commit(const int *path, int path_len);
+int registry_commit(const registry_path_t path);
 
 /**
  * @brief Convenience function to parse a configuration parameter value from
@@ -574,8 +604,7 @@ int registry_commit(const int *path, int path_len);
  * parameter is string.
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_value_from_str(char *val_str, registry_type_t type, void *vp,
-                                    int maxlen);
+int registry_convert_value_from_str(char *val_str, registry_type_t type, void *vp, int maxlen);
 
 /**
  * @brief Convenience function to parse a configuration parameter value from
@@ -614,8 +643,7 @@ int registry_convert_bytes_from_str(char *val_str, void *vp, int *len);
  * @param[in] buf_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_convert_str_from_value(registry_type_t type, const void *vp, char *buf,
-                                      int buf_len);
+char *registry_convert_str_from_value(registry_type_t type, const void *vp, char *buf, int buf_len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value of
@@ -653,11 +681,10 @@ int registry_store_save(void);
  * facility, with the provided value (@p val).
  *
  * @param[in] path Path of the configuration parameter
- * @param[in] path_len Length of @p path
  * @param[in] context Context of the schema instance
  * @return 0 on success, non-zero on failure
  */
-int registry_store_save_one(const int *path, int path_len, void *context);
+int registry_store_save_one(const registry_path_t path, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
@@ -667,18 +694,17 @@ int registry_store_save_one(const int *path, int path_len, void *context);
  * @param[in] export_func Exporting function call with the @p path and current
  * value of a specific or all configuration parameters
  * @param[in] path Path representing the configuration parameter. Can be NULL.
- * @param[in] path_len Length of @p path
  * @param[in] recursion_depth Defines how deeply nested child groups / parameters will be shown. (0 to show all children, 1 to only show the exact match, 2 - n to show the exact match plus its children ... plus n levels of children )
  * @param[in] context Context that will be passed to @p export_func
  * @return 0 on success, non-zero on failure
  */
-int registry_export(int (*export_func)(const int *path, int path_len,
+int registry_export(int (*export_func)(const registry_path_t path,
                                        const registry_schema_t *schema,
                                        const registry_instance_t *instance,
                                        const registry_schema_item_t *meta,
                                        const registry_value_t *value,
                                        void *context),
-                    const int *path, int path_len, int recursion_depth, void *context);
+                    const registry_path_t path, int recursion_depth, void *context);
 
 #ifdef __cplusplus
 }

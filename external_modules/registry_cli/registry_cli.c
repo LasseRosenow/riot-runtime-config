@@ -38,28 +38,43 @@ static int _parse_string_path(char *path, int *buf, int *buf_len)
     return 0;
 }
 
-static int _export_func(const int *path, int path_len, const registry_schema_t *schema,
+static int _export_func(const registry_path_t path, const registry_schema_t *schema,
                         const registry_instance_t *instance, const registry_schema_item_t *meta,
                         const registry_value_t *value, void *context)
 {
-    (void)path;
-    (void)path_len;
-    (void)schema;
-    (void)instance;
-    (void)meta;
     (void)value;
     (void)context;
+
+    int path_len = path.path_len;
+
+    if (path.root_group != NULL) {
+        path_len++;
+    }
+
+    if (path.schema_id != NULL) {
+        path_len++;
+    }
+
+    if (path.instance_id != NULL) {
+        path_len++;
+    }
 
     printf("%*c\b", ((path_len - 1) * 3) + 1, ' ');
 
     if (meta == NULL) {
         if (instance == NULL) {
-            /* Schema */
-            printf("%d %s\n", path[0], schema->name);
+            if (schema == NULL) {
+                /* Root Group */
+                printf("%d\n", path.root_group);
+            }
+            else {
+                /* Schema */
+                printf("%d %s\n", path.schema_id, schema->name);
+            }
         }
         else {
             /* Instance */
-            printf("%d %s\n", path[1], instance->name);
+            printf("%d %s\n", path.instance_id, instance->name);
         }
     }
     else {
@@ -95,7 +110,7 @@ int registry_cli_cmd(int argc, char **argv)
         }
 
         char buf[REGISTRY_MAX_VAL_LEN];
-        registry_get_string(path, path_len, buf, ARRAY_SIZE(buf));
+        registry_get_string(path, buf, ARRAY_SIZE(buf));
         printf("%s\n", buf);
         return 0;
     }
@@ -105,7 +120,7 @@ int registry_cli_cmd(int argc, char **argv)
             return 1;
         }
 
-        registry_set_string(path, path_len, argv[3]);
+        registry_set_string(path, argv[3]);
         return 0;
     }
     else if (strcmp(argv[1], "commit") == 0) {
@@ -114,7 +129,7 @@ int registry_cli_cmd(int argc, char **argv)
             return 1;
         }
 
-        registry_commit(path, path_len);
+        registry_commit(path);
         return 0;
     }
     else if (strcmp(argv[1], "export") == 0) {
@@ -133,7 +148,7 @@ int registry_cli_cmd(int argc, char **argv)
             recursion_level = atoi(argv[4]);
         }
 
-        registry_export(_export_func, path, path_len, recursion_level, NULL);
+        registry_export(_export_func, path, recursion_level, NULL);
         return 0;
     }
 

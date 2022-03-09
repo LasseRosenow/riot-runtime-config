@@ -57,6 +57,8 @@ registry_store_t dummy_store = {
     .itf = &dummy_store_itf,
 };
 
+bool new_registry_get_bool(registry_path_t path);
+
 int main(void)
 {
     /* init registry */
@@ -75,6 +77,8 @@ int main(void)
     /* for the thread running the shell */
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
+
+    registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
     //registry_store_save();
     //registry_store_load();
