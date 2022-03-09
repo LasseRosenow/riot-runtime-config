@@ -105,9 +105,17 @@ extern "C" {
                                     (REGISTRY_MAX_DIR_DEPTH - 1))
 /** @} */
 
+/**
+ * @brief Calculates the size of an @ref registry_schema_item_t array.
+ *
+ */
 #define REGISTRY_NUMARGS(...)  (sizeof((registry_schema_item_t[]){ __VA_ARGS__ }) / \
                                 sizeof(registry_schema_item_t))
 
+/**
+ * @brief Creates and initializes a @ref registry_schema_t struct.
+ *
+ */
 #define REGISTRY_SCHEMA(_field_name, _id, _name, _description, _get, _set, ...) \
     registry_schema_t _field_name = { \
         .id = _id, \
@@ -119,6 +127,10 @@ extern "C" {
         .items_len = REGISTRY_NUMARGS(__VA_ARGS__), \
     }
 
+/**
+ * @brief Creates and initializes a @ref registry_schema_item_t struct and defaults its type to @ref REGISTRY_SCHEMA_TYPE_GROUP.
+ *
+ */
 #define REGISTRY_GROUP(_id, _name, _description, ...) \
     { \
         .id = _id, \
@@ -131,6 +143,10 @@ extern "C" {
         }, \
     },
 
+/**
+ * @brief Creates and initializes a @ref registry_schema_item_t struct and defaults its type to @ref REGISTRY_SCHEMA_TYPE_PARAMETER.
+ *
+ */
 #define REGISTRY_PARAMETER(_id, _name, _description, _type) \
     { \
         .id = _id, \
@@ -244,10 +260,13 @@ typedef enum {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
 
+/**
+ * @brief Basic representation of a registry parameter, containing information about its type and its value.
+ */
 typedef struct {
-    registry_type_t type;
-    void *buf;
-    int buf_len;
+    registry_type_t type;   /**< The type of the parameter */
+    void *buf;              /**< Pointer to the buffer containing the value of the parameter */
+    int buf_len;            /**< Length of the buffer */
 } registry_value_t;
 
 /**
@@ -273,14 +292,14 @@ typedef enum {
 } registry_schema_type_t;
 
 struct _registry_schema_item_t {
-    int id;             /**< Integer representing the configuration parameter */
-    char *name;         /**< String describing the configuration parameter */
-    char *description;  /**< String describing the configuration parameter with more details */
-    registry_schema_type_t type;
+    int id;                                     /**< Integer representing the path id of the schema item */
+    char *name;                                 /**< String describing the schema item */
+    char *description;                          /**< String describing the schema item with more details */
+    registry_schema_type_t type;                /**< Type of the schema item (group or parameter) */
     union {
-        registry_schema_group_t group;
-        registry_schema_parameter_t parameter;
-    } value;
+        registry_schema_group_t group;          /**< Value of the schema item if it is a group. Contains an array of schema item children */
+        registry_schema_parameter_t parameter;  /**< Value of the schema item if it is a parameter. Contains its type */
+    } value;                                    /**< Union containing either group or parameter data */
 };
 
 /**
@@ -334,7 +353,8 @@ typedef struct registry_store_itf {
      * @brief Saves a parameter into storage.
      *
      * @param[in] store Storage facility descriptor
-     * @param[in] name String representing the parameter (key)
+     * @param[in] path Path of the parameter
+     * @param[in] path_len Length of @p path
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
@@ -362,6 +382,8 @@ typedef struct {
     /**
      * @brief Will be called after @ref registry_commit() was called on this instance.
      *
+     * @param[in] path Path of the parameter to commit changes to
+     * @param[in] path_len Length of @p path
      * @param[in] context Context of the instance
      * @return 0 on success, non-zero on failure
      */
@@ -383,7 +405,7 @@ typedef struct {
     char *description;              /**< String describing the configuration group with more details */
     registry_schema_item_t *items;  /**< Array representing all the configuration parameters that belong to this group */
     int items_len;                  /**< Size of items array */
-    clist_node_t instances;
+    clist_node_t instances;         /**< Linked list of schema instances @ref registry_instance_t */
 
     /**
      * @brief Handler to get the current value of a configuration parameter.
@@ -392,7 +414,7 @@ typedef struct {
      * @param[in] instance Pointer to the instance of the schema, that contains the parameter
      * @param[out] buf Pointer to a buffer to store the current value
      * @param[in] buf_len Length of the buffer to store the current value
-     * @param[in] context Context of the schema
+     * @param[in] context Context of the schema instance
      */
     void (*get)(int param_id, registry_instance_t *instance, void *buf,
                 int buf_len, void *context);
@@ -404,7 +426,7 @@ typedef struct {
      * @param[in] instance Pointer to the instance of the schema, that contains the parameter
      * @param[in] val Buffer containing the new value
      * @param[in] val_len Length of the buffer to store the current value
-     * @param[in] context Context of the schema
+     * @param[in] context Context of the schema instance
      */
     void (*set)(int param_id, registry_instance_t *instance, const void *val,
                 int val_len, void *context);
@@ -465,8 +487,10 @@ int registry_add_instance(int schema_id, registry_instance_t *instance);
 /**
  * @brief Sets the value of a parameter that belongs to a configuration group.
  *
- * @param[in] name String of the name of the parameter to be set
- * @param[in] val_str New value for the parameter
+ * @param[in] path Path of the parameter to be set
+ * @param[in] path_len Length of @p path
+ * @param[in] val New value for the parameter (must have the correct type => use registry_set_<type>() instead!)
+ * @param[in] val Length of @p val
  * @return -EINVAL if schema could not be found, otherwise returns the
  *             value of the set schema function.
  */
@@ -495,12 +519,11 @@ int registry_set_float64(const int *path, int path_len, double val);
 
 /**
  * @brief Gets the current value of a parameter that belongs to a configuration
- *        group, identified by @p name.
- *
- * @param[in] name String of the name of the parameter to get the value of
- * @param[out] buf Pointer to a buffer to store the current value
- * @param[in] buf_len Length of the buffer to store the current value
- * @return Pointer to the beginning of the buffer
+ *        group, identified by @p path.
+ * @param[in] path Path of the parameter to get the value of
+ * @param[in] path_len Length of @p path
+ * @param[out] value Pointer to a uninitialized @ref registry_value_t struct
+ * @return @p value. Use registry_get_<type>() to get values as a concrete type
  */
 registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
 
@@ -526,12 +549,13 @@ double registry_get_float64(const int *path, int path_len);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
- * @brief If a @p name is passed it calls the commit schema for that
- *        configuration group. If no @p name is passed the commit schema is
+ * @brief If a @p path is passed it calls the commit schema for that
+ *        configuration group. If no @p path is passed the commit schema is
  *        called for every registered configuration group.
  *
- * @param[in] name Name of the configuration group to commit the changes (can
+ * @param[in] path Path of the configuration group to commit the changes (can
  * be NULL).
+ * @param[in] path_len Length of @p path
  * @return 0 on success, -EINVAL if the group has not implemented the commit
  * function.
  */
@@ -557,11 +581,11 @@ int registry_convert_value_from_str(char *val_str, registry_type_t type, void *v
  * @brief Convenience function to parse a configuration parameter value from
  * another value. The type of the parameter must be known.
  *
- * @param[in] val_str Pointer of the string containing the value
- * @param[in] type Type of the parameter to be parsed
- * @param[out] vp Pointer to store the parsed value
- * @param[in] maxlen Maximum length of the output buffer when the type of the
- * parameter is string.
+ * @param[in] val_in Pointer of the input value
+ * @param[in] val_in_type Type of the input value
+ * @param[in] val_out Pointer to the output buffer
+ * @param[in] val_out_len Length of @p val_out
+ * @param[in] val_out_type Type of the output value
  * @return 0 on success, non-zero on failure
  */
 int registry_convert_value_from_value(const void *val_in, registry_type_t val_in_type,
@@ -628,21 +652,24 @@ int registry_store_save(void);
  * @brief Save a specific configuration paramter to the registered storage
  * facility, with the provided value (@p val).
  *
- * @param[in] name String representing the configuration parameter
- * @param[in] val Struct representing the value of the configuration parameter
+ * @param[in] path Path of the configuration parameter
+ * @param[in] path_len Length of @p path
+ * @param[in] context Context of the schema instance
  * @return 0 on success, non-zero on failure
  */
 int registry_store_save_one(const int *path, int path_len, void *context);
 
 /**
  * @brief Export an specific or all configuration parameters using the
- * @p export_func function. If name is NULL then @p export_func is called for
+ * @p export_func function. If @p path is NULL then @p export_func is called for
  * every configuration parameter on each configuration group.
  *
- * @param[in] export_func Exporting function call with the name and current
- * value of an specific or all configuration parameters
- * @param[in] name String representing the configuration parameter. Can be NULL.
+ * @param[in] export_func Exporting function call with the @p path and current
+ * value of a specific or all configuration parameters
+ * @param[in] path Path representing the configuration parameter. Can be NULL.
+ * @param[in] path_len Length of @p path
  * @param[in] recursion_depth Defines how deeply nested child groups / parameters will be shown. (0 to show all children, 1 to only show the exact match, 2 - n to show the exact match plus its children ... plus n levels of children )
+ * @param[in] context Context that will be passed to @p export_func
  * @return 0 on success, non-zero on failure
  */
 int registry_export(int (*export_func)(const int *path, int path_len,
