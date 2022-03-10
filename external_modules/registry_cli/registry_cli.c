@@ -12,7 +12,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-static int _parse_string_path(char *path, int *buf, int *buf_len)
+static int _parse_string_path(char *path, registry_path_t *buf)
 {
     int buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -22,7 +22,17 @@ static int _parse_string_path(char *path, int *buf, int *buf_len)
 
     for (int i = 0; i <= path_len; i++) {
         if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
-            buf[buf_index++] = atoi(curr_path_segment);
+            switch (buf_index) {
+            case 0: buf->root_group = atoi(curr_path_segment); break;
+            case 1: buf->schema_id = atoi(curr_path_segment); break;
+            case 2: buf->instance_id = atoi(curr_path_segment); break;
+
+            default:
+                buf->path[buf->path_len++] = atoi(curr_path_segment);
+                break;
+            }
+
+            buf_index++;
             curr_path_segment_index = 0;
         }
         else {
@@ -34,7 +44,6 @@ static int _parse_string_path(char *path, int *buf, int *buf_len)
         }
     }
 
-    *buf_len = buf_index;
     return 0;
 }
 
@@ -94,11 +103,10 @@ int registry_cli_cmd(int argc, char **argv)
 
     bool invalid_path = false;
 
-    int path[REGISTRY_MAX_DIR_DEPTH];
-    int path_len = 0;
+    registry_path_t path;
 
     if (argc > 2) {
-        if (_parse_string_path(argv[2], path, &path_len) < 0) {
+        if (_parse_string_path(argv[2], &path) < 0) {
             invalid_path = true;
         }
     }

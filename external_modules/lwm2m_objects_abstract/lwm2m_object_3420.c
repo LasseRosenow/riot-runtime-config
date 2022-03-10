@@ -14,15 +14,16 @@ enum object_properties {
 static int _get_rgb_value(int instance, void *buf, int buf_len)
 {
     (void)buf_len;
+    registry_path_t path;
 
-    int path_red[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_RED };
-    uint8_t red = registry_get_uint8(path_red, ARRAY_SIZE(path_red));
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_RED);
+    uint8_t red = registry_get_uint8(path);
 
-    int path_green[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_GREEN };
-    uint8_t green = registry_get_uint8(path_green, ARRAY_SIZE(path_green));
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_GREEN);
+    uint8_t green = registry_get_uint8(path);
 
-    int path_blue[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_BLUE };
-    uint8_t blue = registry_get_uint8(path_blue, ARRAY_SIZE(path_blue));
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_BLUE);
+    uint8_t blue = registry_get_uint8(path);
 
     sprintf(buf, "%02X%02X%02X", red, green, blue);
 
@@ -32,6 +33,7 @@ static int _get_rgb_value(int instance, void *buf, int buf_len)
 static int _set_rgb_value(int instance, void *val, int val_len)
 {
     (void)val_len;
+    registry_path_t path;
 
     /* Convert Hex-String to rgb integers */
     uint8_t r, g, b;
@@ -40,25 +42,21 @@ static int _set_rgb_value(int instance, void *val, int val_len)
 
 
     /* Set rgb values in registry */
-    int path_red[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_RED };
-
-    registry_set_uint8(path_red, ARRAY_SIZE(path_red), r);
-
-
-    int path_green[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_GREEN };
-
-    registry_set_uint8(path_green, ARRAY_SIZE(path_green), g);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_RED);
+    registry_set_uint8(path, r);
 
 
-    int path_blue[] = { REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_BLUE };
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_GREEN);
+    registry_set_uint8(path, g);
 
-    registry_set_uint8(path_blue, ARRAY_SIZE(path_blue), b);
+
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance, REGISTRY_SCHEMA_RGB_LED_BLUE);
+    registry_set_uint8(path, b);
 
 
     /* Apply changes */
-    int path_commit[] = { REGISTRY_SCHEMA_RGB_LED, instance };
-
-    registry_commit(path_commit, ARRAY_SIZE(path_commit));
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, instance);
+    registry_commit(path);
 
 
     return 0;

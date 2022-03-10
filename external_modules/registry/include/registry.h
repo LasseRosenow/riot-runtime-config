@@ -273,21 +273,27 @@ typedef struct {
     registry_root_group_t root_group;
     int *schema_id;
     int *instance_id;
-    const int *path;
+    int *path;
     int path_len;
 } registry_path_t;
 
 #define _REGISTRY_PATH_NUMARGS(...)  (sizeof((int[]){ __VA_ARGS__ }) / \
                                       sizeof(int))
 
-#define REGISTRY_PATH_SYS(_schema_id, _instance_id, ...) \
+#define REGISTRY_PATH(_root_group, _schema_id, _instance_id, ...) \
     (registry_path_t) { \
-        .root_group = REGISTRY_ROOT_GROUP_SYS, \
+        .root_group = _root_group, \
         .schema_id = _schema_id, \
         .instance_id = _instance_id, \
         .path = (int[]) { __VA_ARGS__ }, \
         .path_len = _REGISTRY_PATH_NUMARGS(__VA_ARGS__), \
     }
+
+#define REGISTRY_PATH_SYS(_schema_id, _instance_id, ...) \
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_SYS, _schema_id, _instance_id, __VA_ARGS__)
+
+#define REGISTRY_PATH_APP(_schema_id, _instance_id, ...) \
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_APP, _schema_id, _instance_id, __VA_ARGS__)
 
 
 

@@ -173,13 +173,7 @@ static int _registry_store_save_internal(clist_node_t schemas, registry_root_gro
     do {
         schema = container_of(node, registry_schema_t, node);
 
-        registry_path_t path = {
-            .root_group = root_group,
-            .schema_id = schema->id,
-            .instance_id = NULL,
-            .path = NULL,
-            .path_len = 0,
-        };
+        registry_path_t path = REGISTRY_PATH(root_group, schema->id, NULL);
 
         res2 = registry_export(_registry_store_save_one_export_func, path, 0, NULL);
         if (res == 0) {

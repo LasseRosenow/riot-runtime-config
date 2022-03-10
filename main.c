@@ -61,6 +61,11 @@ bool new_registry_get_bool(registry_path_t path);
 
 int main(void)
 {
+    registry_path_t path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0,
+                                             REGISTRY_SCHEMA_TYPES_TEST_U8);
+
+    (void)path;
+
     /* init registry */
     registry_init();
     registry_schemas_init();
@@ -78,7 +83,7 @@ int main(void)
     //registry_coap_cli_init();
     //registry_lwm2m_cli_init();
 
-    registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
+    //registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
     //registry_store_save();
     //registry_store_load();
