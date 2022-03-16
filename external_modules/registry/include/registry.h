@@ -270,7 +270,7 @@ typedef enum {
 } registry_root_group_t;
 
 typedef struct {
-    registry_root_group_t root_group;
+    registry_root_group_t *root_group;
     int *schema_id;
     int *instance_id;
     int *path;
@@ -280,21 +280,74 @@ typedef struct {
 #define _REGISTRY_PATH_NUMARGS(...)  (sizeof((int[]){ __VA_ARGS__ }) / \
                                       sizeof(int))
 
-#define REGISTRY_PATH(_root_group, _schema_id, _instance_id, ...) \
+#define _REGISTRY_PATH_0() \
     (registry_path_t) { \
-        .root_group = _root_group, \
-        .schema_id = _schema_id, \
-        .instance_id = _instance_id, \
+        .root_group = NULL, \
+        .schema_id = NULL, \
+        .instance_id = NULL, \
+        .path = NULL, \
+        .path_len = 0, \
+    }
+
+#define _REGISTRY_PATH_1(_root_group) \
+    (registry_path_t) { \
+        .root_group = (registry_root_group_t[]) { _root_group }, \
+        .schema_id = NULL, \
+        .instance_id = NULL, \
+        .path = NULL, \
+        .path_len = 0, \
+    }
+
+#define _REGISTRY_PATH_2(_root_group, _schema_id) \
+    (registry_path_t) { \
+        .root_group = (registry_root_group_t[]) { _root_group }, \
+        .schema_id = (int[]) { _schema_id }, \
+        .instance_id = NULL, \
+        .path = NULL, \
+        .path_len = 0, \
+    }
+
+#define _REGISTRY_PATH_3(_root_group, _schema_id, _instance_id) \
+    (registry_path_t) { \
+        .root_group = (registry_root_group_t[]) { _root_group }, \
+        .schema_id = (int[]) { _schema_id }, \
+        .instance_id = (int[]) { _instance_id }, \
+        .path = NULL, \
+        .path_len = 0, \
+    }
+
+#define _REGISTRY_PATH_4_AND_MORE(_root_group, _schema_id, _instance_id, ...) \
+    (registry_path_t) { \
+        .root_group = (registry_root_group_t[]) { _root_group }, \
+        .schema_id = (int[]) { _schema_id }, \
+        .instance_id = (int[]) { _instance_id }, \
         .path = (int[]) { __VA_ARGS__ }, \
         .path_len = _REGISTRY_PATH_NUMARGS(__VA_ARGS__), \
     }
 
-#define REGISTRY_PATH_SYS(_schema_id, _instance_id, ...) \
-    REGISTRY_PATH(REGISTRY_ROOT_GROUP_SYS, _schema_id, _instance_id, __VA_ARGS__)
+#define GET_MACRO(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, NAME, ...) NAME
+#define REGISTRY_PATH(...) \
+    GET_MACRO(_0, ## __VA_ARGS__, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_4_AND_MORE, \
+              _REGISTRY_PATH_3, \
+              _REGISTRY_PATH_2, \
+              _REGISTRY_PATH_1, \
+              _REGISTRY_PATH_0) \
+    (__VA_ARGS__)
 
-#define REGISTRY_PATH_APP(_schema_id, _instance_id, ...) \
-    REGISTRY_PATH(REGISTRY_ROOT_GROUP_APP, _schema_id, _instance_id, __VA_ARGS__)
+#define REGISTRY_PATH_SYS(...) \
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_SYS, __VA_ARGS__)
 
+#define REGISTRY_PATH_APP(...) \
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_APP, __VA_ARGS__)
+
+// _Generic((-2), int : absi, double : absd)
 
 
 

@@ -12,13 +12,13 @@ static clist_node_t load_srcs;
 
 static void _debug_print_path(const registry_path_t path)
 {
-    DEBUG("%d", path.root_group);
+    DEBUG("%d", *path.root_group);
 
     if (path.schema_id != NULL) {
-        DEBUG("/%d", path.schema_id);
+        DEBUG("/%d", *path.schema_id);
 
         if (path.instance_id != NULL) {
-            DEBUG("/%d", path.instance_id);
+            DEBUG("/%d", *path.instance_id);
 
             if (path.path_len > 0) {
                 DEBUG("/");
@@ -173,7 +173,7 @@ static int _registry_store_save_internal(clist_node_t schemas, registry_root_gro
     do {
         schema = container_of(node, registry_schema_t, node);
 
-        registry_path_t path = REGISTRY_PATH(root_group, schema->id, NULL);
+        registry_path_t path = REGISTRY_PATH(root_group, schema->id);
 
         res2 = registry_export(_registry_store_save_one_export_func, path, 0, NULL);
         if (res == 0) {
@@ -190,8 +190,6 @@ static int _registry_store_save_internal(clist_node_t schemas, registry_root_gro
 
 int registry_store_save(void)
 {
-    registry_schema_t *schema;
-    clist_node_t *node = registry_schemas_sys.next;
     int res = 0;
     int res2;
 

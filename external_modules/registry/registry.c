@@ -159,14 +159,14 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
                          registry_type_t val_type)
 {
     /* lookup schema */
-    registry_schema_t *schema = _schema_lookup(path.schema_id);
+    registry_schema_t *schema = _schema_lookup(*path.schema_id);
 
     if (!schema) {
         return -EINVAL;
     }
 
     /* lookup instance */
-    registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
+    registry_instance_t *instance = _instance_lookup(schema, *path.instance_id);
 
     if (!instance) {
         return -EINVAL;
@@ -206,14 +206,14 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
                          registry_type_t val_type)
 {
     /* lookup schema */
-    registry_schema_t *schema = _schema_lookup(path.schema_id);
+    registry_schema_t *schema = _schema_lookup(*path.schema_id);
 
     if (!schema) {
         return -EINVAL;
     }
 
     /* lookup instance */
-    registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
+    registry_instance_t *instance = _instance_lookup(schema, *path.instance_id);
 
     if (!instance) {
         return -EINVAL;
@@ -263,7 +263,7 @@ int registry_commit(const registry_path_t path)
     /* schema/? */
     if (path.schema_id != NULL) {
         /* lookup schema */
-        registry_schema_t *schema = _schema_lookup(path.schema_id);
+        registry_schema_t *schema = _schema_lookup(*path.schema_id);
         if (!schema) {
             return -EINVAL;
         }
@@ -271,7 +271,7 @@ int registry_commit(const registry_path_t path)
         /* schema/Instance */
         if (path.instance_id != NULL) {
             /* lookup instance */
-            registry_instance_t *instance = _instance_lookup(schema, path.instance_id);
+            registry_instance_t *instance = _instance_lookup(schema, *path.instance_id);
             if (!instance) {
                 return -EINVAL;
             }
@@ -386,13 +386,13 @@ int registry_export(int (*export_func)(const registry_path_t path,
 
     DEBUG("[registry export] exporting all in ");
     for (int i = 0; i < path.path_len; i++) {
-        DEBUG("/%d", path[i]);
+        DEBUG("/%d", path.path[i]);
     }
     DEBUG("\n");
 
     /* Get schema, if in path */
     if (path.schema_id != NULL) {
-        schema = _schema_lookup(path.schema_id);
+        schema = _schema_lookup(*path.schema_id);
         if (!schema) {
             return -EINVAL;
         }
@@ -402,7 +402,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
 
         /* Get instance, if in path */
         if (path.instance_id != NULL) {
-            instance = _instance_lookup(schema, path.instance_id);
+            instance = _instance_lookup(schema, *path.instance_id);
             if (!instance) {
                 return -EINVAL;
             }
@@ -471,7 +471,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
                     registry_path_t new_path = {
                         .root_group = path.root_group,
                         .schema_id = path.schema_id,
-                        .instance_id = instance_id,
+                        .instance_id = &instance_id,
                         .path = NULL,
                         .path_len = 0,
                     };
@@ -516,7 +516,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
                 /* Create new path that includes the new schema_id */
                 registry_path_t new_path = {
                     .root_group = path.root_group,
-                    .schema_id = schema->id,
+                    .schema_id = &schema->id,
                     .instance_id = NULL,
                     .path = NULL,
                     .path_len = 0,
@@ -546,7 +546,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
                         /* Create new path that includes the new schema_id and instance_id */
                         registry_path_t new_path = {
                             .root_group = path.root_group,
-                            .schema_id = instance_id,
+                            .schema_id = &instance_id,
                             .instance_id = NULL,
                             .path = NULL,
                             .path_len = 0,

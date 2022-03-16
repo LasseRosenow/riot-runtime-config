@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <base64.h>
+#include <kernel_defines.h>
 
 #include "registry.h"
 

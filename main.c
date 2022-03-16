@@ -57,15 +57,8 @@ registry_store_t dummy_store = {
     .itf = &dummy_store_itf,
 };
 
-bool new_registry_get_bool(registry_path_t path);
-
 int main(void)
 {
-    registry_path_t path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0,
-                                             REGISTRY_SCHEMA_TYPES_TEST_U8);
-
-    (void)path;
-
     /* init registry */
     registry_init();
     registry_schemas_init();
