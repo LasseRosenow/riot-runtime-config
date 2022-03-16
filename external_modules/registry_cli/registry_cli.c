@@ -103,7 +103,7 @@ int registry_cli_cmd(int argc, char **argv)
 
     bool invalid_path = false;
 
-    registry_path_t path;
+    registry_path_t path = REGISTRY_PATH();
 
     if (argc > 2) {
         if (_parse_string_path(argv[2], &path) < 0) {
