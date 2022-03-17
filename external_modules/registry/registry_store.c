@@ -10,9 +10,21 @@
 static registry_store_t *save_dst;
 static clist_node_t load_srcs;
 
+static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_group_id)
+{
+    switch (root_group_id) {
+    case REGISTRY_ROOT_GROUP_SYS:
+        return &registry_root_group_sys;
+    case REGISTRY_ROOT_GROUP_APP:
+        return &registry_root_group_app;
+    }
+
+    return NULL;
+}
+
 static void _debug_print_path(const registry_path_t path)
 {
-    DEBUG("%d", *path.root_group);
+    DEBUG("%d", *path.root_group_id);
 
     if (path.schema_id != NULL) {
         DEBUG("/%d", *path.schema_id);
@@ -85,7 +97,8 @@ static void _registry_store_dup_check_cb(const registry_path_t path, void *val, 
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
 
-    if (path.root_group != dup_arg->path.root_group || path.schema_id != dup_arg->path.schema_id ||
+    if (path.root_group_id != dup_arg->path.root_group_id ||
+        path.schema_id != dup_arg->path.schema_id ||
         path.instance_id != dup_arg->path.instance_id) {
         return;
     }
@@ -151,12 +164,20 @@ int registry_store_save_one(const registry_path_t path, void *context)
     return _registry_store_save_one_export_func(path, NULL, NULL, NULL, &value, context);
 }
 
-static int _registry_store_save_internal(clist_node_t schemas, registry_root_group_t root_group)
+static int _registry_store_save_internal(registry_root_group_id_t root_group_id)
 {
-    registry_schema_t *schema;
-    clist_node_t *node = schemas.next;
     int res = 0;
     int res2;
+
+    /* lookup root_group */
+    registry_root_group_t *root_group = _root_group_lookup(root_group_id);
+
+    if (!root_group) {
+        return -EINVAL;
+    }
+
+    registry_schema_t *schema;
+    clist_node_t *node = root_group->schemas.next;
 
     if (!node) {
         return -1;
@@ -173,13 +194,13 @@ static int _registry_store_save_internal(clist_node_t schemas, registry_root_gro
     do {
         schema = container_of(node, registry_schema_t, node);
 
-        registry_path_t path = REGISTRY_PATH(root_group, schema->id);
+        registry_path_t path = REGISTRY_PATH(root_group_id, schema->id);
 
         res2 = registry_export(_registry_store_save_one_export_func, path, 0, NULL);
         if (res == 0) {
             res = res2;
         }
-    } while (node != registry_schemas_sys.next);
+    } while (node != root_group->schemas.next);
 
     if (save_dst->itf->save_end) {
         save_dst->itf->save_end(save_dst);
@@ -193,8 +214,8 @@ int registry_store_save(void)
     int res = 0;
     int res2;
 
-    res = _registry_store_save_internal(registry_schemas_sys, REGISTRY_ROOT_GROUP_SYS);
-    res2 = _registry_store_save_internal(registry_schemas_app, REGISTRY_ROOT_GROUP_APP);
+    res = _registry_store_save_internal(REGISTRY_ROOT_GROUP_SYS);
+    res2 = _registry_store_save_internal(REGISTRY_ROOT_GROUP_APP);
 
     if (res == 0) {
         res = res2;

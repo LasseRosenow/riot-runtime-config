@@ -276,8 +276,8 @@ typedef struct {
     clist_node_t schemas;           /**< Linked list of schemas @ref registry_schema_t */
 } registry_root_group_t;
 
-registry_root_group_t registry_root_group_sys;
-registry_root_group_t registry_root_group_app;
+extern registry_root_group_t registry_root_group_sys;
+extern registry_root_group_t registry_root_group_app;
 
 typedef struct {
     registry_root_group_id_t *root_group_id;
@@ -352,12 +352,12 @@ typedef struct {
     (__VA_ARGS__)
 
 #define REGISTRY_PATH_SYS(...) \
-    REGISTRY_PATH(REGISTRY_ROOT_GROUP_SYS, __VA_ARGS__)
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_SYS, ## __VA_ARGS__)
 
 #define REGISTRY_PATH_APP(...) \
-    REGISTRY_PATH(REGISTRY_ROOT_GROUP_APP, __VA_ARGS__)
+    REGISTRY_PATH(REGISTRY_ROOT_GROUP_APP, ## __VA_ARGS__)
 
-// _Generic((-2), int : absi, double : absd)
+
 
 
 

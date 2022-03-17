@@ -68,9 +68,9 @@ int main(void)
     registry_store_register_dst(&dummy_store);
 
     /* add schema instances */
-    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_1);
-    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_2);
-    registry_add_instance(registry_schema_rgb_led.id, &rgb_led_instance_3);
+    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_1);
+    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_2);
+    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_3);
 
     /* for the thread running the shell */
     //registry_coap_cli_init();

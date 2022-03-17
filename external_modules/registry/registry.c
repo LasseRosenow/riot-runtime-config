@@ -66,8 +66,6 @@ static size_t _get_registry_parameter_data_len(registry_type_t type)
 
 static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_group_id)
 {
-    clist_node_t *node;
-
     switch (root_group_id) {
     case REGISTRY_ROOT_GROUP_SYS:
         return &registry_root_group_sys;
@@ -131,7 +129,7 @@ int registry_register_schema(registry_root_group_id_t root_group_id, registry_sc
         return -EINVAL;
     }
 
-    clist_rpush(&registry_root_group_sys.schemas, &(schema->node));
+    clist_rpush(&root_group->schemas, &(schema->node));
 
     return 0;
 }
@@ -376,7 +374,7 @@ static int _registry_commit_root_group(const registry_path_t path)
     }
     /* no schema => call all */
     else {
-        clist_node_t *node = &root_group->schemas.next;
+        clist_node_t *node = root_group->schemas.next;
 
         if (!node) {
             return -EINVAL;
@@ -386,19 +384,11 @@ static int _registry_commit_root_group(const registry_path_t path)
             node = node->next;
             registry_schema_t *schema = container_of(node, registry_schema_t, node);
 
-            registry_path_t new_path = {
-                .root_group_id = path.root_group_id,
-                .schema_id = schema->id,
-                .instance_id = NULL,
-                .path = NULL,
-                .path_len = 0,
-            };
-
-            int _rc = _registry_commit_schema(new_path);
+            int _rc = _registry_commit_schema(REGISTRY_PATH(*path.root_group_id, schema->id));
             if (!_rc) {
                 rc = _rc;
             }
-        } while (node != &root_group->schemas.next);
+        } while (node != root_group->schemas.next);
     }
 
     return rc;
@@ -422,7 +412,7 @@ int registry_commit(const registry_path_t path)
         }
 
         /* Commit app root group */
-        int _rc = _registry_commit_root_group(REGISTRY_PATH_APP());
+        _rc = _registry_commit_root_group(REGISTRY_PATH_APP());
         if (!_rc) {
             rc = _rc;
         }
@@ -552,6 +542,8 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
                                                       void *context),
                                    const registry_path_t path, int recursion_depth, void *context)
 {
+    int rc = 0;
+
     /* lookup root_group */
     registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
 
@@ -571,10 +563,10 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
 
     /* Get instance, if in path */
     if (path.instance_id != NULL) {
-        int res =
+        int _rc =
             _registry_export_instance(export_func, path, schema, recursion_depth, context);
-        if (res != 0) {
-            return res;
+        if (!_rc) {
+            rc = _rc;
         }
     }
     /* Schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
@@ -611,11 +603,11 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
                     .path_len = 0,
                 };
 
-                int res = _registry_export_instance(export_func, new_path, schema,
+                int _rc = _registry_export_instance(export_func, new_path, schema,
                                                     recursion_depth,
                                                     context);
-                if (res != 0) {
-                    return res;
+                if (!_rc) {
+                    rc = _rc;
                 }
 
                 instance_id++;
@@ -623,7 +615,7 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
         }
     }
 
-    return 0;
+    return rc;
 }
 
 static int _registry_export_root_group(int (*export_func)(const registry_path_t path,
@@ -634,6 +626,8 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
                                                           void *context),
                                        const registry_path_t path, int recursion_depth, void *context)
 {
+    int rc = 0;
+
     /* lookup root_group */
     registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
 
@@ -646,7 +640,10 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
 
     /* Get schema, if in path */
     if (path.schema_id != NULL) {
-        _registry_export_schema(export_func, path, recursion_depth, context);
+        int _rc = _registry_export_schema(export_func, path, recursion_depth, context);
+        if (!_rc) {
+            rc = _rc;
+        }
     }
     /* Empty path => Export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
     else {
@@ -674,10 +671,15 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
                     .path_len = 0,
                 };
 
-                _registry_export_schema(export_func, new_path, recursion_depth, context);
-            } while (schema_node != &root_group->schemas.next);
+                int _rc = _registry_export_schema(export_func, new_path, recursion_depth, context);
+                if (!_rc) {
+                    rc = _rc;
+                }
+            } while (schema_node != root_group->schemas.next);
         }
     }
+
+    return rc;
 }
 
 int registry_export(int (*export_func)(const registry_path_t path,
@@ -690,6 +692,8 @@ int registry_export(int (*export_func)(const registry_path_t path,
 {
     assert(export_func != NULL);
 
+    int rc = 0;
+
     DEBUG("[registry export] exporting all in ");
     for (int i = 0; i < path.path_len; i++) {
         DEBUG("/%d", path.path[i]);
@@ -698,7 +702,10 @@ int registry_export(int (*export_func)(const registry_path_t path,
 
     /* Get root_group if in path */
     if (path.root_group_id != NULL) {
-        _registry_export_root_group(export_func, path, recursion_depth, context);
+        int _rc = _registry_export_root_group(export_func, path, recursion_depth, context);
+        if (!_rc) {
+            rc = _rc;
+        }
     }
     else {
         if (recursion_depth != 1) {
@@ -707,14 +714,22 @@ int registry_export(int (*export_func)(const registry_path_t path,
             }
 
             /* Export sys root group */
-            _registry_export_root_group(export_func, REGISTRY_PATH_SYS(), recursion_depth, context);
+            int _rc = _registry_export_root_group(export_func,
+                                                  REGISTRY_PATH_SYS(), recursion_depth, context);
+            if (!_rc) {
+                rc = _rc;
+            }
 
             /* Export app root group */
-            _registry_export_root_group(export_func, REGISTRY_PATH_APP(), recursion_depth, context);
+            _rc = _registry_export_root_group(export_func,
+                                              REGISTRY_PATH_APP(), recursion_depth, context);
+            if (!_rc) {
+                rc = _rc;
+            }
         }
     }
 
-    return 0;
+    return rc;
 }
 
 /* registry_set functions */
