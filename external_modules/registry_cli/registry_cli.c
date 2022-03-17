@@ -12,6 +12,18 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
+static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_group_id)
+{
+    switch (root_group_id) {
+    case REGISTRY_ROOT_GROUP_SYS:
+        return &registry_root_group_sys;
+    case REGISTRY_ROOT_GROUP_APP:
+        return &registry_root_group_app;
+    }
+
+    return NULL;
+}
+
 static int _parse_string_path(char *path, registry_path_t *buf)
 {
     int buf_index = 0;
@@ -54,6 +66,8 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
     (void)value;
     (void)context;
 
+    registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
+
     int path_len = path.path_len;
 
     if (path.root_group_id != NULL) {
@@ -74,7 +88,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
         if (instance == NULL) {
             if (schema == NULL) {
                 /* Root Group */
-                printf("%d\n", *path.root_group_id);
+                printf("%d %s\n", *path.root_group_id, root_group->name);
             }
             else {
                 /* Schema */
