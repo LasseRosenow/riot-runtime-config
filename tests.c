@@ -46,7 +46,7 @@ static void test_registry_setup(void)
     registry_schemas_init();
 
     /* add schema instances */
-    registry_add_instance(REGISTRY_SCHEMA_TYPES_TEST, &test_instance_1);
+    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, REGISTRY_SCHEMA_TYPES_TEST, &test_instance_1);
 }
 
 static void test_registry_teardown(void)
