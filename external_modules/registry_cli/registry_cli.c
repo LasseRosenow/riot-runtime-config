@@ -23,7 +23,7 @@ static int _parse_string_path(char *path, registry_path_t *buf)
     for (int i = 0; i <= path_len; i++) {
         if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
             switch (buf_index) {
-            case 0: *buf->root_group = atoi(curr_path_segment); break;
+            case 0: *buf->root_group_id = atoi(curr_path_segment); break;
             case 1: *buf->schema_id = atoi(curr_path_segment); break;
             case 2: *buf->instance_id = atoi(curr_path_segment); break;
 
@@ -56,7 +56,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 
     int path_len = path.path_len;
 
-    if (path.root_group != NULL) {
+    if (path.root_group_id != NULL) {
         path_len++;
     }
 
@@ -74,7 +74,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
         if (instance == NULL) {
             if (schema == NULL) {
                 /* Root Group */
-                printf("%d\n", *path.root_group);
+                printf("%d\n", *path.root_group_id);
             }
             else {
                 /* Schema */
