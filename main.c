@@ -22,10 +22,37 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
-registry_schema_rgb_led_t rgb_led_instance_1_data = {
+int rgb_led_instance_0_commit_cb(const registry_path_t path, void *context)
+{
+    (void)context;
+    printf("RGB Instance 0 commit_cb was executed: %d", *path.root_group_id);
+    if (path.schema_id) {
+        printf("/%d", *path.schema_id);
+    }
+    if (path.instance_id) {
+        printf("/%d", *path.schema_id);
+    }
+    for (int i = 0; i < path.path_len; i++) {
+        printf("/%d", path.path[i]);
+    }
+    return 0;
+}
+
+registry_schema_rgb_led_t rgb_led_instance_0_data = {
     .red = 0,
     .green = 255,
     .blue = 70,
+};
+registry_instance_t rgb_led_instance_0 = {
+    .name = "rgb-0",
+    .data = &rgb_led_instance_0_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
+};
+
+registry_schema_rgb_led_t rgb_led_instance_1_data = {
+    .red = 90,
+    .green = 4,
+    .blue = 0,
 };
 registry_instance_t rgb_led_instance_1 = {
     .name = "rgb-1",
@@ -33,23 +60,13 @@ registry_instance_t rgb_led_instance_1 = {
 };
 
 registry_schema_rgb_led_t rgb_led_instance_2_data = {
-    .red = 90,
-    .green = 4,
-    .blue = 0,
-};
-registry_instance_t rgb_led_instance_2 = {
-    .name = "rgb-2",
-    .data = &rgb_led_instance_2_data,
-};
-
-registry_schema_rgb_led_t rgb_led_instance_3_data = {
     .red = 7,
     .green = 8,
     .blue = 9,
 };
-registry_instance_t rgb_led_instance_3 = {
-    .name = "rgb-3",
-    .data = &rgb_led_instance_3_data,
+registry_instance_t rgb_led_instance_2 = {
+    .name = "rgb-2",
+    .data = &rgb_led_instance_2_data,
 };
 
 
@@ -68,9 +85,9 @@ int main(void)
     registry_store_register_dst(&dummy_store);
 
     /* add schema instances */
+    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_0);
     registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_1);
     registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_2);
-    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_3);
 
     /* for the thread running the shell */
     //registry_coap_cli_init();

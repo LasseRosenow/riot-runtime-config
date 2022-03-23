@@ -335,18 +335,28 @@ static int _registry_commit_schema(const registry_path_t path)
         if (!instance) {
             return -EINVAL;
         }
-        int _rc = instance->commit_cb(path, instance->context);
-        if (!_rc) {
-            rc = _rc;
+        if (instance->commit_cb) {
+            int _rc = instance->commit_cb(path, instance->context);
+            if (!_rc) {
+                rc = _rc;
+            }
+        }
+        else {
+            rc = -EINVAL;
         }
     }
     /* only schema */
     else {
         for (size_t i = 0; i < clist_count(&schema->instances); i++) {
             registry_instance_t *instance = _instance_lookup(schema, i);
-            int _rc = instance->commit_cb(path, instance->context);
-            if (!_rc) {
-                rc = _rc;
+            if (instance->commit_cb) {
+                int _rc = instance->commit_cb(path, instance->context);
+                if (!_rc) {
+                    rc = _rc;
+                }
+            }
+            else {
+                rc = -EINVAL;
             }
         }
     }
