@@ -122,7 +122,7 @@ int registry_cli_cmd(int argc, char **argv)
                 case 0: path.root_group_id = (registry_root_group_id_t *)&int_path[i]; break;
                 case 1: path.schema_id = &int_path[i]; break;
                 case 2: path.instance_id = &int_path[i]; break;
-                case 3: path.path = &int_path[i]; break; // Add path.path to correct position in int_path array
+                case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
                 default: path.path_len++; break;
                 }
             }
