@@ -647,7 +647,7 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
     }
     /* Empty path => Export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
     else {
-        clist_node_t *schema_node = &root_group->schemas;
+        clist_node_t *schema_node = root_group->schemas.next;
 
         if (!schema_node) {
             return -EINVAL;

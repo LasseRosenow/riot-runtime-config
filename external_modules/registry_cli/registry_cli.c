@@ -24,7 +24,8 @@ static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_g
     return NULL;
 }
 
-static int _parse_string_path(char *path, registry_path_t *buf)
+
+static int _parse_string_path(char *path, int *buf, int *buf_len)
 {
     int buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -34,17 +35,7 @@ static int _parse_string_path(char *path, registry_path_t *buf)
 
     for (int i = 0; i <= path_len; i++) {
         if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
-            switch (buf_index) {
-            case 0: *buf->root_group_id = atoi(curr_path_segment); break;
-            case 1: *buf->schema_id = atoi(curr_path_segment); break;
-            case 2: *buf->instance_id = atoi(curr_path_segment); break;
-
-            default:
-                buf->path[buf->path_len++] = atoi(curr_path_segment);
-                break;
-            }
-
-            buf_index++;
+            buf[buf_index++] = atoi(curr_path_segment);
             curr_path_segment_index = 0;
         }
         else {
@@ -56,6 +47,7 @@ static int _parse_string_path(char *path, registry_path_t *buf)
         }
     }
 
+    *buf_len = buf_index;
     return 0;
 }
 
@@ -74,15 +66,15 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
         path_len++;
     }
 
-    if (path.schema_id != NULL) {
+    if (schema != NULL) {
         path_len++;
     }
 
-    if (path.instance_id != NULL) {
+    if (instance != NULL) {
         path_len++;
     }
 
-    printf("%*c\b", ((path_len - 1) * 3) + 1, ' ');
+    printf("%*c\b", ((path_len - 1) * 2) + 1, ' ');
 
     if (meta == NULL) {
         if (instance == NULL) {
@@ -110,18 +102,30 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 
 int registry_cli_cmd(int argc, char **argv)
 {
+    bool invalid_path = false;
+    int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
+    int int_path[int_path_len];
+    registry_path_t path = REGISTRY_PATH();
+
     if (argc == 1) {
         /* show help for main commands */
         goto help_error;
     }
 
-    bool invalid_path = false;
-
-    registry_path_t path = REGISTRY_PATH();
-
     if (argc > 2) {
-        if (_parse_string_path(argv[2], &path) < 0) {
+        if (_parse_string_path(argv[2], int_path, &int_path_len) < 0) {
             invalid_path = true;
+        }
+        else {
+            for (int i = 0; i < int_path_len; i++) {
+                switch (i) {
+                case 0: path.root_group_id = (registry_root_group_id_t *)&int_path[i]; break;
+                case 1: path.schema_id = &int_path[i]; break;
+                case 2: path.instance_id = &int_path[i]; break;
+                case 3: path.path = &int_path[i]; break; // Add path.path to correct position in int_path array
+                default: path.path_len++; break;
+                }
+            }
         }
     }
 
@@ -176,5 +180,6 @@ int registry_cli_cmd(int argc, char **argv)
 
 help_error:
     printf("usage: %s {get|set|commit|export}\n", argv[0]);
+
     return 1;
 }
