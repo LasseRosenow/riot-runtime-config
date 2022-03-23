@@ -148,11 +148,11 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
             if (schema_item->id == path.path[path_index]) {
                 if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER &&
                     path_index == path.path_len - 1) {
-                    // If this is the last path segment and it is a parameter => return the parameter
+                    // if this is the last path segment and it is a parameter => return the parameter
                     return schema_item;
                 }
                 else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
-                    // If this is not the last path segment and its a group => update schemas and schemas_len values
+                    // if this is not the last path segment and its a group => update schemas and schemas_len values
                     schema_items = schema_item->value.group.items;
                     schema_items_len = schema_items->value.group.items_len;
                 }
@@ -328,7 +328,7 @@ static int _registry_commit_schema(const registry_path_t path)
         return -EINVAL;
     }
 
-    /* schema/Instance */
+    /* schema/instance */
     if (path.instance_id != NULL) {
         /* lookup instance */
         registry_instance_t *instance = _instance_lookup(schema, *path.instance_id);
@@ -340,7 +340,7 @@ static int _registry_commit_schema(const registry_path_t path)
             rc = _rc;
         }
     }
-    /* only Schema */
+    /* only schema */
     else {
         for (size_t i = 0; i < clist_count(&schema->instances); i++) {
             registry_instance_t *instance = _instance_lookup(schema, i);
@@ -405,13 +405,13 @@ int registry_commit(const registry_path_t path)
         }
     }
     else {
-        /* Commit sys root group */
+        /* commit sys root group */
         int _rc = _registry_commit_root_group(REGISTRY_PATH_SYS());
         if (!_rc) {
             rc = _rc;
         }
 
-        /* Commit app root group */
+        /* commit app root group */
         _rc = _registry_commit_root_group(REGISTRY_PATH_APP());
         if (!_rc) {
             rc = _rc;
@@ -434,7 +434,7 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
     for (int i = 0; i < schema_items_len; i++) {
         registry_schema_item_t schema_item = schema_items[i];
 
-        /* Create new path including the current schema_item */
+        /* create new path including the current schema_item */
         int _new_path_path[current_path.path_len + 1];
         for (int j = 0; j < current_path.path_len; j++) {
             _new_path_path[j] = current_path.path[j];
@@ -448,9 +448,9 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
             .path_len = ARRAY_SIZE(_new_path_path),
         };
 
-        /* Check if the current schema_item is a group or a parameter */
+        /* check if the current schema_item is a group or a parameter */
         if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
-            /* Parameter found => Export */
+            /* parameter found => export */
             char val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
             registry_value_t val = {
                 .buf = val_buf,
@@ -460,14 +460,14 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
             export_func(new_path, schema, instance, &schema_item, &val, context);
         }
         else if (schema_item.type == REGISTRY_SCHEMA_TYPE_GROUP) {
-            /* Group => search for parameters */
+            /* group => search for parameters */
             registry_schema_group_t group = schema_item.value.group;
 
             export_func(new_path, schema, instance, &schema_item, NULL, context);
 
-            /* If recursion_depth is not 1 then not only the group itself will be exported, but also its children depending on recursion_depth */
+            /* if recursion_depth is not 1 then not only the group itself will be exported, but also its children depending on recursion_depth */
             if (recursion_depth != 1) {
-                int new_recursion_depth = 0;     // Create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
+                int new_recursion_depth = 0;     // create a new variable, because recursion_depth would otherwise be decreased in each cycle of the for loop
                 if (recursion_depth != 0) {
                     new_recursion_depth = recursion_depth - 1;
                 }
@@ -494,14 +494,14 @@ static int _registry_export_instance(int (*export_func)(const registry_path_t pa
         return -EINVAL;
     }
 
-    /* Export instance */
+    /* export instance */
     export_func(path, schema, instance, NULL, NULL, context);
 
-    /* Schema/Instance/Item => Export concrete schema item with data of the given instance */
+    /* schema/instance/item => export concrete schema item with data of the given instance */
     if (path.path_len > 0) {
         registry_schema_item_t *schema_item = _parameter_meta_lookup(path, schema);
 
-        /* Create a new path which does not include the last value, because _registry_export_params will add it inside */
+        /* create a new path which does not include the last value, because _registry_export_params will add it inside */
         int _new_path_path[path.path_len - 1];
         for (int j = 0; j < path.path_len; j++) {
             _new_path_path[j] = path.path[j];
@@ -517,9 +517,9 @@ static int _registry_export_instance(int (*export_func)(const registry_path_t pa
         _registry_export_params(export_func, new_path, schema, instance,
                                 schema_item, 1, recursion_depth, context);
     }
-    /* Schema/Instance => Export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
+    /* schema/instance => export the schema instance meta data (name) and its parameters recursively depending on recursion_depth */
     else if (path.path_len == 0) {
-        /* Export instance parameters (recursion_depth == 1 means only the exact path, which would only be a specific instance in this case) */
+        /* export instance parameters (recursion_depth == 1 means only the exact path, which would only be a specific instance in this case) */
         if (recursion_depth != 1) {
             if (recursion_depth != 0) {
                 recursion_depth--;
@@ -558,10 +558,10 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
         return -EINVAL;
     }
 
-    /* Export schema */
+    /* export schema */
     export_func(path, schema, NULL, NULL, NULL, context);
 
-    /* Get instance, if in path */
+    /* get instance, if in path */
     if (path.instance_id != NULL) {
         int _rc =
             _registry_export_instance(export_func, path, schema, recursion_depth, context);
@@ -569,9 +569,9 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
             rc = _rc;
         }
     }
-    /* Schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
+    /* schema => Export schema meta data (name, description etc.) and its items depending on recursion_depth */
     else {
-        /* Export instances (recursion_depth == 1 means only the exact path, which would only be a specific schema in this case) */
+        /* export instances (recursion_depth == 1 means only the exact path, which would only be a specific schema in this case) */
         if (recursion_depth != 1) {
             if (recursion_depth != 0) {
                 recursion_depth--;
@@ -594,7 +594,7 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
                     return -EINVAL;
                 }
 
-                /* Create new path that includes the new instance_id */
+                /* create new path that includes the new instance_id */
                 registry_path_t new_path = {
                     .root_group_id = path.root_group_id,
                     .schema_id = path.schema_id,
@@ -635,17 +635,17 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
         return -EINVAL;
     }
 
-    /* Export root_group */
+    /* export root_group */
     export_func(path, NULL, NULL, NULL, NULL, context);
 
-    /* Get schema, if in path */
+    /* get schema, if in path */
     if (path.schema_id != NULL) {
         int _rc = _registry_export_schema(export_func, path, recursion_depth, context);
         if (!_rc) {
             rc = _rc;
         }
     }
-    /* Empty path => Export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
+    /* empty path => export everything depending on recursion_depth (0 = everything, 1 = nothing, 2 = all schemas, 3 = all schemas and all their instances etc.) */
     else {
         clist_node_t *schema_node = root_group->schemas.next;
 
@@ -662,7 +662,7 @@ static int _registry_export_root_group(int (*export_func)(const registry_path_t 
                 schema_node = schema_node->next;
                 registry_schema_t *schema = container_of(schema_node, registry_schema_t, node);
 
-                /* Create new path that includes the new schema_id */
+                /* create new path that includes the new schema_id */
                 registry_path_t new_path = {
                     .root_group_id = path.root_group_id,
                     .schema_id = &schema->id,
@@ -700,7 +700,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
     }
     DEBUG("\n");
 
-    /* Get root_group if in path */
+    /* get root_group if in path */
     if (path.root_group_id != NULL) {
         int _rc = _registry_export_root_group(export_func, path, recursion_depth, context);
         if (!_rc) {
@@ -713,14 +713,14 @@ int registry_export(int (*export_func)(const registry_path_t path,
                 recursion_depth--;
             }
 
-            /* Export sys root group */
+            /* export sys root group */
             int _rc = _registry_export_root_group(export_func,
                                                   REGISTRY_PATH_SYS(), recursion_depth, context);
             if (!_rc) {
                 rc = _rc;
             }
 
-            /* Export app root group */
+            /* export app root group */
             _rc = _registry_export_root_group(export_func,
                                               REGISTRY_PATH_APP(), recursion_depth, context);
             if (!_rc) {
