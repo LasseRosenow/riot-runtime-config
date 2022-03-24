@@ -25,16 +25,14 @@ static const shell_command_t shell_commands[] = {
 int rgb_led_instance_0_commit_cb(const registry_path_t path, void *context)
 {
     (void)context;
-    printf("RGB Instance 0 commit_cb was executed: %d", *path.root_group_id);
+    printf("RGB instance commit_cb was executed: %d", *path.root_group_id);
     if (path.schema_id) {
         printf("/%d", *path.schema_id);
     }
     if (path.instance_id) {
-        printf("/%d", *path.schema_id);
+        printf("/%d", *path.instance_id);
     }
-    for (int i = 0; i < path.path_len; i++) {
-        printf("/%d", path.path[i]);
-    }
+    printf("\n");
     return 0;
 }
 
@@ -57,6 +55,7 @@ registry_schema_rgb_led_t rgb_led_instance_1_data = {
 registry_instance_t rgb_led_instance_1 = {
     .name = "rgb-1",
     .data = &rgb_led_instance_1_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
 };
 
 registry_schema_rgb_led_t rgb_led_instance_2_data = {
@@ -67,6 +66,7 @@ registry_schema_rgb_led_t rgb_led_instance_2_data = {
 registry_instance_t rgb_led_instance_2 = {
     .name = "rgb-2",
     .data = &rgb_led_instance_2_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
 };
 
 

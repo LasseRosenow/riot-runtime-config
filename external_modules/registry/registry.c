@@ -336,7 +336,9 @@ static int _registry_commit_schema(const registry_path_t path)
             return -EINVAL;
         }
         if (instance->commit_cb) {
-            int _rc = instance->commit_cb(path, instance->context);
+            registry_path_t new_path = REGISTRY_PATH(*path.root_group_id, *path.schema_id,
+                                                     *path.instance_id);
+            int _rc = instance->commit_cb(new_path, instance->context);
             if (!_rc) {
                 rc = _rc;
             }
@@ -350,7 +352,8 @@ static int _registry_commit_schema(const registry_path_t path)
         for (size_t i = 0; i < clist_count(&schema->instances); i++) {
             registry_instance_t *instance = _instance_lookup(schema, i);
             if (instance->commit_cb) {
-                int _rc = instance->commit_cb(path, instance->context);
+                registry_path_t new_path = REGISTRY_PATH(*path.root_group_id, *path.schema_id, i);
+                int _rc = instance->commit_cb(new_path, instance->context);
                 if (!_rc) {
                     rc = _rc;
                 }

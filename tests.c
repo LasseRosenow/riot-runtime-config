@@ -11,6 +11,20 @@
 
 #include "tests.h"
 
+int test_instance_0_commit_cb(const registry_path_t path, void *context)
+{
+    (void)context;
+    printf("Test instance commit_cb was executed: %d", *path.root_group_id);
+    if (path.schema_id) {
+        printf("/%d", *path.schema_id);
+    }
+    if (path.instance_id) {
+        printf("/%d", *path.instance_id);
+    }
+    printf("\n");
+    return 0;
+}
+
 registry_schema_types_test_t test_instance_1_data = {
     .string = "hallo",
     .boolean = true,
@@ -37,6 +51,7 @@ registry_schema_types_test_t test_instance_1_data = {
 registry_instance_t test_instance_1 = {
     .name = "test-1",
     .data = &test_instance_1_data,
+    .commit_cb = &test_instance_0_commit_cb,
 };
 
 static void test_registry_setup(void)
