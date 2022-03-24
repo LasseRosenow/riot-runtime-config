@@ -56,21 +56,20 @@ and the following acronyms and definitions:
 
 ### Definitions
 
-- Configuration group: A set of key-value configurations with the same naming
- scheme and under the same scope. E.g `LIGHT_SENSOR_THRESHOLD` and
-`TRANSMISSION_PERIOD` configuration parameters can be contained in an
-_Application_ configuration group, as well as `IEEE802154_CHANNEL` and
-`IEEE802154_TX_POWER` in an _IEEE802.15.4 Radio_ configuration group.
-Within RIOT, each Configuration Group is represented by a Configuration Schema.
+- Root Configuration Group: A root group, that splits configuration schemas in 2 categories: `SYS` and `APP`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
+The `APP` root configuration group must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
 
 - Configuration Schema: A descriptor that acts as an interface between the RIOT Registry and a module that exposes configurations. It provides a common interface to `get` and `set` configurations of a given instance and provides Meta-Data for each configuration parameter `(type, name, description, ...)` as a tree structure. A CS can have multiple Schema Instances (SI).
 
 - Schema Instance: An instance of a CS (Configuration Schema), containing the configuration parameter values. Different `modules/drivers` can use their own SI of the same CS.
 
-- Storage Facility: A descriptor that acts as an interface between the RIOT
-Registry and a non-volatile storage device. It provides a common interface to
-`load` and `store` key-value data from storage devices that might have different
-data representations.
+- Configuration Group: A set of key-value configurations under the same scope. E.g `LIGHT_SENSOR_THRESHOLD` and
+`TRANSMISSION_PERIOD` configuration parameters can be contained in an
+_Application_ configuration group, as well as `IEEE802154_CHANNEL` and
+`IEEE802154_TX_POWER` in an _IEEE802.15.4 Radio_ configuration group.
+Within RIOT, each configuration schema contains one configuration group. And each configuration group can contain multiple sub configuration groups.
+
+- Storage Facility: A descriptor that acts as an interface between the RIOT Registry and a non-volatile storage device. It provides a common interface to `load` and `store` key-value data from storage devices that might have different data representations.
 
 # 1. Introduction
 
@@ -127,10 +126,10 @@ The API of the RIOT Registry allows to:
 - Register a CS to expose a configuration group in the RIOT Registry.
 - Add instances to a CS, to expose real values to the RIOT Registry.
 - Register source and destination SF.
-- Get or set configuration parameters for a given configuration group instance.
+- Get or set configuration parameters for a given configuration schema instance.
 - Commit changes (transactionally apply configurations).
 - Export configuration parameters (e.g copy to a buffer, print, etc).
-- Load and store configuration parameters from and to a persistent.storage device.
+- Load and store configuration parameters from and to a persistent storage device.
 
 Any mechanism of security (access control, encryption of configurations) is NOT
 directly in the scope of the Registry but in the Configuration Managers and the
@@ -142,7 +141,7 @@ information.
 ## 3.1. Configuration Schemas
 
 A CS represents a configuration group in the RIOT Registry. A RIOT
-module requires to add an instance to a given Configuration Schema in order to expose its configurations to the Registry API. Or needs to implement its own custom CS.
+module is required to add an instance to a given Configuration Schema in order to expose its configurations to the Registry API. Or needs to implement its own custom CS.
 
 A CS is defined by an id, some Meta-Data (name, description) and a get and set handler for interacting with the configuration parameters of the configuration group.
 
@@ -151,20 +150,20 @@ A CS is defined by an id, some Meta-Data (name, description) and a get and set h
 
 The CS also contains the struct that specifies how each instance (SI) stores the actual data.
 
-A conceptual example of a RH implementation can be found in the
+A conceptual example of a CS implementation can be found in the
 [Appendix](#Appendix).
 
 ## 3.1.1 Schema Instances
 
-An instance of a CS, which contains the actual data values. It can be added to a CS and contains a `commit_cb` handler, to notify the module containing the instance about changes.
+An instance of a CS, which contains the actual data values. It can be added to a CS and contains a `commit_cb` handler, to notify the module containing the instance about configuration changes that need to be applied.
 
-- `commit_cb`: To be called once configuration parameters have been `set`, in order o apply any further logic required to make them effective (e.g. handling dependencies).
+- `commit_cb`: To be called once configuration parameters have been `set`, in order to apply any further logic required to make them effective (e.g. handling dependencies).
 
-## 3.2. Storage facilities
+## 3.2. Storage Facilities
 
-Storage facilities MUST implement the **storage interface** to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value strings, it is responsibility of the SF to transform that to the proper format for storage (e.g. lines separated by `\n` character in a file).
+Storage facilities MUST implement the **storage interface** to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value pairs with certain types, it is the responsibility of the SF to transform those into a proper format to store them. (E.g. lines separated by `\n` character in a file or encoded in cbor etc.).
 
-The interface of a SF is defined with a descriptor with the following attributes:
+The interface of a SF is defined with a descriptor that has the following attributes:
 
 - `load`: Executes a callback function for every configuration parameter stored in the storage.
 - `store`: Stores one configuration parameter in the storage.
@@ -208,7 +207,7 @@ Figure 04 - Behavioral flow of the basic API of the RIOT Registry
 
 At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_store_load` function) or _store_ them in the SF destination (`registry_store_save` function).
 
-As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will navigate through all RH and call their _export_ function with the SF _store_ handler as callback.
+As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF _store_ handler as callback.
 
 Figure 05 shows the above described processes.
 
@@ -221,21 +220,24 @@ Figure 05 - Behavioral flow of the store_load and store_save calls
 
 ![Figure 06](./doc/images/api.svg "RIOT Registry API")
 
-```c
+```c++
 /* Base */
 void registry_init(void);
-void registry_register_schema(registry_schema_t *schema);
-int registry_add_instance(int schema_id, registry_instance_t *instance);
-int registry_set_value(const int *path, int path_len, const void *val, int val_len);
-registry_value_t *registry_get_value(const int *path, int path_len, registry_value_t *value);
-int registry_commit(const int *path, int path_len);
-int registry_export(int (*export_func)(const int *path, int path_len,
+int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
+int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
+int registry_set_value(const registry_path_t path, const void *val, int val_len);
+registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
+int registry_commit(const registry_path_t path);
+int registry_export(int (*export_func)(
+    const registry_path_t path,
     const registry_schema_t *schema,
     const registry_instance_t *instance,
     const registry_schema_item_t *meta,
     const registry_value_t *value,
     void *context
-  ), const int *path, int path_len, int recursion_depth, void *context);
+  ),
+  const registry_path_t path, int recursion_depth, void *context
+);
 
 
 /* Store */
@@ -244,7 +246,7 @@ void registry_store_register_src(registry_store_t *src);
 void registry_store_register_dst(registry_store_t *dst);
 int registry_store_load(void);
 int registry_store_save(void);
-int registry_store_save_one(const int *path, int path_len, void *context);
+int registry_store_save_one(const registry_path_t path, void *context);
 
 
 /* Schemas */
@@ -252,31 +254,31 @@ void registry_schemas_init(void);
 
 
 /* Set convenience functions */
-int registry_set_string(const int *path, int path_len, const char *val);
-int registry_set_bool(const int *path, int path_len, bool val);
-int registry_set_uint8(const int *path, int path_len, uint8_t val);
-int registry_set_uint16(const int *path, int path_len, uint16_t val);
-int registry_set_uint32(const int *path, int path_len, uint32_t val);
-int registry_set_uint64(const int *path, int path_len, uint64_t val);
-int registry_set_int8(const int *path, int path_len, int8_t val);
-int registry_set_int16(const int *path, int path_len, int16_t val);
-int registry_set_int32(const int *path, int path_len, int32_t val);
-int registry_set_int64(const int *path, int path_len, int64_t val);
-int registry_set_float32(const int *path, int path_len, float val);
-int registry_set_float64(const int *path, int path_len, double val);
+int registry_set_string(const registry_path_t path, const char *val);
+int registry_set_bool(const registry_path_t path, bool val);
+int registry_set_uint8(const registry_path_t path, uint8_t val);
+int registry_set_uint16(const registry_path_t path, uint16_t val);
+int registry_set_uint32(const registry_path_t path, uint32_t val);
+int registry_set_uint64(const registry_path_t path, uint64_t val);
+int registry_set_int8(const registry_path_t path, int8_t val);
+int registry_set_int16(const registry_path_t path, int16_t val);
+int registry_set_int32(const registry_path_t path, int32_t val);
+int registry_set_int64(const registry_path_t path, int64_t val);
+int registry_set_float32(const registry_path_t path, float val);
+int registry_set_float64(const registry_path_t path, double val);
 
 
 /* Get convenience functions */
-char *registry_get_string(const int *path, int path_len, char *buf, int buf_len);
-bool registry_get_bool(const int *path, int path_len);
-uint8_t registry_get_uint8(const int *path, int path_len);
-uint16_t registry_get_uint16(const int *path, int path_len);
-uint32_t registry_get_uint32(const int *path, int path_len);
-uint64_t registry_get_uint64(const int *path, int path_len);
-int8_t registry_get_int8(const int *path, int path_len);
-int16_t registry_get_int16(const int *path, int path_len);
-int32_t registry_get_int32(const int *path, int path_len);
-int64_t registry_get_int64(const int *path, int path_len);
-float registry_get_float32(const int *path, int path_len);
-double registry_get_float64(const int *path, int path_len);
+char *registry_get_string(const registry_path_t path, char *buf, int buf_len);
+bool registry_get_bool(const registry_path_t path);
+uint8_t registry_get_uint8(const registry_path_t path);
+uint16_t registry_get_uint16(const registry_path_t path);
+uint32_t registry_get_uint32(const registry_path_t path);
+uint64_t registry_get_uint64(const registry_path_t path);
+int8_t registry_get_int8(const registry_path_t path);
+int16_t registry_get_int16(const registry_path_t path);
+int32_t registry_get_int32(const registry_path_t path);
+int64_t registry_get_int64(const registry_path_t path);
+float registry_get_float32(const registry_path_t path);
+double registry_get_float64(const registry_path_t path);
 ```
