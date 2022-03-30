@@ -34,7 +34,7 @@ The main advantages of having such a system are:
 
 ## Status
 
-This document is currently under open discussion. This document is a product of
+This document is currently under open discussion. This document is a product of the
 [Configuration Task
 Force](https://github.com/RIOT-OS/RIOT/wiki/Configuration-Task-Force-(CTF)), and
 aims to describe the architecture of a runtime configuration system. The content
@@ -50,26 +50,31 @@ and the following acronyms and definitions:
 - RDM: RIOT Developer Memo
 - CTF: RIOT Configuration Task Force
 - RCS: Runtime Configuration System
+- CP: Configuration Path
 - CS: Configuration Schema
 - SI: Schema Instance
 - SF: Storage Facility
 
 ### Definitions
 
-- Root Configuration Group: A root group, that splits configuration schemas in 2 categories: `SYS` and `APP`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
+- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information so that it knows where to look for the requested value etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
+`(sys_id|app_id)/schema_id/instance_id/(group_id/)*parameter-name`\
+ In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
+
+- __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS` and `APP`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
 The `APP` root configuration group must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
 
-- Configuration Schema: A descriptor that acts as an interface between the RIOT Registry and a module that exposes configurations. It provides a common interface to `get` and `set` configurations of a given instance and provides Meta-Data for each configuration parameter `(type, name, description, ...)` as a tree structure. A CS can have multiple Schema Instances (SI).
+- __Configuration Schema__: A descriptor that acts as an interface between the RIOT Registry and a module that exposes configurations. It provides a common interface to `get` and `set` configurations of a given instance and provides Meta-Data for each configuration parameter `(type, name, description, ...)` as a tree structure. A CS can have multiple Schema Instances (SI).
 
-- Schema Instance: An instance of a CS (Configuration Schema), containing the configuration parameter values. Different `modules/drivers` can use their own SI of the same CS.
+- __Schema Instance__: An instance of a CS (Configuration Schema), containing the configuration parameter values. Different `modules/drivers` can use their own SI of the same CS.
 
-- Configuration Group: A set of key-value configurations under the same scope. E.g `LIGHT_SENSOR_THRESHOLD` and
+- __Configuration Group__: A set of key-value configurations under the same scope. E.g `LIGHT_SENSOR_THRESHOLD` and
 `TRANSMISSION_PERIOD` configuration parameters can be contained in an
-_Application_ configuration group, as well as `IEEE802154_CHANNEL` and
-`IEEE802154_TX_POWER` in an _IEEE802.15.4 Radio_ configuration group.
+*Application* configuration group, as well as `IEEE802154_CHANNEL` and
+`IEEE802154_TX_POWER` in an *IEEE802.15.4 Radio* configuration group.
 Within RIOT, each configuration schema contains one configuration group. And each configuration group can contain multiple sub configuration groups.
 
-- Storage Facility: A descriptor that acts as an interface between the RIOT Registry and a non-volatile storage device. It provides a common interface to `load` and `store` key-value data from storage devices that might have different data representations.
+- __Storage Facility__: A descriptor that acts as an interface between the RIOT Registry and a non-volatile storage device. It provides a common interface to `load` and `store` key-value data from storage devices that might have different data representations.
 
 # 1. Introduction
 
@@ -106,7 +111,7 @@ The diagram differentiates between 2 different kinds of Configuration Managers:
 
 # 3. The RIOT Registry
 
-The RIOT Registry is a module for interacting with **persistent key-value configurations**. It's heavily inspired by the
+The RIOT Registry is a module for interacting with __persistent key-value configurations__. It's heavily inspired by the
 [Mynewt Config subsystem](https://mynewt.apache.org/latest/os/modules/config/config.html)
 
 The RIOT Registry interacts with RIOT modules via
@@ -161,7 +166,7 @@ An instance of a CS, which contains the actual data values. It can be added to a
 
 ## 3.2. Storage Facilities
 
-Storage facilities MUST implement the **storage interface** to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value pairs with certain types, it is the responsibility of the SF to transform those into a proper format to store them. (E.g. lines separated by `\n` character in a file or encoded in cbor etc.).
+Storage facilities MUST implement the __storage interface__ to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value pairs with certain types, it is the responsibility of the SF to transform those into a proper format to store them. (E.g. lines separated by `\n` character in a file or encoded in cbor etc.).
 
 The interface of a SF is defined with a descriptor that has the following attributes:
 
@@ -178,7 +183,7 @@ A conceptual example of a SF can be found in the [Appendix](#Appendix).
 
 ### Registry Initialization
 
-As described in the flow in Figure 03, modules add their **Schema Instances (SI)** to pre defined **Configuration Schemas (CS)** or declare and register their own **CS** for configuration groups in the RIOT Registry. **Storage facilities (SF)** are registered as sources and/or destinations of configurations in the RIOT Registry.
+As described in the flow in Figure 03, modules add their __Schema Instances (SI)__ to pre defined __Configuration Schemas (CS)__ or declare and register their own __CS__ for configuration groups in the RIOT Registry. __Storage facilities (SF)__ are registered as sources and/or destinations of configurations in the RIOT Registry.
 
 ![Figure 03](./doc/images/boot_flow.svg "Usage flow of the RIOT Registry")
 <p align="center">
@@ -187,16 +192,17 @@ Figure 03 - Usage flow of the RIOT Registry
 
 ### Get, set, commit and export configurations
 
-At any time, the application or a configuration manager can _retrieve_ a
-configuration value (`registry_get_value`), _set_ a configuration value
-(`registry_set_value`), _commit_ configuration changes (`registry_commit`) or
-_export_ configurations using a user-defined callback function
+At any time, the application or a configuration manager can *retrieve* a
+configuration value (`registry_get_value`), *set* a configuration value
+(`registry_set_value`), *commit* configuration changes (`registry_commit`) or
+*export* configurations using a user-defined callback function
 (`registry_export`).
 
 Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
 
 The following diagrams show the process of each function. It's assumed there
-are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) that is inside the _sys_ root group and a _config_ configuration group that is inside the _app_ root group and has a `foo` configuration parameter.
+are 2 CS registered in the RIOT Registry: a *cord* configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) that is inside the *sys* root group and a *config* configuration group that is inside the *app* root group and has a `foo` configuration parameter.
+A registry path usually consists of integers, but the diagrams below use strings instead just for demonstration purposes only.
 
 #### Behavioral flow of the `get` function
 
@@ -228,9 +234,9 @@ Figure 07 - Behavioral flow of the "export" API
 
 ### Load and save configurations from/to storage
 
-At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_store_load` function) or _store_ them in the SF destination (`registry_store_save` function).
+At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry*store*load` function) or *store* them in the SF destination (`registry_store_save` function).
 
-As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF _store_ handler as callback.
+As one could expect, `registry*store*load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry*store*save` will call `registry_export` on all CS with the SF *store* handler as callback.
 
 Figure 08 shows the above described processes.
 
