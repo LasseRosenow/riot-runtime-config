@@ -58,10 +58,10 @@ and the following acronyms and definitions:
 ### Definitions
 
 - __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
-`(sys_id|app_id)/schema_id/instance_id/(group_id/)*parameter-name`\
+`root_group_id/schema_id/instance_id/(group_id/)*parameter-name`\
  In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
-- __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS` and `APP`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
+- __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS=0` and `APP=1`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
 The `APP` root configuration group must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
 
 - __Configuration Schema__: A descriptor that acts as an interface between the RIOT Registry and a module that exposes configurations. It provides a common interface to `get` and `set` configurations of a given instance and provides Meta-Data for each configuration parameter `(type, name, description, ...)` as a tree structure. A CS can have multiple Schema Instances (SI).
