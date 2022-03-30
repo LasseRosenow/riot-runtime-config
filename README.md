@@ -247,7 +247,7 @@ Figure 08 - Behavioral flow of the store_load and store_save calls
 
 ### Add custom schema to the registry
 
-The registry itself already comes with many configuration schemas that live within the `sys` root configuration group. But sometimes an application needs some custom runtime configurations that are too specific for the registry to abstract, so it is possible to register custom CS within the `app` root configuration group.
+The registry itself already comes with many configuration schemas that live within the `sys` root configuration group. But sometimes an application needs some custom runtime configurations that are too specific for the registry to abstract, so it is possible to register a custom CS within the `app` root configuration group.
 One MUST NOT register a custom schema within the `sys` root configuration group, as this would almost certainly result in conflicts whenever RIOT gets updated.
 
 Below is a diagram that shows the behavioral flow of adding a custom schema:
