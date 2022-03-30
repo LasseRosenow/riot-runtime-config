@@ -185,11 +185,11 @@ As described in the flow in Figure 03, modules add their **Schema Instances (SI)
 Figure 03 - Usage flow of the RIOT Registry
 </p>
 
-### Get, set, apply and export configurations
+### Get, set, commit and export configurations
 
 At any time, the application or a configuration manager can _retrieve_ a
 configuration value (`registry_get_value`), _set_ a configuration value
-(`registry_set_value`), _apply_ configuration changes (`registry_commit`) or
+(`registry_set_value`), _commit_ configuration changes (`registry_commit`) or
 _export_ configurations using a user-defined callback function
 (`registry_export`).
 

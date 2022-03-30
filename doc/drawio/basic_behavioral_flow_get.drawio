@@ -10,7 +10,7 @@
                 <mxCell id="189" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="166" target="188" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="166" value="registry_get_value(&quot;cord/0/rd_ip_addr&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="166" value="registry_get_value(&lt;br&gt;&quot;sys/cord/0/rd_ip_addr&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-1100" y="60" width="220" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="191" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="188" target="192" edge="1">
@@ -18,7 +18,7 @@
                         <mxPoint x="-868" y="330" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="188" value="Search for &quot;cord&quot; configuration schema" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="188" value="Search for &quot;cord&quot; configuration schema&lt;br&gt;in &quot;sys&quot; root group" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-840" y="60" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="194" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="192" target="198" edge="1">
@@ -62,7 +62,7 @@
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="204" value="Get value of &quot;rd_ip_addr&quot;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                <mxCell id="204" value="Return value of &quot;rd_ip_addr&quot;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
                     <mxGeometry x="30" y="60" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="205" value="Valid" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
