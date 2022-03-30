@@ -1,0 +1,74 @@
+<mxfile host="65bd71144e">
+    <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
+        <mxGraphModel dx="2962" dy="887" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="274" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="-1150" y="20" width="1110" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="184" value="registry_export(&quot;application/0&quot;, my_export_function)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1140" y="30" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="253" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="184" target="255" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-168" y="270" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="254" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="255" target="258" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-59" y="379" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="255" value="Search for &quot;application&quot; configuration schema" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-860" y="30" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="256" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="258" target="259" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="41" y="419" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="257" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="258" target="268" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-59" y="489" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="258" value="Found cs" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-670" y="20" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="259" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-680" y="150" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="265" value="Call my_export_function&lt;br&gt;on each configuration in application" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-200" y="24.5" width="150" height="71" as="geometry"/>
+                </mxCell>
+                <mxCell id="267" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="268" target="271" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-59" y="599" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="268" value="Call registry_get_value() for each configuration in &quot;application&quot;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-530" y="30" width="136" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="269" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="271" target="272" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="41" y="639" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="270" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="271" target="265" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-59" y="719" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="271" value="Valid" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-340" y="20" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="272" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-360" y="150" width="120" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

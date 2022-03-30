@@ -1,0 +1,98 @@
+<mxfile host="65bd71144e">
+    <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
+        <mxGraphModel dx="3068" dy="939" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="274" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="-1150" y="50" width="1450" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="189" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="166" target="188" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="166" value="registry_get_value(&quot;cord/0/rd_ip_addr&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1140" y="60" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="191" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="188" target="192" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-868" y="330" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="188" value="Search for &quot;cord&quot; configuration schema" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-850" y="60" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="194" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="192" target="198" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-768" y="370" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="200" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="192" target="208" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-868" y="440" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="192" value="Found cs" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-650" y="50" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="198" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-670" y="180" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="206" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="199" target="205" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="199" value="cs-&amp;gt;get(&quot;rd_ip_addr&quot;, si)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-160" y="60" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="201" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="205" target="202" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-873" y="690" as="sourcePoint"/>
+                        <mxPoint x="-813" y="690" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="202" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry y="180" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="203" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="205" target="204" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-1053" y="840" as="sourcePoint"/>
+                        <mxPoint x="-993" y="840" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="204" value="Get value of &quot;rd_ip_addr&quot;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="170" y="60" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="205" value="Valid" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="50" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="207" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="208" target="211" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-868" y="550" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="208" value="Search for &quot;0&quot; schema instance" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-500" y="60" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="209" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="211" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-768" y="590" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="210" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="211" target="199" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-868" y="660" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="211" value="Found si" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-310" y="50" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="212" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-320" y="180" width="120" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -198,9 +198,24 @@ Note these functions don't interact with SF, so configuration changes are not re
 The following diagram shows the process of each function. It's assumed there
 are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) and an _Application_ configuration group with a `foo` configuration parameter.
 
-![Figure 04](./doc/images/basic_behavioral_flow.svg "Behavioral flow of the basic API of the RIOT Registry")
+![Figure 04](./doc/images/basic_behavioral_flow_get.svg "Behavioral flow of the basic API of the RIOT Registry")
 <p align="center">
-Figure 04 - Behavioral flow of the basic API of the RIOT Registry
+Figure 04 - Behavioral flow of the get API of the RIOT Registry
+</p>
+
+![Figure 05](./doc/images/basic_behavioral_flow_set.svg "Behavioral flow of the basic API of the RIOT Registry")
+<p align="center">
+Figure 05 - Behavioral flow of the get API of the RIOT Registry
+</p>
+
+![Figure 06](./doc/images/basic_behavioral_flow_commit.svg "Behavioral flow of the basic API of the RIOT Registry")
+<p align="center">
+Figure 06 - Behavioral flow of the get API of the RIOT Registry
+</p>
+
+![Figure 07](./doc/images/basic_behavioral_flow_export.svg "Behavioral flow of the basic API of the RIOT Registry")
+<p align="center">
+Figure 07 - Behavioral flow of the get API of the RIOT Registry
 </p>
 
 ### Load and save configurations from / to  storage
@@ -209,16 +224,16 @@ At any time, the application or a configuration manager can _load_ all configura
 
 As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF _store_ handler as callback.
 
-Figure 05 shows the above described processes.
+Figure 08 shows the above described processes.
 
-![Figure 05](./doc/images/store_behavioral_flow.svg "Behavioral flow of the store_load and store_save calls")
+![Figure 08](./doc/images/store_behavioral_flow.svg "Behavioral flow of the store_load and store_save calls")
 <p align="center">
-Figure 05 - Behavioral flow of the store_load and store_save calls
+Figure 08 - Behavioral flow of the store_load and store_save calls
 </p>
 
 ## 3.4. RIOT Registry API
 
-![Figure 06](./doc/images/api.svg "RIOT Registry API")
+![Figure 09](./doc/images/api.svg "RIOT Registry API")
 
 ```c++
 /* Base */
