@@ -57,7 +57,7 @@ and the following acronyms and definitions:
 
 ### Definitions
 
-- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information so that it knows where to look for the requested value etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
+- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
 `(sys_id|app_id)/schema_id/instance_id/(group_id/)*parameter-name`\
  In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
