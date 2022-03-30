@@ -193,32 +193,40 @@ configuration value (`registry_get_value`), _set_ a configuration value
 _export_ configurations using a user-defined callback function
 (`registry_export`).
 
-Note these functions don't interact with SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store` is called (see [Load and store configurations](#load-and-store-configurations))
+Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
 
-The following diagram shows the process of each function. It's assumed there
-are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) and an _Application_ configuration group with a `foo` configuration parameter.
+The following diagrams show the process of each function. It's assumed there
+are 2 CS registered in the RIOT Registry: a _cord_ configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) that is inside the _sys_ root group and a _config_ configuration group that is inside the _app_ root group and has a `foo` configuration parameter.
 
-![Figure 04](./doc/images/basic_behavioral_flow_get.svg "Behavioral flow of the basic API of the RIOT Registry")
+#### Behavioral flow of the `get` function
+
+![Figure 04](./doc/images/basic_behavioral_flow_get.svg "Behavioral flow of the get API")
 <p align="center">
-Figure 04 - Behavioral flow of the get API of the RIOT Registry
+Figure 04 - Behavioral flow of the "get" API
 </p>
 
-![Figure 05](./doc/images/basic_behavioral_flow_set.svg "Behavioral flow of the basic API of the RIOT Registry")
+#### Behavioral flow of the `set` function
+
+![Figure 05](./doc/images/basic_behavioral_flow_set.svg "Behavioral flow of the set API")
 <p align="center">
-Figure 05 - Behavioral flow of the get API of the RIOT Registry
+Figure 05 - Behavioral flow of the "set" API
 </p>
 
-![Figure 06](./doc/images/basic_behavioral_flow_commit.svg "Behavioral flow of the basic API of the RIOT Registry")
+#### Behavioral flow of the `commit` function
+
+![Figure 06](./doc/images/basic_behavioral_flow_commit.svg "Behavioral flow of the commit API")
 <p align="center">
-Figure 06 - Behavioral flow of the get API of the RIOT Registry
+Figure 06 - Behavioral flow of the "commit" API
 </p>
 
-![Figure 07](./doc/images/basic_behavioral_flow_export.svg "Behavioral flow of the basic API of the RIOT Registry")
+#### Behavioral flow of the `export` function
+
+![Figure 07](./doc/images/basic_behavioral_flow_export.svg "Behavioral flow of the export API")
 <p align="center">
-Figure 07 - Behavioral flow of the get API of the RIOT Registry
+Figure 07 - Behavioral flow of the "export" API
 </p>
 
-### Load and save configurations from / to  storage
+### Load and save configurations from/to storage
 
 At any time, the application or a configuration manager can _load_ all configurations from all SF sources (`registry_store_load` function) or _store_ them in the SF destination (`registry_store_save` function).
 
