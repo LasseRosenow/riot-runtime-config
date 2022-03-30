@@ -234,9 +234,9 @@ Figure 07 - Behavioral flow of the "export" API
 
 ### Load and save configurations from/to storage
 
-At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry*store*load` function) or *store* them in the SF destination (`registry_store_save` function).
+At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_store_load` function) or *store* them in the SF destination (`registry_store_save` function).
 
-As one could expect, `registry*store*load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry*store*save` will call `registry_export` on all CS with the SF *store* handler as callback.
+As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF *store* handler as callback.
 
 Figure 08 shows the above described processes.
 
@@ -245,9 +245,21 @@ Figure 08 shows the above described processes.
 Figure 08 - Behavioral flow of the store_load and store_save calls
 </p>
 
+### Add custom schema to the registry
+
+The registry itself already comes with many configuration schemas that live within the `sys` root configuration group. But sometimes an application needs some custom runtime configurations that are to specific for the registry to abstract, so it is possible to register custom CS within the `app` root configuration group.
+One MUST NOT register a custom schema within the `sys` root configuration group, as this would almost certainly result in conflicts whenever RIOT gets updated.
+
+Below is a diagram that shows the behavioral flow of adding a custom schema:
+
+![Figure 09](./doc/images/register_custom_schema_flow.svg "Behavioral flow of the registration of custom registry schemas")
+<p align="center">
+Figure 09 - Behavioral flow of the registration of custom registry schemas
+</p>
+
 ## 3.4. RIOT Registry API
 
-![Figure 09](./doc/images/api.svg "RIOT Registry API")
+![Figure 10](./doc/images/api.svg "RIOT Registry API")
 
 ```c++
 /* Base */
