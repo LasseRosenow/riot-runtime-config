@@ -332,8 +332,9 @@ Then each external configuration manager has to implement its own `adapter` modu
 
 ## 4.1. LwM2M
 
-LwM2M is a relatively new protocol which is similar to the RIOT registry as to that it specifies official (and inofficial) `object models` that define which information is to find where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
+LwM2M is a relatively new protocol which is similar to the RIOT registry as to that it specifies official (and inofficial) `object models` that define which information can be found where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
 `object_id/instance_id/parameter_id`\
+The `object_id` is similar to RIOTs `schema_id`, the `instance_id` is the same as in RIOT and the `parameter_id` is also the same as in RIOT except LwM2M does not know anything about nesting, so there are no paths longer than `3`.\
 To integrate LwM2M to the RIOT Registry it is necessary to write a adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
 An example of how this adapter would handle a `set` call can be seen below:
 
