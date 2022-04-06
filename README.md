@@ -58,7 +58,7 @@ and the following acronyms and definitions:
 ### Definitions
 
 - __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
-`root_group_id/schema_id/instance_id/(group_id/)*parameter-name`\
+`root_group_id/schema_id/instance_id/(group_id/)*parameter_name`\
  In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
 - __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS=0` and `APP=1`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
@@ -326,6 +326,15 @@ double registry_get_float64(const registry_path_t path);
 
 # 4. Integrating external Configuration Managers
 
+While having the ability to use the Registry inside RIOT and using a (UART) CLI, the registry itself is designed so that it can easily integrate with common external configuration managers. This makes it possible to modify parameters for example via the ethernet, LoRa, bluetooth, 802.15.4 etc.
+The basic idea is that the RIOT Registry with its common `schemas` defines a RIOT internal `Single Source of Truth`, as to which kind of data is to find where.
+Then each external configuration manager has to implement its own `adapter` module, which maps/converts their own structures to the RIOT Registry.
+
 ## 4.1. LwM2M
 
-![Figure 10](./doc/images/lwm2m_integration_flow.svg "RIOT Registry API")
+LwM2M is a relatively new protocol which is similar to the RIOT registry as to that it specifies official (and inofficial) `object models` that define which information is to find where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
+`object_id/instance_id/parameter_id`\
+To integrate LwM2M to the RIOT Registry it is necessary to write a adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
+An example of how this adapter would handle a `set` call can be seen below:
+
+![Figure 11](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
