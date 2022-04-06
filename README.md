@@ -57,9 +57,9 @@ and the following acronyms and definitions:
 
 ### Definitions
 
-- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers. \
-`root_group_id/schema_id/instance_id/(group_id/)*parameter_name`\
- In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
+- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers:
+ `root_group_id/schema_id/instance_id/(group_id/)*parameter_name`\
+In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
 - __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS=0` and `APP=1`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
 The `APP` root configuration group must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
@@ -158,7 +158,7 @@ The CS also contains the struct that specifies how each instance (SI) stores the
 A conceptual example of a CS implementation can be found in the
 [Appendix](#Appendix).
 
-## 3.1.1 Schema Instances
+## 3.1.1. Schema Instances
 
 An instance of a CS, which contains the actual data values. It can be added to a CS and contains a `commit_cb` handler, to notify the module containing the instance about configuration changes that need to be applied.
 
@@ -339,3 +339,167 @@ To integrate LwM2M to the RIOT Registry it is necessary to write a adapter that 
 An example of how this adapter would handle a `set` call can be seen below:
 
 ![Figure 11](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
+
+# 5. Appendix
+
+## 5.1. Example Registry Schema
+
+### 5.1.1 rgb_led.h
+
+```c++
+#include "registry.h"
+
+#define REGISTRY_SCHEMA_RGB_LED 1
+
+extern registry_schema_t registry_schema_rgb_led;
+
+typedef struct {
+    clist_node_t node;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} registry_schema_rgb_led_t;
+
+typedef enum {
+    REGISTRY_SCHEMA_RGB_LED_RED,
+    REGISTRY_SCHEMA_RGB_LED_GREEN,
+    REGISTRY_SCHEMA_RGB_LED_BLUE,
+} registry_schema_rgb_led_indices_t;
+```
+
+### 5.1.2 rgb_led.c
+
+```c++
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "kernel_defines.h"
+#include "registry.h"
+#include "rgb_led.h"
+
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
+static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
+                void *context);
+
+REGISTRY_SCHEMA(
+    registry_schema_rgb_led,
+    REGISTRY_SCHEMA_RGB_LED,
+    "rgb", "Representation of an rgb color.",
+    get, set,
+
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_RED,
+        "red", "Intensity of the red color of the rgb lamp.")
+
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_GREEN,
+        "green", "Intensity of the green color of the rgb lamp.")
+
+    REGISTRY_PARAMETER_UINT8(
+        REGISTRY_SCHEMA_RGB_LED_BLUE,
+        "blue", "Intensity of the blue color of the rgb lamp.")
+
+    );
+
+static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len,
+                void *context)
+{
+    (void)buf_len;
+    (void)context;
+
+    registry_schema_rgb_led_t *_instance = (registry_schema_rgb_led_t *)instance->data;
+
+    switch (param_id) {
+    case REGISTRY_SCHEMA_RGB_LED_RED:
+        memcpy(buf, &_instance->red, sizeof(_instance->red));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_LED_GREEN:
+        memcpy(buf, &_instance->green, sizeof(_instance->green));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_LED_BLUE:
+        memcpy(buf, &_instance->blue, sizeof(_instance->blue));
+        break;
+    }
+}
+
+static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
+                void *context)
+{
+    (void)val_len;
+    (void)context;
+
+    registry_schema_rgb_led_t *_instance = (registry_schema_rgb_led_t *)instance->data;
+
+    switch (param_id) {
+    case REGISTRY_SCHEMA_RGB_LED_RED:
+        memcpy(&_instance->red, val, sizeof(_instance->red));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_LED_GREEN:
+        memcpy(&_instance->green, val, sizeof(_instance->green));
+        break;
+
+    case REGISTRY_SCHEMA_RGB_LED_BLUE:
+        memcpy(&_instance->blue, val, sizeof(_instance->blue));
+        break;
+    }
+}
+```
+
+### 5.1.3 main.c
+
+```c++
+#include <string.h>
+#include <msg.h>
+#include <stdio.h>
+
+#include "registry.h"
+#include "assert.h"
+
+#include "rgb_led.h"
+
+registry_schema_rgb_led_t rgb_led_instance_0_data = {
+    .red = 0,
+    .green = 255,
+    .blue = 70,
+};
+registry_instance_t rgb_led_instance_0 = {
+    .name = "rgb-0",
+    .data = &rgb_led_instance_0_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
+};
+
+registry_schema_rgb_led_t rgb_led_instance_1_data = {
+    .red = 90,
+    .green = 4,
+    .blue = 0,
+};
+registry_instance_t rgb_led_instance_1 = {
+    .name = "rgb-1",
+    .data = &rgb_led_instance_1_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
+};
+
+int main(void)
+{
+    /* init registry */
+    registry_init();
+
+    /* add schema instances */
+    registry_add_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_0);
+
+    registry_add_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_1);
+
+    /* set value */
+    registry_set_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE), 19);
+
+    /* get value */
+    registry_get_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
+
+    return 0;
+}
+```
