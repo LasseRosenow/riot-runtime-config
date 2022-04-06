@@ -323,3 +323,9 @@ int64_t registry_get_int64(const registry_path_t path);
 float registry_get_float32(const registry_path_t path);
 double registry_get_float64(const registry_path_t path);
 ```
+
+# 4. Integrating external Configuration Managers
+
+## 4.1. LwM2M
+
+![Figure 10](./doc/images/lwm2m_integration_flow.svg "RIOT Registry API")
