@@ -185,7 +185,11 @@ A conceptual example of a SF can be found in the [Appendix](#Appendix).
 
 As described in the flow in Figure 03, modules add their __Schema Instances (SI)__ to pre defined __Configuration Schemas (CS)__ or declare and register their own __CS__ for configuration groups in the RIOT Registry. __Storage facilities (SF)__ are registered as sources and/or destinations of configurations in the RIOT Registry.
 
+<center>
+
 ![Figure 03](./doc/images/boot_flow.svg "Usage flow of the RIOT Registry")
+
+</center>
 <p align="center">
 Figure 03 - Usage flow of the RIOT Registry
 </p>
@@ -367,6 +371,12 @@ For example: `commit/device_id/root_group_id/schema_id/...`
 - Have a dedicated `commit` topic, which can be set to a specific path, which then will be committed. For example: `Publish commit -> /device_id/root_group_id/schema_id/...`
 - Don't implement the `commit` concept at all, but rather commit every `set` message and allow to send values to whole groups / schemas with the complete group / schema or parts of it. For example in the CBOR or JSON format. This way it still is possible to change multiple values at once.
 
+<center>
+
+![Figure 11](./doc/images/mqtt_integration_flow.svg "MQTT integration")
+
+</center>
+
 ### 4.1.3. MCUMgr (mgmt)
 
 TODO
@@ -385,7 +395,7 @@ The `object_id` is similar to RIOTs `schema_id`, the `instance_id` is the same a
 To integrate LwM2M to the RIOT Registry it is necessary to write an adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
 An example of how this adapter would handle a `set` call can be seen below:
 
-![Figure 11](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
+![Figure 12](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
 
 # 5. Appendix
 
