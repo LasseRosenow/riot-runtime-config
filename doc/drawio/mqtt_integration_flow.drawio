@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
-        <mxGraphModel dx="2064" dy="440" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+        <mxGraphModel dx="2243" dy="528" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -39,7 +39,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="420" value="&lt;font style=&quot;font-size: 17px&quot;&gt;RIOT Device&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;horizontal=0;" parent="1" vertex="1">
+                <mxCell id="420" value="&lt;font style=&quot;font-size: 17px&quot;&gt;RIOT Device 7&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;horizontal=0;" parent="1" vertex="1">
                     <mxGeometry x="-760" y="290" width="70" height="229" as="geometry"/>
                 </mxCell>
                 <mxCell id="421" value="" style="group" parent="1" vertex="1" connectable="0">
