@@ -112,7 +112,7 @@ The diagram differentiates between 2 different kinds of Configuration Managers:
 # 3. The RIOT Registry
 
 The RIOT Registry is a module for interacting with __persistent key-value configurations__. It's heavily inspired by the
-[Mynewt Config subsystem](https://mynewt.apache.org/latest/os/modules/config/config.html)
+[Mynewt Config subsystem](https://mynewt.apache.org/latest/os/modules/config/config.html) and [LwM2M Object Models](https://technical.openmobilealliance.org/OMNA/LwM2M/LwM2MRegistry.html)
 
 The RIOT Registry interacts with RIOT modules via
 [Configuration Schemas](#31-Registry-schemas), and with non-volatile storage
