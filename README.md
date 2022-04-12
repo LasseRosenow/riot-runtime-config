@@ -368,6 +368,8 @@ For example: `commit/root_group_id/schema_id/...`
 
 ### 4.1.3. MCUMgr (mgmt)
 
+TODO
+
 ## 4.2. Advanced Configuration Managers
 
 While having the ability to use the Registry inside RIOT and using a (UART) CLI, the registry itself is designed so that it can easily integrate with common external configuration managers. This makes it possible to modify parameters for example via the ethernet, LoRa, bluetooth, 802.15.4 etc.
