@@ -352,7 +352,7 @@ Like the RIOT CLI the MQTT integration also uses the RIOT internal registry stru
 So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event notifies the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
 The `export` command is not necessary because the MQTT broker gets a initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
 Less trivial is how `commit` can be exposed to MQTT.\
-One way to implement commit events would be to extend the topic of the path that needs to be commited with a `commit` prefix.
+One way to implement commit events would be to extend the topic of the path that needs to be committed with a `commit` prefix.
 For example: `commit/root_group_id/schema_id/...`
 
 ### 4.1.3. MCUMgr (mgmt)
