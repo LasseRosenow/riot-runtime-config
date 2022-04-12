@@ -346,14 +346,23 @@ The export command also has the additional `-r <recursion depth>` flag. It defau
 
 ### 4.1.1. CoAP
 
+The CoAP integration uses the RIOT internal registry structure and does not come with its own schema structure. But CoAP only has `get` and `set`, but no `export` or `commit`. So the get and set command of the RIOT registry will just be mapped to the get and set of CoAP. For example: `GET /root_group_id/schema_id/...` or `SET /root_group_id/schema_id/... -> new_value`
+The `export` command can be realized through the `GET /.well-known/core` endpoint.
+The `commit` command is less trivial as there is no equivalent construct within CoAP itself.
+
+- One possible solution is to make a get request which path has a `commit` prefix like: `GET /commit/root_group_id/schema_id/...`
+- Another possible solution is to have a dedicated `commit` endpoint, which can be set to a specific path, which then will be committed. For example: `SET /commit -> /root_group_id/schema_id/...`
+
 ### 4.1.2. MQTT
 
-Like the RIOT CLI the MQTT integration also uses the RIOT internal registry structure and does not come with its own structure. But is limited to only having events with or without data.\
+The MQTT integration uses the RIOT internal registry structure and does not come with its own schema structure. But is limited to only having events with or without data.\
 So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event notifies the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
 The `export` command is not necessary because the MQTT broker gets a initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
-Less trivial is how `commit` can be exposed to MQTT.\
-One way to implement commit events would be to extend the topic of the path that needs to be committed with a `commit` prefix.
+Less trivial is how `commit` can be exposed to MQTT.
+
+- One way to implement commit events is to extend the topic of the path that needs to be committed with a `commit` prefix.
 For example: `commit/root_group_id/schema_id/...`
+- Another possible solution is to have a dedicated `commit` topic, which can be set to a specific path, which then will be committed. For example: `Publish commit -> /root_group_id/schema_id/...`
 
 ### 4.1.3. MCUMgr (mgmt)
 
