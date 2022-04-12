@@ -57,7 +57,7 @@ and the following acronyms and definitions:
 
 ### Definitions
 
-- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is an regex example showing how the configuration path is structured. All path elements have to be integers:
+- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is a regex example showing how the configuration path is structured. All path elements have to be integers:
  `root_group_id/schema_id/instance_id/(group_id/)*parameter_name`\
 In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
@@ -200,9 +200,8 @@ configuration value (`registry_get_value`), *set* a configuration value
 
 Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
 
-The following diagrams show the process of each function. It's assumed there
-are 2 CS registered in the RIOT Registry: a *cord* configuration group with a Resource Directory Server IP Address (`rd_ip_addr`) that is inside the *sys* root group and a *config* configuration group that is inside the *app* root group and has a `foo` configuration parameter.
-A registry path usually consists of integers, but the diagrams below use strings instead just for demonstration purposes only.
+The following diagrams show the process of each function. It's assumed there are 2 CS registered in the RIOT Registry: a *cord* configuration schema with a `rd_ip_addr` configuration parameter that is inside the *sys* root group and a *config* configuration schema that is inside the *app* root group and has a `foo` configuration parameter.
+A registry path usually consists of integers, but the diagrams below uses strings instead just for demonstration purposes only.
 
 #### Behavioral flow of the `get` function
 
@@ -326,16 +325,43 @@ double registry_get_float64(const registry_path_t path);
 
 # 4. Integrating external Configuration Managers
 
+## 4.1 Simple Configuration Managers
+
+Simple Configuration Managers are ways to use the RIOT Registry without the need to maintaining adapters. Those managers would only be implemented once and mirror the internal structure of the RIOT Registry.
+This can be quite powerful within RIOT only environments, but is not as powerful in terms of its "plug and play"ness
+
+### 4.1.1 CLI
+
+The RIOT cli can be extended with a `registry` command, which is followed by `set | get | commit | export`.\
+Each of those have their own api:
+
+- set: `<path> <value>`
+- get: `<path>`
+- commit: `<path>`
+- export: `<path> [-r <recursion depth>]`
+
+The `<path>` argument is a string of integers separated by `/`. It maps directly to the RIOT registry internal path structure.\
+The `<value>` argument is just the value as a string.\
+The export command also has the additional `-r <recursion depth>` flag. It defaults to 0, which means that everything will be exported recursively. A value of 1 means, that only the parameter that exactly matches the specified path will be exported. A value of 2 means the same as a value of 1 but also all of its children will be exported etc...
+
+### 4.1.1 CoAP
+
+### 4.1.1 MQTT
+
+### 4.1.1 MCUMgr (mgmt)
+
+## 4.2 Advanced Configuration Managers
+
 While having the ability to use the Registry inside RIOT and using a (UART) CLI, the registry itself is designed so that it can easily integrate with common external configuration managers. This makes it possible to modify parameters for example via the ethernet, LoRa, bluetooth, 802.15.4 etc.
 The basic idea is that the RIOT Registry with its common `schemas` defines a RIOT internal `Single Source of Truth`, as to which kind of data is to find where.
 Then each external configuration manager has to implement its own `adapter` module, which maps/converts their own structures to the RIOT Registry.
 
-## 4.1. LwM2M
+### 4.2.1. LwM2M
 
 LwM2M is a relatively new protocol which is similar to the RIOT registry as to that it specifies official (and inofficial) `object models` that define which information can be found where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
 `object_id/instance_id/parameter_id`\
 The `object_id` is similar to RIOTs `schema_id`, the `instance_id` is the same as in RIOT and the `parameter_id` is also the same as in RIOT except LwM2M does not know anything about nesting, so there are no paths longer than `3`.\
-To integrate LwM2M to the RIOT Registry it is necessary to write a adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
+To integrate LwM2M to the RIOT Registry it is necessary to write an adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
 An example of how this adapter would handle a `set` call can be seen below:
 
 ![Figure 11](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
