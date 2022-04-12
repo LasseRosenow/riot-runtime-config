@@ -181,7 +181,7 @@ A conceptual example of a SF can be found in the [Appendix](#Appendix).
 
 ## 3.3. RIOT Registry Usage Flow
 
-### Registry Initialization
+### 3.3.1. Registry Initialization
 
 As described in the flow in Figure 03, modules add their __Schema Instances (SI)__ to pre defined __Configuration Schemas (CS)__ or declare and register their own __CS__ for configuration groups in the RIOT Registry. __Storage facilities (SF)__ are registered as sources and/or destinations of configurations in the RIOT Registry.
 
@@ -190,7 +190,7 @@ As described in the flow in Figure 03, modules add their __Schema Instances (SI)
 Figure 03 - Usage flow of the RIOT Registry
 </p>
 
-### Get, set, commit and export configurations
+### 3.3.2. Get, set, commit and export configurations
 
 At any time, the application or a configuration manager can *retrieve* a
 configuration value (`registry_get_value`), *set* a configuration value
@@ -325,12 +325,12 @@ double registry_get_float64(const registry_path_t path);
 
 # 4. Integrating external Configuration Managers
 
-## 4.1 Simple Configuration Managers
+## 4.1. Simple Configuration Managers
 
 Simple Configuration Managers are ways to use the RIOT Registry without the need to maintaining adapters. Those managers would only be implemented once and mirror the internal structure of the RIOT Registry.
 This can be quite powerful within RIOT only environments, but is not as powerful in terms of its "plug and play"ness
 
-### 4.1.1 CLI
+### 4.1.1. CLI
 
 The RIOT cli can be extended with a `registry` command, which is followed by `set | get | commit | export`.\
 Each of those have their own api:
@@ -344,13 +344,20 @@ The `<path>` argument is a string of integers separated by `/`. It maps directly
 The `<value>` argument is just the value as a string.\
 The export command also has the additional `-r <recursion depth>` flag. It defaults to 0, which means that everything will be exported recursively. A value of 1 means, that only the parameter that exactly matches the specified path will be exported. A value of 2 means the same as a value of 1 but also all of its children will be exported etc...
 
-### 4.1.1 CoAP
+### 4.1.1. CoAP
 
-### 4.1.1 MQTT
+### 4.1.2. MQTT
 
-### 4.1.1 MCUMgr (mgmt)
+Like the RIOT CLI the MQTT integration also uses the RIOT internal registry structure and does not come with its own structure. But is limited to only having events with or without data.\
+So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event notifies the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
+The `export` command is not necessary because the MQTT broker gets a initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
+Less trivial is how `commit` can be exposed to MQTT.\
+One way to implement commit events would be to extend the topic of the path that needs to be commited with a `commit` prefix.
+For example: `commit/root_group_id/schema_id/...`
 
-## 4.2 Advanced Configuration Managers
+### 4.1.3. MCUMgr (mgmt)
+
+## 4.2. Advanced Configuration Managers
 
 While having the ability to use the Registry inside RIOT and using a (UART) CLI, the registry itself is designed so that it can easily integrate with common external configuration managers. This makes it possible to modify parameters for example via the ethernet, LoRa, bluetooth, 802.15.4 etc.
 The basic idea is that the RIOT Registry with its common `schemas` defines a RIOT internal `Single Source of Truth`, as to which kind of data is to find where.
@@ -370,7 +377,7 @@ An example of how this adapter would handle a `set` call can be seen below:
 
 ## 5.1. Example Registry Schema
 
-### 5.1.1 rgb_led.h
+### 5.1.1. rgb_led.h
 
 ```c++
 #include "registry.h"
@@ -476,7 +483,7 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
 }
 ```
 
-### 5.1.3 main.c
+### 5.1.3. main.c
 
 ```c++
 #include <string.h>
