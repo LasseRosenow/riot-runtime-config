@@ -1,5 +1,3 @@
-#ifdef CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED
-
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -78,5 +76,3 @@ static void set(int param_id, registry_instance_t *instance, const void *val, in
         break;
     }
 }
-
-#endif /* CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED */

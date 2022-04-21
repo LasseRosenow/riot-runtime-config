@@ -37,7 +37,8 @@ USEMODULE += tinycbor_float
 
 
 
-
+# File systems
+USEMODULE += spiffs
 
 
 
@@ -60,6 +61,7 @@ CFLAGS += -DCONFIG_REGISTRY_ENABLE_SCHEMA_TYPES_TEST=1
 # External modules
 USEMODULE += registry
 USEMODULE += registry_schemas
+USEMODULE += registry_storage_facilities
 USEMODULE += registry_cli
 USEMODULE += registry_coap
 #USEMODULE += lwm2m_objects

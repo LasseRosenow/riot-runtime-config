@@ -1,5 +1,5 @@
-#ifndef REGISTRY_REGISTRY_SCHEMAS_H
-#define REGISTRY_REGISTRY_SCHEMAS_H
+#ifndef REGISTRY_SCHEMAS_H
+#define REGISTRY_SCHEMAS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -104,4 +104,4 @@ typedef enum {
 }
 #endif
 
-#endif /* REGISTRY_REGISTRY_SCHEMAS_H */
+#endif /* REGISTRY_SCHEMAS_H */

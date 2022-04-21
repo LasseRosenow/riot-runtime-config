@@ -1,4 +1,4 @@
-#include "storage_facility_dummy.h"
+#include "registry_storage_facilities.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -8,10 +8,10 @@
 #define DUMMY_STORE_CAPACITY 100
 
 /* The store argument is the descriptor of the storage facility */
-static int registry_dummy_load(registry_store_t *store, load_cb_t cb,
-                               void *cb_arg);
-static int registry_dummy_save(registry_store_t *store, const registry_path_t path,
-                               const registry_value_t value);
+static int load(registry_store_instance_t *store, load_cb_t cb,
+                void *cb_arg);
+static int save(registry_store_instance_t *store, const registry_path_t path,
+                const registry_value_t value);
 
 /*
    This conceptual example shows the implementation of a dummy Storage Facility.
@@ -32,15 +32,15 @@ static dummy_store_storage_t dummy_store[DUMMY_STORE_CAPACITY];
 
 /* Storage Facility interface descriptor to be registered in the RIOT
    Registry */
-registry_store_itf_t dummy_store_itf = {
-    .load = registry_dummy_load,
-    .save = registry_dummy_save,
+registry_store_t registry_store_heap_dummy = {
+    .load = load,
+    .save = save,
 };
 
 /* Implementation of `load`. Execute a `cb` callback for each configuration
    found in the dummy storage array */
-static int registry_dummy_load(registry_store_t *store, load_cb_t cb,
-                               void *cb_arg)
+static int load(registry_store_instance_t *store, load_cb_t cb,
+                void *cb_arg)
 {
     (void)store;
     registry_path_t path;
@@ -63,8 +63,8 @@ static int registry_dummy_load(registry_store_t *store, load_cb_t cb,
 
 /* Implementation of `store`. Save parameter with given name and value in
    the dummy storage array */
-static int registry_dummy_save(registry_store_t *store, const registry_path_t path,
-                               const registry_value_t value)
+static int save(registry_store_instance_t *store, const registry_path_t path,
+                const registry_value_t value)
 {
     int free_slot = -1;
 

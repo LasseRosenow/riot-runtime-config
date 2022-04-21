@@ -47,7 +47,7 @@
  * ### Storage Facilities
  *
  * @ref sys_registry_store "Storage Facilities" (SF) implement the
- * @ref registry_store_itf_t "storage interface" to allow the RIOT Registry to
+ * @ref registry_store_t_t "storage interface" to allow the RIOT Registry to
  * load, search and store configuration parameters.
  *
  * ## RIOT Registry usage flow
@@ -418,19 +418,22 @@ typedef struct {
     bool is_dup;                /**< flag indicating if the parameter is duplicated or not */
 } registry_dup_check_arg_t;
 
+typedef struct _registry_store_t registry_store_t;
+
 /**
  * @brief Store facility descriptor
  */
 typedef struct {
-    clist_node_t node;                      /**< linked list node */
-    const struct registry_store_itf *itf;   /**< interface for the facility */
-} registry_store_t;
+    clist_node_t node;              /**< linked list node */
+    registry_store_t *itf;          /**< interface for the facility */
+    void *data;                     /**< Struct containing all config data for the store */
+} registry_store_instance_t;
 
 /**
  * @brief Storage facility interface.
  * All store facilities should, at least, implement the load and save actions.
  */
-typedef struct registry_store_itf {
+struct _registry_store_t {
     /**
      * @brief Loads all stored parameters and calls the @p cb callback function.
      *
@@ -439,7 +442,7 @@ typedef struct registry_store_itf {
      * @param[in] cb_arg Argument passed to @p cb function
      * @return 0 on success, non-zero on failure
      */
-    int (*load)(registry_store_t *store, load_cb_t cb, void *cb_arg);
+    int (*load)(registry_store_instance_t *store, load_cb_t cb, void *cb_arg);
 
     /**
      * @brief If implemented, it is used for any preparation the storage may
@@ -448,7 +451,7 @@ typedef struct registry_store_itf {
      * @param[in] store Storage facility descriptor
      * @return 0 on success, non-zero on failure
      */
-    int (*save_start)(registry_store_t *store);
+    int (*save_start)(registry_store_instance_t *store);
 
     /**
      * @brief Saves a parameter into storage.
@@ -458,7 +461,8 @@ typedef struct registry_store_itf {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_t *store, const registry_path_t path, const registry_value_t value);
+    int (*save)(registry_store_instance_t *store, const registry_path_t path,
+                const registry_value_t value);
 
     /**
      * @brief If implemented, it is used for any tear-down the storage may need
@@ -467,8 +471,8 @@ typedef struct registry_store_itf {
      * @param[in] store Storage facility descriptor
      * @return 0 on success, non-zero on failure
      */
-    int (*save_end)(registry_store_t *store);
-} registry_store_itf_t;
+    int (*save_end)(registry_store_instance_t *store);
+};
 
 /**
  * @brief Instance of a schema containing its data.
@@ -556,7 +560,7 @@ int registry_register_schema(registry_root_group_id_t root_group_id, registry_sc
  *
  * @param[in] src Pointer to the storage to register as source.
  */
-void registry_store_register_src(registry_store_t *src);
+void registry_store_register_src(registry_store_instance_t *src);
 
 /**
  * @brief Registers a new storage as a destination for saving configurations.
@@ -567,7 +571,7 @@ void registry_store_register_src(registry_store_t *src);
  *
  * @param[in] dst Pointer to the storage to register
  */
-void registry_store_register_dst(registry_store_t *dst);
+void registry_store_register_dst(registry_store_instance_t *dst);
 
 /**
  * @brief Adds a new instance of a schema.

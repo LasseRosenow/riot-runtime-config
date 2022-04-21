@@ -8,9 +8,12 @@
 #include "registry_schemas.h"
 #include "registry_cli.h"
 #include "tests.h"
-#include "storage_facility_dummy.h"
+#include "registry_storage_facilities.h"
 #include "cbor_example.h"
 #include "assert.h"
+#include "fs/spiffs_fs.h"
+#include "vfs.h"
+#include "mtd.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -70,19 +73,39 @@ registry_instance_t rgb_led_instance_2 = {
 };
 
 
-registry_store_t dummy_store = {
-    .itf = &dummy_store_itf,
+static struct spiffs_desc spiffs_desc = {
+    .lock = MUTEX_INIT,
+};
+
+static vfs_mount_t _vfs_mount = {
+    .fs = &spiffs_file_system,
+    .mount_point = "/sda",
+    .private_data = &spiffs_desc,
+};
+
+registry_store_instance_t vfs_instance_1 = {
+    .itf = &registry_store_vfs,
+    .data = &_vfs_mount,
+};
+
+registry_store_instance_t vfs_instance_2 = {
+    .itf = &registry_store_vfs,
+    .data = &_vfs_mount,
 };
 
 int main(void)
 {
+#if SPIFFS_HAL_CALLBACK_EXTRA == 1
+    spiffs_desc.dev = MTD_0;
+#endif
+
     /* init registry */
     registry_init();
     registry_schemas_init();
 
     /* register store source and destination */
-    registry_store_register_src(&dummy_store);
-    registry_store_register_dst(&dummy_store);
+    registry_store_register_src(&vfs_instance_1);
+    registry_store_register_dst(&vfs_instance_2);
 
     /* add schema instances */
     registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_0);

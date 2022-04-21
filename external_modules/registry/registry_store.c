@@ -7,7 +7,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-static registry_store_t *save_dst;
+static registry_store_instance_t *save_dst;
 static clist_node_t load_srcs;
 
 static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_group_id)
@@ -63,13 +63,13 @@ void registry_store_init(void)
     load_srcs.next = NULL;
 }
 
-void registry_store_register_src(registry_store_t *src)
+void registry_store_register_src(registry_store_instance_t *src)
 {
     assert(src != NULL);
     clist_rpush(&load_srcs, &(src->node));
 }
 
-void registry_store_register_dst(registry_store_t *dst)
+void registry_store_register_dst(registry_store_instance_t *dst)
 {
     assert(dst != NULL);
     save_dst = dst;
@@ -84,8 +84,8 @@ int registry_store_load(void)
     }
 
     do {
-        registry_store_t *src;
-        src = container_of(node, registry_store_t, node);
+        registry_store_instance_t *src;
+        src = container_of(node, registry_store_instance_t, node);
         src->itf->load(src, _registry_store_load_cb, NULL);
     } while (node != load_srcs.next);
     return 0;
@@ -124,7 +124,7 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
     (void)schema;
     (void)meta;
     (void)instance;
-    registry_store_t *dst = save_dst;
+    registry_store_instance_t *dst = save_dst;
 
     DEBUG("[registry_store] Saving: ");
     _debug_print_path(path);
