@@ -124,6 +124,11 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
     (void)schema;
     (void)meta;
     (void)instance;
+
+    if (value == NULL) {
+        return 0;
+    }
+
     registry_store_instance_t *dst = save_dst;
 
     DEBUG("[registry_store] Saving: ");
