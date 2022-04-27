@@ -1,0 +1,3 @@
+ifneq (,$(filter registry_tests,$(USEMODULE)))
+  USEMODULE += embunit
+endif

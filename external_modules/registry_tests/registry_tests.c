@@ -9,7 +9,7 @@
 #include "registry.h"
 #include "registry_schemas.h"
 
-#include "tests.h"
+#include "registry_tests.h"
 
 int test_instance_0_commit_cb(const registry_path_t path, void *context)
 {
@@ -306,7 +306,7 @@ Test *tests_registry(void)
     return (Test *)&registry_tests;
 }
 
-int tests_run(void)
+int registry_tests_run(void)
 {
     TESTS_START();
     TESTS_RUN(tests_registry());

@@ -98,17 +98,17 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     _mount(mount);
 
     /* save data */
-    vfs_DIR root_group_dir;
+    // vfs_DIR root_group_dir;
 
-    char root_group_string[REGISTRY_MAX_DIR_NAME_LEN];
+    // char root_group_string[REGISTRY_MAX_DIR_NAME_LEN];
 
-    sprintf(root_group_string, "%d", *path.root_group_id);
+    // sprintf(root_group_string, "%d", *path.root_group_id);
 
-    if (vfs_opendir(&root_group_dir, root_group_string) != 0) {
-        printf("CAN NOT OPEN\n\n");
-        /* vfs_mkdir(root_group_string)
-           int fd = vfs_open("/sda/test.txt", O_CREAT | O_RDWR, 0); */
-    }
+    // if (vfs_opendir(&root_group_dir, root_group_string) != 0) {
+    //     printf("CAN NOT OPEN\n\n");
+    //     /* vfs_mkdir(root_group_string)
+    //        int fd = vfs_open("/sda/test.txt", O_CREAT | O_RDWR, 0); */
+    // }
 
 
     // vfs_write(fd, buf, sizeof(buf));

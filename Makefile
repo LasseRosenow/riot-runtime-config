@@ -12,17 +12,14 @@ RIOTBASE ?= $(CURDIR)/RIOT
 
 # Include packages that pull up and auto-init the link layer.
 # NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
-USEMODULE += netdev_default
-USEMODULE += auto_init_gnrc_netif
+#USEMODULE += netdev_default
+#USEMODULE += auto_init_gnrc_netif
 # Specify the mandatory networking modules
-USEMODULE += gnrc_ipv6_default
-USEMODULE += gcoap
+#USEMODULE += gnrc_ipv6_default
+#USEMODULE += gcoap
 # Additional networking modules that can be dropped if not needed
-USEMODULE += gnrc_icmpv6_echo
+#USEMODULE += gnrc_icmpv6_echo
 
-# Required by gcoap example
-USEMODULE += od
-USEMODULE += fmt
 # Add also the shell, some shell commands
 USEMODULE += shell
 USEMODULE += shell_commands
@@ -31,14 +28,10 @@ USEMODULE += ps
 # Unit tests
 USEMODULE += embunit
 
-# Cbor
-USEPKG += tinycbor
-USEMODULE += tinycbor_float
-
-
-
 # File systems
 USEMODULE += spiffs
+USEMODULE += mtd
+USEMODULE += vfs
 
 
 
@@ -63,9 +56,10 @@ USEMODULE += registry
 USEMODULE += registry_schemas
 USEMODULE += registry_storage_facilities
 USEMODULE += registry_cli
-USEMODULE += registry_coap
+USEMODULE += registry_tests
+#USEMODULE += registry_coap
 #USEMODULE += lwm2m_objects
-USEMODULE += lwm2m_objects_abstract
+#USEMODULE += lwm2m_objects_abstract
 EXTERNAL_MODULE_DIRS += external_modules
 
 # Enable lwM2M objects

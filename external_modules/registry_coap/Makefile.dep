@@ -1,1 +1,4 @@
-
+ifneq (,$(filter registry_coap,$(USEMODULE)))
+  USEMODULE += od
+  USEMODULE += fmt
+endif

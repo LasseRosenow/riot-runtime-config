@@ -3,13 +3,11 @@
 #include <msg.h>
 #include <stdio.h>
 
-#include "registry_coap.h"
 #include "registry.h"
 #include "registry_schemas.h"
 #include "registry_cli.h"
-#include "tests.h"
+#include "registry_tests.h"
 #include "registry_storage_facilities.h"
-#include "cbor_example.h"
 #include "assert.h"
 #include "fs/spiffs_fs.h"
 #include "vfs.h"
@@ -19,7 +17,7 @@
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
 
 static const shell_command_t shell_commands[] = {
-    { "registry_coap", "Registry CoAP cli", registry_coap_cli_cmd },
+    //{ "registry_coap", "Registry CoAP cli", registry_coap_cli_cmd },
     { "registry", "Registry cli", registry_cli_cmd },
     // { "registry_lwm2m", "Registry LwM2M cli", registry_lwm2m_cli_cmd },
     { NULL, NULL, NULL }
@@ -118,13 +116,11 @@ int main(void)
 
     //registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    //registry_store_save();
+    registry_store_save();
     //registry_store_load();
 
     /* test registry */
-    tests_run();
-
-    cbor_example_run();
+    registry_tests_run();
 
     msg_init_queue(_shell_queue, SHELL_QUEUE_SIZE);
     char line_buf[SHELL_DEFAULT_BUFSIZE];

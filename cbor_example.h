@@ -1,6 +1,0 @@
-#ifndef RUNTIME_CONFIG_CBOR_EXAMPLE_H
-#define RUNTIME_CONFIG_CBOR_EXAMPLE_H
-
-int cbor_example_run(void);
-
-#endif //RUNTIME_CONFIG_CBOR_EXAMPLE_H
