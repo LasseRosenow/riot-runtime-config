@@ -125,6 +125,7 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
     (void)meta;
     (void)instance;
 
+    /* The registry also exports just the root group or just a schema, but the storage facility is only interested in paths with values */
     if (value == NULL) {
         return 0;
     }

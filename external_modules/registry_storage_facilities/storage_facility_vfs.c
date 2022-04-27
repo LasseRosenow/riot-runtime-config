@@ -5,6 +5,7 @@
 #include <kernel_defines.h>
 #include "errno.h"
 #include "vfs.h"
+#include <fcntl.h>
 
 static int load(registry_store_instance_t *store, load_cb_t cb,
                 void *cb_arg);
@@ -72,16 +73,18 @@ static int load(registry_store_instance_t *store, load_cb_t cb,
 
     vfs_mount_t *mount = store->data;
 
+    (void)mount;
+
     //vfs_mount_t *vfs_mount = (vfs_mount_t *)store->data;
 
     /* mount */
-    _mount(mount);
+    //_mount(mount);
 
     /* load data */
     //int fd = vfs_open("/sda/test.txt", O_RDONLY, 0);
 
     /* umount */
-    _umount(mount);
+    //_umount(mount);
 
     return 0;
 }
@@ -98,16 +101,35 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     _mount(mount);
 
     /* save data */
-    // vfs_DIR root_group_dir;
+    //vfs_DIR root_group_dir;
 
-    // char root_group_string[REGISTRY_MAX_DIR_NAME_LEN];
+    char string_path[REGISTRY_MAX_DIR_NAME_LEN];
 
-    // sprintf(root_group_string, "%d", *path.root_group_id);
+    sprintf(string_path, "%s/%d/%d/%d", mount->mount_point, *path.root_group_id, *path.schema_id,
+            *path.instance_id);
 
-    // if (vfs_opendir(&root_group_dir, root_group_string) != 0) {
-    //     printf("CAN NOT OPEN\n\n");
-    //     /* vfs_mkdir(root_group_string)
-    //        int fd = vfs_open("/sda/test.txt", O_CREAT | O_RDWR, 0); */
+    for (int i = 0; i < path.path_len; i++) {
+        sprintf(string_path, "%s/%d", string_path, path.path[i]);
+    }
+
+    printf("Path will be: %s\n", string_path);
+
+    int fd = vfs_open(string_path, O_RDWR, O_RDWR);
+
+    if (fd <= 0) {
+        printf("CAN NOT OPEN FILE\n");
+    }
+
+    if (vfs_close(fd) != 0) {
+        printf("CAN NOT CLOSE FILE\n");
+    }
+
+    // if (vfs_opendir(&root_group_dir, string_path) != 0) {
+    //     printf("CAN NOT OPEN DIR\n");
+    // }
+
+    // if (vfs_closedir(&root_group_dir) != 0) {
+    //     printf("CAN NOT CLOSE DIR\n");
     // }
 
 
@@ -117,6 +139,8 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
 
     /* umount */
     _umount(mount);
+
+    printf("\n\n");
 
     return 0;
 }
