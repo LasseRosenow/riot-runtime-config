@@ -280,6 +280,11 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
         return -EINVAL;
     }
 
+    /* if no specific type was requested, set the registry_value_t type to the type of the schema param */
+    if (val_type == REGISTRY_TYPE_NONE) {
+        val->type = param_meta->value.parameter.type;
+    }
+
     /* call handler to get the parameter value from the instance of the schema */
     uint8_t buf[REGISTRY_MAX_VAL_LEN];     /* max_val_len is the largest allowed size as a string => largest size in general */
 
@@ -303,7 +308,7 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
         }
     }
     else {
-        /* convert native value to string value */
+        /* copy buf to registry_value_t value */
         memcpy(val->buf, buf, val->buf_len);
     }
 
