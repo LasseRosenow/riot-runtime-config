@@ -114,10 +114,20 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
 
     printf("Path will be: %s\n", string_path);
 
-    int fd = vfs_open(string_path, O_RDWR, O_RDWR);
+    int fd = vfs_open(string_path, O_CREAT | O_RDWR, 0);
 
     if (fd <= 0) {
         printf("CAN NOT OPEN FILE\n");
+    }
+
+    if (vfs_write(fd, value.buf, value.buf_len) < 0) {
+        printf("CAN NOT WRITE TO FILE\n");
+    }
+
+    char read_val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
+
+    if (vfs_read(fd, read_val_buf, value.buf_len) < 0) {
+        printf("CAN NOT READ FROM FILE\n");
     }
 
     if (vfs_close(fd) != 0) {
