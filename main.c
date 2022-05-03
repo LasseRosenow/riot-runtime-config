@@ -9,8 +9,9 @@
 #include "registry_tests.h"
 #include "registry_storage_facilities.h"
 #include "assert.h"
-#include "fs/spiffs_fs.h"
+#include "fs/littlefs2_fs.h"
 #include "vfs.h"
+#include "board.h"
 #include "mtd.h"
 
 #define SHELL_QUEUE_SIZE (8)
@@ -71,14 +72,24 @@ registry_instance_t rgb_led_instance_2 = {
 };
 
 
-static struct spiffs_desc spiffs_desc = {
+// static struct spiffs_desc spiffs_desc = {
+//     .lock = MUTEX_INIT,
+// };
+
+// static vfs_mount_t _vfs_mount = {
+//     .fs = &spiffs_file_system,
+//     .mount_point = "/sda",
+//     .private_data = &spiffs_desc,
+// };
+
+static littlefs2_desc_t littlefs2_desc = {
     .lock = MUTEX_INIT,
 };
 
 static vfs_mount_t _vfs_mount = {
-    .fs = &spiffs_file_system,
+    .fs = &littlefs2_file_system,
     .mount_point = "/sda",
-    .private_data = &spiffs_desc,
+    .private_data = &littlefs2_desc,
 };
 
 registry_store_instance_t vfs_instance_1 = {
@@ -93,9 +104,12 @@ registry_store_instance_t vfs_instance_2 = {
 
 int main(void)
 {
-#if SPIFFS_HAL_CALLBACK_EXTRA == 1
-    spiffs_desc.dev = MTD_0;
-#endif
+// #if defined(MODULE_SPIFFS)
+//     spiffs_desc.dev = MTD_0;
+// #endif
+//#if defined(MODULE_LITTLEFS2)
+    littlefs2_desc.dev = MTD_0;
+//#endif
 
     /* init registry */
     registry_init();
@@ -116,11 +130,11 @@ int main(void)
 
     //registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    registry_store_save();
-    //registry_store_load();
+    //registry_store_save();
+    registry_store_load();
 
     /* test registry */
-    registry_tests_run();
+    // registry_tests_run();
 
     msg_init_queue(_shell_queue, SHELL_QUEUE_SIZE);
     char line_buf[SHELL_DEFAULT_BUFSIZE];

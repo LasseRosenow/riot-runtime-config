@@ -100,9 +100,9 @@ extern "C" {
  * @brief Maximum length of a configuration name.
  * @{
  */
-#define REGISTRY_MAX_NAME_LEN      ((REGISTRY_MAX_DIR_NAME_LEN * \
-                                     REGISTRY_MAX_DIR_DEPTH) + \
-                                    (REGISTRY_MAX_DIR_DEPTH - 1))
+#define REGISTRY_MAX_DIR_LEN      ((REGISTRY_MAX_DIR_NAME_LEN * \
+                                    REGISTRY_MAX_DIR_DEPTH) + \
+                                   (REGISTRY_MAX_DIR_DEPTH - 1))
 /** @} */
 
 /**
@@ -407,7 +407,7 @@ struct _registry_schema_item_t {
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(const registry_path_t path, void *val, int val_len, void *cb_arg);
+typedef void (*load_cb_t)(const registry_path_t path, const registry_value_t val, void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities

@@ -29,7 +29,8 @@ USEMODULE += ps
 USEMODULE += embunit
 
 # File systems
-USEMODULE += spiffs
+USEMODULE += littlefs2
+#USEMODULE += spiffs
 USEMODULE += mtd
 USEMODULE += vfs
 

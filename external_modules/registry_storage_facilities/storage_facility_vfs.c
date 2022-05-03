@@ -1,12 +1,14 @@
 #include "registry_storage_facilities.h"
 
+#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <kernel_defines.h>
 #include "errno.h"
 #include "vfs.h"
 #include <fcntl.h>
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 static int load(registry_store_instance_t *store, load_cb_t cb,
@@ -19,15 +21,41 @@ registry_store_t registry_store_vfs = {
     .save = save,
 };
 
+static int _parse_string_path(char *path, int *buf, int *buf_len)
+{
+    int buf_index = 0;
+    char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
+    int curr_path_segment_index = 0;
+
+    int path_len = strlen(path);
+
+    for (int i = 0; i <= path_len; i++) {
+        if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
+            buf[buf_index++] = atoi(curr_path_segment);
+            curr_path_segment_index = 0;
+        }
+        else {
+            if (!isdigit(path[i])) {
+                return -EINVAL;
+            }
+            curr_path_segment[curr_path_segment_index++] = path[i];
+            curr_path_segment[curr_path_segment_index] = '\0';
+        }
+    }
+
+    *buf_len = buf_index;
+    return 0;
+}
+
 static int _format(vfs_mount_t *mount)
 {
-    printf("formating %s....\t", mount->mount_point);
+    DEBUG("formating %s....\t", mount->mount_point);
     if (vfs_format(mount) < 0) {
-        puts("[Failed]");
+        DEBUG("[Failed]\n");
         return 1;
     }
     else {
-        puts("[OK]");
+        DEBUG("[OK]\n");
     }
 
     return 0;
@@ -38,7 +66,7 @@ static int _mount(vfs_mount_t *mount)
     int res = vfs_mount(mount);
 
     if (res < 0) {
-        printf("Error while mounting %s ... (%d) ... try format\n", mount->mount_point, res);
+        DEBUG("Error while mounting %s ... (%d) ... try format\n", mount->mount_point, res);
 
         /* format to fix mount */
         _format(mount);
@@ -50,7 +78,6 @@ static int _mount(vfs_mount_t *mount)
         }
     }
 
-    printf("%s successfully mounted\n", mount->mount_point);
     return 0;
 }
 
@@ -59,11 +86,115 @@ static int _umount(vfs_mount_t *mount)
     int res = vfs_umount(mount);
 
     if (res < 0) {
-        printf("Error while unmounting %s...\n", mount->mount_point);
+        DEBUG("Error while unmounting %s...\n", mount->mount_point);
         return 1;
     }
 
-    printf("%s successfully unmounted\n", mount->mount_point);
+    return 0;
+}
+
+static int _load_recursive(vfs_DIR *dirp, char *string_path, load_cb_t cb, void *cb_arg)
+{
+    vfs_dirent_t entry;
+    int res = 0;
+
+    do {
+        res = vfs_readdir(dirp, &entry);
+        if (res == 1 && strcmp(entry.d_name, ".") != 0 && strcmp(entry.d_name, "..") != 0) {
+            /* save string_path length to restore it later */
+            int old_string_path_len = strlen(string_path);
+
+            /* add new directory to string_path */
+            sprintf(string_path, "%s/%s", string_path, entry.d_name);
+
+            struct stat _stat;
+            vfs_stat(string_path, &_stat);
+
+            if (S_ISDIR(_stat.st_mode)) {
+                /* open directory */
+                vfs_DIR new_dirp;
+                if (vfs_opendir(&new_dirp, string_path) != 0) {
+                    DEBUG("[registry storace_facility_vfs] load: Can not open dir\n");
+                }
+
+                /* handle directory recursively */
+                _load_recursive(&new_dirp, string_path, cb, cb_arg);
+
+                /* close directory */
+                if (vfs_closedir(&new_dirp) != 0) {
+                    DEBUG("[registry storace_facility_vfs] load: Can not close dir\n");
+                }
+            }
+            else {
+                /* open file */
+                int fd = vfs_open(string_path, O_RDONLY, 0);
+
+                if (fd <= 0) {
+                    DEBUG("[registry storace_facility_vfs] load: Can not open file: %d\n", fd);
+                }
+
+                /* read value from file */
+                uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
+                if (vfs_read(fd, value_buf, sizeof(uint8_t)) < 0) {
+                    DEBUG("[registry storace_facility_vfs] load: Can not read from file\n");
+                }
+                else {
+                    int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
+                    int int_path[int_path_len];
+
+                    /* try to convert string path to int path */
+                    if (_parse_string_path(string_path, int_path, &int_path_len) < 0) {
+                        DEBUG("[registry storace_facility_vfs] load: Invalid registry path\n");
+                    }
+                    else {
+                        /* convert int path to registry_path_t */
+                        registry_path_t path = REGISTRY_PATH();
+                        for (int i = 0; i < int_path_len; i++) {
+                            switch (i) {
+                            case 0: path.root_group_id = (registry_root_group_id_t *)&int_path[i];
+                                break;
+                            case 1: path.schema_id = &int_path[i]; break;
+                            case 2: path.instance_id = &int_path[i]; break;
+                            case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
+                            default: path.path_len++; break;
+                            }
+                        }
+
+                        /* get registry meta data of configuration parameter */
+                        registry_value_t value;
+                        registry_get_value(path, &value);
+
+                        /* create new value based on old value but with an updated buffer */
+                        const registry_value_t new_value = {
+                            .type = value.type,
+                            .buf = value.buf,
+                            .buf_len = value.buf_len,
+                        };
+
+                        /* call callback with value and path */
+                        cb(path, new_value, cb_arg);
+
+                        if (ENABLE_DEBUG) {
+                            char string_value[REGISTRY_MAX_VAL_LEN];
+
+                            registry_convert_str_from_value(value.type, value.buf, string_value,
+                                                            ARRAY_SIZE(string_value));
+                            DEBUG("FILE: %s: %s\n", string_path, string_value);
+                        }
+                    }
+                }
+
+                /* close file */
+                if (vfs_close(fd) != 0) {
+                    DEBUG("[registry storace_facility_vfs] load: Can not close file: %d\n", fd);
+                }
+            }
+
+            /* restore old string_path */
+            string_path[old_string_path_len] = '\0';
+        }
+    } while (res == 1);
+
     return 0;
 }
 
@@ -72,50 +203,30 @@ static int load(registry_store_instance_t *store, load_cb_t cb,
 {
     (void)cb;
     (void)cb_arg;
+    (void)store;
 
     vfs_mount_t *mount = store->data;
 
     /* mount */
     _mount(mount);
 
-    /* save data */
+    /* create dir path */
+    char string_path[REGISTRY_MAX_DIR_LEN];
 
+    sprintf(string_path, "%s", mount->mount_point);
+
+    /* read dirs */
     vfs_DIR dirp;
 
-    if (vfs_opendir(&dirp, "/sda/dgdg/jsfklsdjfk/lksjdfkl/lsjdkfl/") != 0) {
-        printf("CAN NOT OPEN DIR\n");
+    if (vfs_opendir(&dirp, string_path) != 0) {
+        DEBUG("[registry storace_facility_vfs] load: Can not open dir\n");
     }
 
-    vfs_dirent_t entry;
-    int res = 0;
-
-    do {
-        res = vfs_readdir(&dirp, &entry);
-        printf("PATH: %s\n", entry.d_name);
-    } while (res == 1);
+    _load_recursive(&dirp, string_path, cb, cb_arg);
 
     if (vfs_closedir(&dirp) != 0) {
-        printf("CAN NOT CLOSE DIR\n");
+        DEBUG("[registry storace_facility_vfs] load: Can not close dir\n");
     }
-
-    // int fd = vfs_open(string_path, O_RDONLY, 0);
-
-    // if (fd <= 0) {
-    //     printf("[registry storace_facility_vfs] save: Can not open file\n");
-    // }
-
-    // uint8_t read_val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
-
-    // if (vfs_read(fd, read_val_buf, value.buf_len) < 0) {
-    //     printf("[registry storace_facility_vfs] save: Can not read from file\n");
-    // }
-    // else {
-    //     printf("LOOOOOOOOOL: %d\n", *read_val_buf);
-    // }
-
-    // if (vfs_close(fd) != 0) {
-    //     printf("[registry storace_facility_vfs] save: Can not close file\n");
-    // }
 
     /* umount */
     _umount(mount);
@@ -136,32 +247,42 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     /* mount */
     _mount(mount);
 
-    vfs_mkdir("/0", O_CREAT);
-    vfs_mkdir("/asdf", O_CREAT);
+    /* create dir path */
+    char string_path[REGISTRY_MAX_DIR_LEN];
 
-    /* save data */
+    sprintf(string_path, "%s/%d", mount->mount_point, *path.root_group_id);
+    vfs_mkdir(string_path, 0);
 
-    char string_path[REGISTRY_MAX_DIR_NAME_LEN];
+    sprintf(string_path, "%s/%d", string_path, *path.schema_id);
+    vfs_mkdir(string_path, 0);
 
-    sprintf(string_path, "%s/%d/%d/%d", mount->mount_point, *path.root_group_id, *path.schema_id,
-            *path.instance_id);
+    sprintf(string_path, "%s/%d", string_path, *path.instance_id);
+    vfs_mkdir(string_path, 0);
 
-    for (int i = 0; i < path.path_len; i++) {
+    /* exclude the last element, as it will be the file name and not a folder */
+    for (int i = 0; i < path.path_len - 1; i++) {
         sprintf(string_path, "%s/%d", string_path, path.path[i]);
+        int res = vfs_mkdir(string_path, 0);
+        if (res != 0 && res != -EEXIST) {
+            DEBUG("[registry storace_facility_vfs] save: Can not create dir: %d\n", res);
+        }
     }
+
+    /* open file */
+    sprintf(string_path, "%s/%d", string_path, path.path[path.path_len - 1]);
 
     int fd = vfs_open(string_path, O_CREAT | O_RDWR, 0);
 
     if (fd <= 0) {
-        DEBUG("[registry storace_facility_vfs] save: Can not open file\n");
+        DEBUG("[registry storace_facility_vfs] save: Can not open file: %d\n", fd);
     }
 
     if (vfs_write(fd, value.buf, value.buf_len) < 0) {
-        DEBUG("[registry storace_facility_vfs] save: Can not write to file\n");
+        DEBUG("[registry storace_facility_vfs] save: Can not write to file: %d\n", fd);
     }
 
     if (vfs_close(fd) != 0) {
-        DEBUG("[registry storace_facility_vfs] save: Can not close file\n");
+        DEBUG("[registry storace_facility_vfs] save: Can not close file: %d\n", fd);
     }
 
     /* umount */

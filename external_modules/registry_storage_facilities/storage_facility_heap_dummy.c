@@ -55,7 +55,14 @@ static int load(registry_store_instance_t *store, load_cb_t cb,
                 .path = dummy_store[i].path,
                 .path_len = dummy_store[i].path_len,
             };
-            cb(path, dummy_store[i].val, ARRAY_SIZE(val), cb_arg);
+
+            registry_value_t value = {
+                .type = REGISTRY_TYPE_NONE,
+                .buf = dummy_store[i].val,
+                .buf_len = ARRAY_SIZE(val),
+            };
+
+            cb(path, value, cb_arg);
         }
     }
     return 0;

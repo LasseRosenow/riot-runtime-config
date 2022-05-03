@@ -47,7 +47,7 @@ static void _debug_print_path(const registry_path_t path)
     }
 }
 
-static void _registry_store_load_cb(const registry_path_t path, void *val, int val_len,
+static void _registry_store_load_cb(const registry_path_t path, const registry_value_t val,
                                     void *cb_arg)
 {
     (void)cb_arg;
@@ -55,7 +55,7 @@ static void _registry_store_load_cb(const registry_path_t path, void *val, int v
     _debug_print_path(path);
     // TODO DEBUG(" to %s\n", val);
 
-    registry_set_value(path, val, val_len);
+    registry_set_value(path, val.buf, val.buf_len);
 }
 
 void registry_store_init(void)
@@ -91,7 +91,7 @@ int registry_store_load(void)
     return 0;
 }
 
-static void _registry_store_dup_check_cb(const registry_path_t path, void *val, int val_len,
+static void _registry_store_dup_check_cb(const registry_path_t path, const registry_value_t val,
                                          void *cb_arg)
 {
     assert(cb_arg != NULL);
@@ -109,7 +109,7 @@ static void _registry_store_dup_check_cb(const registry_path_t path, void *val, 
         }
     }
 
-    if (memcmp(val, dup_arg->val.buf, val_len) == 0) {
+    if (memcmp(val.buf, dup_arg->val.buf, val.buf_len) == 0) {
         dup_arg->is_dup = true;
     }
 }
