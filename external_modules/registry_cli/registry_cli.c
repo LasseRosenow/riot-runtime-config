@@ -25,29 +25,53 @@ static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_g
 }
 
 
-static int _parse_string_path(char *path, int *buf, int *buf_len)
+static int _parse_string_path(char *string_path, int *buf, int *buf_len)
 {
     int buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
     int curr_path_segment_index = 0;
 
-    int path_len = strlen(path);
+    int path_len = strlen(string_path);
 
     for (int i = 0; i <= path_len; i++) {
-        if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
+        if (string_path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
             buf[buf_index++] = atoi(curr_path_segment);
             curr_path_segment_index = 0;
         }
         else {
-            if (!isdigit(path[i])) {
+            if (!isdigit(string_path[i])) {
                 return -EINVAL;
             }
-            curr_path_segment[curr_path_segment_index++] = path[i];
+            curr_path_segment[curr_path_segment_index++] = string_path[i];
             curr_path_segment[curr_path_segment_index] = '\0';
         }
     }
 
     *buf_len = buf_index;
+    return 0;
+}
+
+static int _registry_path_from_string_path(char *string_path, int *int_path_buf,
+                                           int *int_path_buf_len, registry_path_t *registry_path)
+{
+    int res = _parse_string_path(string_path, int_path_buf, int_path_buf_len);
+
+    if (res < 0) {
+        return res;
+    }
+    else {
+        for (int i = 0; i < *int_path_buf_len; i++) {
+            switch (i) {
+            case 0: registry_path->root_group_id = (registry_root_group_id_t *)&int_path_buf[i];
+                break;
+            case 1: registry_path->schema_id = &int_path_buf[i]; break;
+            case 2: registry_path->instance_id = &int_path_buf[i]; break;
+            case 3: registry_path->path = &int_path_buf[i]; registry_path->path_len++; break;     // Add path.path to correct position in int_path array
+            default: registry_path->path_len++; break;
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -102,7 +126,6 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 
 int registry_cli_cmd(int argc, char **argv)
 {
-    bool invalid_path = false;
     int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
     int int_path[int_path_len];
     registry_path_t path = REGISTRY_PATH();
@@ -112,25 +135,8 @@ int registry_cli_cmd(int argc, char **argv)
         goto help_error;
     }
 
-    if (argc > 2) {
-        if (_parse_string_path(argv[2], int_path, &int_path_len) < 0) {
-            invalid_path = true;
-        }
-        else {
-            for (int i = 0; i < int_path_len; i++) {
-                switch (i) {
-                case 0: path.root_group_id = (registry_root_group_id_t *)&int_path[i]; break;
-                case 1: path.schema_id = &int_path[i]; break;
-                case 2: path.instance_id = &int_path[i]; break;
-                case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
-                default: path.path_len++; break;
-                }
-            }
-        }
-    }
-
     if (strcmp(argv[1], "get") == 0) {
-        if (invalid_path) {
+        if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
@@ -141,7 +147,7 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "set") == 0) {
-        if (invalid_path) {
+        if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
             printf("usage: %s %s <path> <value>\n", argv[0], argv[1]);
             return 1;
         }
@@ -150,7 +156,7 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "commit") == 0) {
-        if (invalid_path) {
+        if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
@@ -160,6 +166,10 @@ int registry_cli_cmd(int argc, char **argv)
     }
     else if (strcmp(argv[1], "export") == 0) {
         /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
+        bool invalid_path = false;
+        if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
+            invalid_path = true;
+        }
         if (invalid_path && strcmp(argv[2], "-r") != 0) {
             printf("usage: %s %s <path> [-r <recursion depth>]\n", argv[0], argv[1]);
             return 1;
@@ -177,9 +187,24 @@ int registry_cli_cmd(int argc, char **argv)
         registry_export(_export_func, path, recursion_level, NULL);
         return 0;
     }
+    else if (strcmp(argv[1], "store") == 0) {
+        /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
+        if (strcmp(argv[2], "load") == 0) {
+            registry_store_load();
+        }
+        else if (strcmp(argv[2], "save") == 0) {
+            registry_store_save();
+        }
+        else {
+            printf("usage: %s %s {load|save}\n", argv[0], argv[1]);
+            return 1;
+        }
+
+        return 0;
+    }
 
 help_error:
-    printf("usage: %s {get|set|commit|export}\n", argv[0]);
+    printf("usage: %s {get|set|commit|export|store}\n", argv[0]);
 
     return 1;
 }

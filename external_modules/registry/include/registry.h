@@ -89,7 +89,7 @@ extern "C" {
 /**
  * @brief Maximum amount of characters per level in configurations names.
  */
-#define REGISTRY_MAX_DIR_NAME_LEN  64
+#define REGISTRY_MAX_DIR_NAME_LEN  10 /* a path is a i32 and i32 MAX has 10 digits. */
 
 /**
  * @brief Maximum length of a value when converted to string

@@ -53,6 +53,7 @@ static void _registry_store_load_cb(const registry_path_t path, const registry_v
     (void)cb_arg;
     DEBUG("[registry_store] Setting ");
     _debug_print_path(path);
+    DEBUG("\n");
     // TODO DEBUG(" to %s\n", val);
 
     registry_set_value(path, val.buf, val.buf_len);

@@ -29,7 +29,13 @@ static int _parse_string_path(char *path, int *buf, int *buf_len)
 
     int path_len = strlen(path);
 
-    for (int i = 0; i <= path_len; i++) {
+    int i = 0;
+
+    if (path[0] == REGISTRY_NAME_SEPARATOR) {
+        i = 1;
+    }
+
+    for (; i <= path_len; i++) {
         if (path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
             buf[buf_index++] = atoi(curr_path_segment);
             curr_path_segment_index = 0;
@@ -93,7 +99,8 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int _load_recursive(vfs_DIR *dirp, char *string_path, load_cb_t cb, void *cb_arg)
+static int _load_recursive(vfs_DIR *dirp, const char *mount_point, char *string_path, load_cb_t cb,
+                           void *cb_arg)
 {
     vfs_dirent_t entry;
     int res = 0;
@@ -118,7 +125,7 @@ static int _load_recursive(vfs_DIR *dirp, char *string_path, load_cb_t cb, void 
                 }
 
                 /* handle directory recursively */
-                _load_recursive(&new_dirp, string_path, cb, cb_arg);
+                _load_recursive(&new_dirp, mount_point, string_path, cb, cb_arg);
 
                 /* close directory */
                 if (vfs_closedir(&new_dirp) != 0) {
@@ -142,8 +149,9 @@ static int _load_recursive(vfs_DIR *dirp, char *string_path, load_cb_t cb, void 
                     int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
                     int int_path[int_path_len];
 
-                    /* try to convert string path to int path */
-                    if (_parse_string_path(string_path, int_path, &int_path_len) < 0) {
+                    /* try to convert string path to registry int path */
+                    if (_parse_string_path(string_path + strlen(mount_point), int_path,
+                                           &int_path_len) < 0) {
                         DEBUG("[registry storace_facility_vfs] load: Invalid registry path\n");
                     }
                     else {
@@ -159,28 +167,21 @@ static int _load_recursive(vfs_DIR *dirp, char *string_path, load_cb_t cb, void 
                             default: path.path_len++; break;
                             }
                         }
+                        (void)path;
 
                         /* get registry meta data of configuration parameter */
-                        registry_value_t value;
+                        char buf[REGISTRY_MAX_VAL_LEN];
+                        registry_value_t value = {
+                            .buf = buf,
+                            .buf_len = ARRAY_SIZE(buf),
+                        };
                         registry_get_value(path, &value);
 
-                        /* create new value based on old value but with an updated buffer */
-                        const registry_value_t new_value = {
-                            .type = value.type,
-                            .buf = value.buf,
-                            .buf_len = value.buf_len,
-                        };
+                        /* add read value to value */
+                        value.buf = value_buf;
 
                         /* call callback with value and path */
-                        cb(path, new_value, cb_arg);
-
-                        if (ENABLE_DEBUG) {
-                            char string_value[REGISTRY_MAX_VAL_LEN];
-
-                            registry_convert_str_from_value(value.type, value.buf, string_value,
-                                                            ARRAY_SIZE(string_value));
-                            DEBUG("FILE: %s: %s\n", string_path, string_value);
-                        }
+                        cb(path, value, cb_arg);
                     }
                 }
 
@@ -222,7 +223,7 @@ static int load(registry_store_instance_t *store, load_cb_t cb,
         DEBUG("[registry storace_facility_vfs] load: Can not open dir\n");
     }
 
-    _load_recursive(&dirp, string_path, cb, cb_arg);
+    _load_recursive(&dirp, mount->mount_point, string_path, cb, cb_arg);
 
     if (vfs_closedir(&dirp) != 0) {
         DEBUG("[registry storace_facility_vfs] load: Can not close dir\n");
