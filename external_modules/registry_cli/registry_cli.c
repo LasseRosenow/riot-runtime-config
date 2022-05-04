@@ -193,7 +193,18 @@ int registry_cli_cmd(int argc, char **argv)
             registry_store_load();
         }
         else if (strcmp(argv[2], "save") == 0) {
-            registry_store_save();
+            if (argc > 3) {
+                if (_registry_path_from_string_path(argv[3], int_path, &int_path_len, &path) < 0) {
+                    printf("usage: %s %s %s [<path>]\n", argv[0], argv[1], argv[2]);
+                    return 1;
+                }
+                else {
+                    registry_store_save_one(path, NULL);
+                }
+            }
+            else {
+                registry_store_save();
+            }
         }
         else {
             printf("usage: %s %s {load|save}\n", argv[0], argv[1]);
