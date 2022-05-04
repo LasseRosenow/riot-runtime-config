@@ -125,6 +125,7 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
     (void)schema;
     (void)meta;
     (void)instance;
+    (void)_registry_store_dup_check_cb;
 
     /* The registry also exports just the root group or just a schema, but the storage facility is only interested in paths with values */
     if (value == NULL) {
@@ -141,17 +142,17 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
         return -ENOENT;
     }
 
-    registry_dup_check_arg_t dup = {
-        .path = path,
-        .val = *value,
-        .is_dup = false,
-    };
+    // registry_dup_check_arg_t dup = {
+    //     .path = path,
+    //     .val = *value,
+    //     .is_dup = false,
+    // };
 
-    save_dst->itf->load(save_dst, _registry_store_dup_check_cb, &dup);
+    // save_dst->itf->load(save_dst, _registry_store_dup_check_cb, &dup);
 
-    if (dup.is_dup) {
-        return -EEXIST;
-    }
+    // if (dup.is_dup) {
+    //     return -EEXIST;
+    // }
 
     return dst->itf->save(dst, path, *value);
 }
