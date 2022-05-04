@@ -11,7 +11,7 @@
 #define ENABLE_DEBUG (1)
 #include "debug.h"
 
-static int load(registry_store_instance_t *store, load_cb_t cb,
+static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg);
 static int save(registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value);
@@ -199,7 +199,7 @@ static int _load_recursive(vfs_DIR *dirp, const char *mount_point, char *string_
     return 0;
 }
 
-static int load(registry_store_instance_t *store, load_cb_t cb,
+static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg)
 {
     (void)cb;

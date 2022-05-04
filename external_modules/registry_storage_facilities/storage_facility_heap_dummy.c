@@ -8,7 +8,7 @@
 #define DUMMY_STORE_CAPACITY 100
 
 /* The store argument is the descriptor of the storage facility */
-static int load(registry_store_instance_t *store, load_cb_t cb,
+static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg);
 static int save(registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value);
@@ -39,16 +39,16 @@ registry_store_t registry_store_heap_dummy = {
 
 /* Implementation of `load`. Execute a `cb` callback for each configuration
    found in the dummy storage array */
-static int load(registry_store_instance_t *store, load_cb_t cb,
+static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg)
 {
     (void)store;
-    registry_path_t path;
+    registry_path_t new_path;
     uint8_t val[REGISTRY_MAX_VAL_LEN];
 
     for (int i = 0; i < DUMMY_STORE_CAPACITY; i++) {
         if (dummy_store[i].path_len > 0) {
-            path = (registry_path_t) {
+            new_path = (registry_path_t) {
                 .root_group_id = &dummy_store[i].root_group_id,
                 .schema_id = &dummy_store[i].schema_id,
                 .instance_id = &dummy_store[i].instance_id,

@@ -438,11 +438,13 @@ struct _registry_store_t {
      * @brief Loads all stored parameters and calls the @p cb callback function.
      *
      * @param[in] store Storage facility descriptor
+     * @param[in] path Path of the parameter
      * @param[in] cb Callback function to call for every stored parameter
      * @param[in] cb_arg Argument passed to @p cb function
      * @return 0 on success, non-zero on failure
      */
-    int (*load)(registry_store_instance_t *store, load_cb_t cb, void *cb_arg);
+    int (*load)(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
+                void *cb_arg);
 
     /**
      * @brief If implemented, it is used for any preparation the storage may
@@ -735,6 +737,15 @@ char *registry_convert_str_from_bytes(void *vp, int vp_len, char *buf, int buf_l
 int registry_store_load(void);
 
 /**
+ * @brief Load a specific configuration paramter from the registered storage
+ * facility.
+ *
+ * @param[in] path Path of the configuration parameter
+ * @return 0 on success, non-zero on failure
+ */
+int registry_store_load_one(const registry_path_t path);
+
+/**
  * @brief Save all configuration parameters of every configuration group to the
  * registered storage facility.
  *
@@ -744,7 +755,7 @@ int registry_store_save(void);
 
 /**
  * @brief Save a specific configuration paramter to the registered storage
- * facility, with the provided value (@p val).
+ * facility.
  *
  * @param[in] path Path of the configuration parameter
  * @param[in] context Context of the schema instance

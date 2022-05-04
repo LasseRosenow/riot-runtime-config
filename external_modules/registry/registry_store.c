@@ -76,7 +76,7 @@ void registry_store_register_dst(registry_store_instance_t *dst)
     save_dst = dst;
 }
 
-int registry_store_load(void)
+int registry_store_load_one(const registry_path_t path)
 {
     clist_node_t *node = load_srcs.next;
 
@@ -87,9 +87,15 @@ int registry_store_load(void)
     do {
         registry_store_instance_t *src;
         src = container_of(node, registry_store_instance_t, node);
-        src->itf->load(src, _registry_store_load_cb, NULL);
+        src->itf->load(src, path, _registry_store_load_cb, NULL);
     } while (node != load_srcs.next);
+
     return 0;
+}
+
+int registry_store_load(void)
+{
+    return registry_store_load_one(REGISTRY_PATH());
 }
 
 static void _registry_store_dup_check_cb(const registry_path_t path, const registry_value_t val,
@@ -142,6 +148,7 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
         return -ENOENT;
     }
 
+    // TODO use registry_store_load_one() to remove overhead
     // registry_dup_check_arg_t dup = {
     //     .path = path,
     //     .val = *value,
