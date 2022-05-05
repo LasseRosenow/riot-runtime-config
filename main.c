@@ -131,6 +131,7 @@ int main(void)
     // registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
     // registry_store_save();
+    // vfs_format(&_vfs_mount);
     registry_store_load();
 
     /* test registry */

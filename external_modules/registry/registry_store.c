@@ -150,7 +150,13 @@ static int _registry_store_save_one_export_func(const registry_path_t path,
 
     DEBUG("[registry_store] Saving: ");
     _debug_print_path(path);
-    // TODO DEBUG(" = %s\n", value);
+    if (ENABLE_DEBUG) {
+        char value_string[REGISTRY_MAX_VAL_LEN];
+
+        registry_convert_str_from_value(value->type, value->buf, value_string, ARRAY_SIZE(
+                                            value_string));
+        DEBUG(" = %s\n", value_string);
+    }
 
     if (!dst) {
         return -ENOENT;
