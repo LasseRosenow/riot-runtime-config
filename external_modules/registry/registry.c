@@ -751,9 +751,9 @@ int registry_export(int (*export_func)(const registry_path_t path,
 }
 
 /* registry_set functions */
-int registry_set_value(const registry_path_t path, const void *val, int val_len)
+int registry_set_value(const registry_path_t path, const registry_value_t val)
 {
-    return _registry_set(path, val, val_len, REGISTRY_TYPE_NONE);
+    return _registry_set(path, val.buf, val.buf_len, val.type);
 }
 
 int registry_set_string(const registry_path_t path, const char *val)

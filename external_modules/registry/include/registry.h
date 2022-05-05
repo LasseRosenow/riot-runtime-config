@@ -589,12 +589,11 @@ int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id,
  * @brief Sets the value of a parameter that belongs to a configuration group.
  *
  * @param[in] path Path of the parameter to be set
- * @param[in] val New value for the parameter (must have the correct type => use registry_set_<type>() instead!)
- * @param[in] val Length of @p val
+ * @param[in] val New value for the parameter
  * @return -EINVAL if schema could not be found, otherwise returns the
  *             value of the set schema function.
  */
-int registry_set_value(const registry_path_t path, const void *val, int val_len);
+int registry_set_value(const registry_path_t path, const registry_value_t val);
 
 int registry_set_string(const registry_path_t path, const char *val);
 int registry_set_bool(const registry_path_t path, bool val);

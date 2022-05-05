@@ -62,7 +62,7 @@ static void _registry_store_load_cb(const registry_path_t path, const registry_v
         DEBUG(" to %s\n", value_string);
     }
 
-    registry_set_value(path, val.buf, val.buf_len);
+    registry_set_value(path, val);
 }
 
 void registry_store_init(void)

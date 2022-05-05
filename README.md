@@ -269,7 +269,7 @@ Figure 09 - Behavioral flow of the registration of custom registry schemas
 void registry_init(void);
 int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
 int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
-int registry_set_value(const registry_path_t path, const void *val, int val_len);
+int registry_set_value(const registry_path_t path, const registry_value_t val);
 registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
 int registry_commit(const registry_path_t path);
 int registry_export(int (*export_func)(
