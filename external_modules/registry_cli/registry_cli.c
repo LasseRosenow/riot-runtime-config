@@ -190,7 +190,18 @@ int registry_cli_cmd(int argc, char **argv)
     else if (strcmp(argv[1], "store") == 0) {
         /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
         if (strcmp(argv[2], "load") == 0) {
-            registry_store_load();
+            if (argc > 3) {
+                if (_registry_path_from_string_path(argv[3], int_path, &int_path_len, &path) < 0) {
+                    printf("usage: %s %s %s [<path>]\n", argv[0], argv[1], argv[2]);
+                    return 1;
+                }
+                else {
+                    registry_store_load_one(path);
+                }
+            }
+            else {
+                registry_store_load();
+            }
         }
         else if (strcmp(argv[2], "save") == 0) {
             if (argc > 3) {

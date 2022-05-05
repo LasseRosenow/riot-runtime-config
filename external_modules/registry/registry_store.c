@@ -4,7 +4,7 @@
 #include "clist.h"
 #include "registry.h"
 #include "assert.h"
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 static registry_store_instance_t *save_dst;
@@ -53,8 +53,14 @@ static void _registry_store_load_cb(const registry_path_t path, const registry_v
     (void)cb_arg;
     DEBUG("[registry_store] Setting ");
     _debug_print_path(path);
-    DEBUG("\n");
-    // TODO DEBUG(" to %s\n", val);
+
+    if (ENABLE_DEBUG) {
+        char value_string[REGISTRY_MAX_VAL_LEN];
+
+        registry_convert_str_from_value(val.type, val.buf, value_string, ARRAY_SIZE(
+                                            value_string));
+        DEBUG(" to %s\n", value_string);
+    }
 
     registry_set_value(path, val.buf, val.buf_len);
 }
@@ -95,7 +101,9 @@ int registry_store_load_one(const registry_path_t path)
 
 int registry_store_load(void)
 {
-    return registry_store_load_one(REGISTRY_PATH());
+    // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
+    // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+    return registry_store_load_one(_REGISTRY_PATH_0());
 }
 
 static void _registry_store_dup_check_cb(const registry_path_t path, const registry_value_t val,

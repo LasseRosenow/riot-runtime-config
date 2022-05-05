@@ -107,9 +107,9 @@ int main(void)
 // #if defined(MODULE_SPIFFS)
 //     spiffs_desc.dev = MTD_0;
 // #endif
-//#if defined(MODULE_LITTLEFS2)
+// #if defined(MODULE_LITTLEFS2)
     littlefs2_desc.dev = MTD_0;
-//#endif
+// #endif
 
     /* init registry */
     registry_init();
@@ -125,12 +125,12 @@ int main(void)
     registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_2);
 
     /* for the thread running the shell */
-    //registry_coap_cli_init();
-    //registry_lwm2m_cli_init();
+    // registry_coap_cli_init();
+    // registry_lwm2m_cli_init();
 
-    //registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
+    // registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    //registry_store_save();
+    // registry_store_save();
     registry_store_load();
 
     /* test registry */

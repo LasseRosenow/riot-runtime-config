@@ -42,6 +42,7 @@ registry_store_t registry_store_heap_dummy = {
 static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg)
 {
+    // TODO implement "path" parameter!!
     (void)store;
     registry_path_t new_path;
     uint8_t val[REGISTRY_MAX_VAL_LEN];
@@ -62,7 +63,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                 .buf_len = ARRAY_SIZE(val),
             };
 
-            cb(path, value, cb_arg);
+            cb(new_path, value, cb_arg);
         }
     }
     return 0;
