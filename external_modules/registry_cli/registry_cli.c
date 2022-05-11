@@ -187,46 +187,41 @@ int registry_cli_cmd(int argc, char **argv)
         registry_export(_export_func, path, recursion_level, NULL);
         return 0;
     }
-    else if (strcmp(argv[1], "store") == 0) {
-        /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
-        if (strcmp(argv[2], "load") == 0) {
-            if (argc > 3) {
-                if (_registry_path_from_string_path(argv[3], int_path, &int_path_len, &path) < 0) {
-                    printf("usage: %s %s %s [<path>]\n", argv[0], argv[1], argv[2]);
-                    return 1;
-                }
-                else {
-                    registry_store_load_one(path);
-                }
+    else if (strcmp(argv[1], "load") == 0) {
+        if (argc > 2) {
+            if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
+                printf("usage: %s %s [<path>]\n", argv[0], argv[1]);
+                return 1;
             }
             else {
-                registry_store_load();
-            }
-        }
-        else if (strcmp(argv[2], "save") == 0) {
-            if (argc > 3) {
-                if (_registry_path_from_string_path(argv[3], int_path, &int_path_len, &path) < 0) {
-                    printf("usage: %s %s %s [<path>]\n", argv[0], argv[1], argv[2]);
-                    return 1;
-                }
-                else {
-                    registry_store_save_one(path, NULL);
-                }
-            }
-            else {
-                registry_store_save();
+                registry_store_load_one(path);
             }
         }
         else {
-            printf("usage: %s %s {load|save}\n", argv[0], argv[1]);
-            return 1;
+            registry_store_load();
+        }
+
+        return 0;
+    }
+    else if (strcmp(argv[1], "save") == 0) {
+        if (argc > 2) {
+            if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
+                printf("usage: %s %s [<path>]\n", argv[0], argv[1]);
+                return 1;
+            }
+            else {
+                registry_store_save_one(path, NULL);
+            }
+        }
+        else {
+            registry_store_save();
         }
 
         return 0;
     }
 
 help_error:
-    printf("usage: %s {get|set|commit|export|store}\n", argv[0]);
+    printf("usage: %s {get|set|commit|export|load|save}\n", argv[0]);
 
     return 1;
 }
