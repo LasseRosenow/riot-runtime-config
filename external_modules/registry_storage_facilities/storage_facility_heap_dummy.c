@@ -44,6 +44,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
 {
     // TODO implement "path" parameter!!
     (void)store;
+    (void)path;
     registry_path_t new_path;
     uint8_t val[REGISTRY_MAX_VAL_LEN];
 

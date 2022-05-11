@@ -8,8 +8,9 @@
 #include "errno.h"
 #include "vfs.h"
 #include <fcntl.h>
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
+#include "ps.h"
 
 static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
                 void *cb_arg);
@@ -69,6 +70,7 @@ static int _format(vfs_mount_t *mount)
 
 static int _mount(vfs_mount_t *mount)
 {
+    //printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
     int res = vfs_mount(mount);
 
     if (res < 0) {
@@ -83,6 +85,7 @@ static int _mount(vfs_mount_t *mount)
             return -1;
         }
     }
+    //printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     return 0;
 }
@@ -99,20 +102,19 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int _load_recursive(vfs_DIR *dirp, const char *mount_point, char *string_path, load_cb_t cb,
-                           void *cb_arg)
+static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *entry, const char *mount_point,
+                           char *string_path, load_cb_t cb, void *cb_arg)
 {
-    vfs_dirent_t entry;
     int res = 0;
 
     do {
-        res = vfs_readdir(dirp, &entry);
-        if (res == 1 && strcmp(entry.d_name, ".") != 0 && strcmp(entry.d_name, "..") != 0) {
+        res = vfs_readdir(dirp, entry);
+        if (res == 1 && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             /* save string_path length to restore it later */
             int old_string_path_len = strlen(string_path);
 
             /* add new directory to string_path */
-            sprintf(string_path, "%s/%s", string_path, entry.d_name);
+            sprintf(string_path, "%s/%s", string_path, entry->d_name);
 
             struct stat _stat;
             vfs_stat(string_path, &_stat);
@@ -125,7 +127,7 @@ static int _load_recursive(vfs_DIR *dirp, const char *mount_point, char *string_
                 }
 
                 /* handle directory recursively */
-                _load_recursive(&new_dirp, mount_point, string_path, cb, cb_arg);
+                _load_recursive(&new_dirp, entry, mount_point, string_path, cb, cb_arg);
 
                 /* close directory */
                 if (vfs_closedir(&new_dirp) != 0) {
@@ -237,7 +239,9 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
         DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
     }
 
-    _load_recursive(&dirp, mount->mount_point, string_path, cb, cb_arg);
+    vfs_dirent_t entry;
+
+    _load_recursive(&dirp, &entry, mount->mount_point, string_path, cb, cb_arg);
 
     if (vfs_closedir(&dirp) != 0) {
         DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");

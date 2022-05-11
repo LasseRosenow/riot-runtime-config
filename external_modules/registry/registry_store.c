@@ -4,7 +4,7 @@
 #include "clist.h"
 #include "registry.h"
 #include "assert.h"
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 
 static registry_store_instance_t *save_dst;
