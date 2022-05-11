@@ -156,7 +156,9 @@ static int _load_recursive(vfs_DIR *dirp, const char *mount_point, char *string_
                     }
                     else {
                         /* convert int path to registry_path_t */
-                        registry_path_t path = REGISTRY_PATH();
+                        // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
+                        // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+                        registry_path_t path = _REGISTRY_PATH_0();
                         for (int i = 0; i < int_path_len; i++) {
                             switch (i) {
                             case 0: path.root_group_id = (registry_root_group_id_t *)&int_path[i];

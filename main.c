@@ -9,7 +9,6 @@
 #include "registry_tests.h"
 #include "registry_storage_facilities.h"
 #include "assert.h"
-#include "fs/littlefs2_fs.h"
 #include "vfs.h"
 #include "board.h"
 #include "mtd.h"
@@ -71,25 +70,25 @@ registry_instance_t rgb_led_instance_2 = {
     .commit_cb = &rgb_led_instance_0_commit_cb,
 };
 
-
-// static struct spiffs_desc spiffs_desc = {
-//     .lock = MUTEX_INIT,
-// };
-
-// static vfs_mount_t _vfs_mount = {
-//     .fs = &spiffs_file_system,
-//     .mount_point = "/sda",
-//     .private_data = &spiffs_desc,
-// };
-
-static littlefs2_desc_t littlefs2_desc = {
+// Littlefs2
+#if defined(MODULE_LITTLEFS2)
+#include "fs/littlefs2_fs.h"
+#define FS_DRIVER littlefs2_file_system
+static littlefs2_desc_t fs_desc = {
     .lock = MUTEX_INIT,
 };
+#elif defined(MODULE_FATFS_VFS)
+#include "fs/fatfs.h"
+#define FS_DRIVER fatfs_file_system
+static fatfs_desc_t fs_desc;
+#endif
+
+
 
 static vfs_mount_t _vfs_mount = {
-    .fs = &littlefs2_file_system,
+    .fs = &FS_DRIVER,
     .mount_point = "/sda",
-    .private_data = &littlefs2_desc,
+    .private_data = &fs_desc,
 };
 
 registry_store_instance_t vfs_instance_1 = {
@@ -104,11 +103,8 @@ registry_store_instance_t vfs_instance_2 = {
 
 int main(void)
 {
-// #if defined(MODULE_SPIFFS)
-//     spiffs_desc.dev = MTD_0;
-// #endif
 // #if defined(MODULE_LITTLEFS2)
-    littlefs2_desc.dev = MTD_0;
+    fs_desc.dev = MTD_0;
 // #endif
 
     /* init registry */
@@ -132,6 +128,7 @@ int main(void)
 
     // registry_store_save();
     // vfs_format(&_vfs_mount);
+
     registry_store_load();
 
     /* test registry */

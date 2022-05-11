@@ -128,7 +128,9 @@ int registry_cli_cmd(int argc, char **argv)
 {
     int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
     int int_path[int_path_len];
-    registry_path_t path = REGISTRY_PATH();
+    // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
+    // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+    registry_path_t path = _REGISTRY_PATH_0();
 
     if (argc == 1) {
         /* show help for main commands */

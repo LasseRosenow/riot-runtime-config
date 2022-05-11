@@ -30,10 +30,14 @@ USEMODULE += embunit
 
 # File systems
 USEMODULE += littlefs2
-#USEMODULE += spiffs
+# USEMODULE += spiffs
+# USEMODULE += fatfs_vfs
+# USEMODULE += fatfs_vfs_format
 USEMODULE += mtd
 USEMODULE += vfs
 
+
+CFLAGS += -DTHREAD_STACKSIZE_MAIN=9000
 
 
 
