@@ -289,6 +289,7 @@ void registry_store_init(void);
 void registry_store_register_src(registry_store_t *src);
 void registry_store_register_dst(registry_store_t *dst);
 int registry_store_load(void);
+int registry_store_load_one(const registry_path_t path);
 int registry_store_save(void);
 int registry_store_save_one(const registry_path_t path, void *context);
 
@@ -339,10 +340,12 @@ This can be quite powerful within RIOT only environments, but is not as powerful
 The RIOT cli can be extended with a `registry` command, which is followed by `set | get | commit | export`.\
 Each of those have their own api:
 
-- set: `<path> <value>`
 - get: `<path>`
+- set: `<path> <value>`
 - commit: `<path>`
 - export: `<path> [-r <recursion depth>]`
+- load: `[path]`
+- save: `[path]`
 
 The `<path>` argument is a string of integers separated by `/`. It maps directly to the RIOT registry internal path structure.\
 The `<value>` argument is just the value as a string.\

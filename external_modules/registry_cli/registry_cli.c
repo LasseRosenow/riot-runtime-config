@@ -192,7 +192,7 @@ int registry_cli_cmd(int argc, char **argv)
     else if (strcmp(argv[1], "load") == 0) {
         if (argc > 2) {
             if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
-                printf("usage: %s %s [<path>]\n", argv[0], argv[1]);
+                printf("usage: %s %s [path]\n", argv[0], argv[1]);
                 return 1;
             }
             else {
@@ -208,7 +208,7 @@ int registry_cli_cmd(int argc, char **argv)
     else if (strcmp(argv[1], "save") == 0) {
         if (argc > 2) {
             if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
-                printf("usage: %s %s [<path>]\n", argv[0], argv[1]);
+                printf("usage: %s %s [path]\n", argv[0], argv[1]);
                 return 1;
             }
             else {
