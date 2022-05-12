@@ -102,24 +102,25 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *entry, const char *mount_point,
+static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *_stat,
+                           const char *mount_point, uint8_t *value_buf,
                            char *string_path, load_cb_t cb, void *cb_arg)
 {
     int res = 0;
 
     do {
-        res = vfs_readdir(dirp, entry);
-        if (res == 1 && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+        res = vfs_readdir(dirp, dir_entry);
+        if (res == 1 &&
+            strcmp(dir_entry->d_name, ".") != 0 && strcmp(dir_entry->d_name, "..") != 0) {
             /* save string_path length to restore it later */
             int old_string_path_len = strlen(string_path);
 
             /* add new directory to string_path */
-            sprintf(string_path, "%s/%s", string_path, entry->d_name);
+            sprintf(string_path, "%s/%s", string_path, dir_entry->d_name);
 
-            struct stat _stat;
-            vfs_stat(string_path, &_stat);
+            vfs_stat(string_path, _stat);
 
-            if (S_ISDIR(_stat.st_mode)) {
+            if (S_ISDIR(_stat->st_mode)) {
                 /* open directory */
                 vfs_DIR new_dirp;
                 if (vfs_opendir(&new_dirp, string_path) != 0) {
@@ -127,7 +128,8 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *entry, const char *mount
                 }
 
                 /* handle directory recursively */
-                _load_recursive(&new_dirp, entry, mount_point, string_path, cb, cb_arg);
+                _load_recursive(&new_dirp, dir_entry, _stat, mount_point, value_buf, string_path,
+                                cb, cb_arg);
 
                 /* close directory */
                 if (vfs_closedir(&new_dirp) != 0) {
@@ -143,7 +145,6 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *entry, const char *mount
                 }
 
                 /* read value from file */
-                uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
                 if (vfs_read(fd, value_buf, sizeof(uint8_t)) < 0) {
                     DEBUG("[registry storage_facility_vfs] load: Can not read from file\n");
                 }
@@ -171,10 +172,9 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *entry, const char *mount
                             default: path.path_len++; break;
                             }
                         }
-                        (void)path;
 
                         /* get registry meta data of configuration parameter */
-                        char buf[REGISTRY_MAX_VAL_LEN];
+                        static char buf[REGISTRY_MAX_VAL_LEN];
                         registry_value_t value = {
                             .buf = buf,
                             .buf_len = ARRAY_SIZE(buf),
@@ -239,9 +239,12 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
         DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
     }
 
-    vfs_dirent_t entry;
+    struct stat _stat;
+    vfs_dirent_t dir_entry;
+    uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
 
-    _load_recursive(&dirp, &entry, mount->mount_point, string_path, cb, cb_arg);
+    _load_recursive(&dirp, &dir_entry, &_stat, mount->mount_point, value_buf, string_path, cb,
+                    cb_arg);
 
     if (vfs_closedir(&dirp) != 0) {
         DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
