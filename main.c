@@ -12,6 +12,7 @@
 #include "vfs.h"
 #include "board.h"
 #include "mtd.h"
+#include "ps.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -67,6 +68,28 @@ registry_schema_rgb_led_t rgb_led_instance_2_data = {
 registry_instance_t rgb_led_instance_2 = {
     .name = "rgb-2",
     .data = &rgb_led_instance_2_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
+};
+
+registry_schema_rgb_led_t rgb_led_instance_3_data = {
+    .red = 7,
+    .green = 8,
+    .blue = 9,
+};
+registry_instance_t rgb_led_instance_3 = {
+    .name = "rgb-3",
+    .data = &rgb_led_instance_3_data,
+    .commit_cb = &rgb_led_instance_0_commit_cb,
+};
+
+registry_schema_rgb_led_t rgb_led_instance_4_data = {
+    .red = 7,
+    .green = 8,
+    .blue = 9,
+};
+registry_instance_t rgb_led_instance_4 = {
+    .name = "rgb-4",
+    .data = &rgb_led_instance_4_data,
     .commit_cb = &rgb_led_instance_0_commit_cb,
 };
 
@@ -128,8 +151,11 @@ int main(void)
 
     // registry_store_save();
     // vfs_format(&_vfs_mount);
+    // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     registry_store_load();
+
+    // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     /* test registry */
     // registry_tests_run();

@@ -36,11 +36,6 @@ USEMODULE += littlefs2
 USEMODULE += mtd
 USEMODULE += vfs
 
-
-CFLAGS += -DTHREAD_STACKSIZE_MAIN=9000
-
-
-
 # Riot registry config
 # Enable int64 and float support
 CFLAGS += -DCONFIG_REGISTRY_USE_UINT64=1
