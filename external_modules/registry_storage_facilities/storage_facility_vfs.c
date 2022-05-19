@@ -102,19 +102,57 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *_stat,
-                           const char *mount_point, uint8_t *value_buf,
-                           char *string_path, load_cb_t cb, void *cb_arg)
+static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
+                void *cb_arg)
 {
+    (void)cb;
+    (void)cb_arg;
+    (void)store;
+
+    vfs_mount_t *mount = store->data;
+
+    /* mount */
+    _mount(mount);
+
+    /* create dir path */
+    char string_path[REGISTRY_MAX_DIR_LEN];
+
+    sprintf(string_path, "%s", mount->mount_point);
+
+    if (path.root_group_id != NULL) {
+        sprintf(string_path, "%s/%d", string_path, *path.root_group_id);
+    }
+
+    if (path.schema_id != NULL) {
+        sprintf(string_path, "%s/%d", string_path, *path.schema_id);
+    }
+
+    if (path.instance_id != NULL) {
+        sprintf(string_path, "%s/%d", string_path, *path.instance_id);
+    }
+
+    /* read dirs */
+    vfs_DIR dirp;
+
+    if (vfs_opendir(&dirp, string_path) != 0) {
+        DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
+    }
+
+    struct stat _stat;
+    vfs_dirent_t dir_entry;
+    uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
+
+
     int i = 0;
     int last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
     int last_dir_string_path_lens[REGISTRY_MAX_DIR_DEPTH] = { 0 };
     int res = 0;
+    bool exit_folder_iteration = false;
 
-    while (true) {
+    while (exit_folder_iteration == false) {
         int dir_entry_position = -1;
         do {
-            res = vfs_readdir(dirp, dir_entry);
+            res = vfs_readdir(&dirp, &dir_entry);
             dir_entry_position++;
 
             if (dir_entry_position > last_dir_entry_positions[i]) {
@@ -124,26 +162,26 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *
                 }
 
                 if (res == 1) {
-                    if (strcmp(dir_entry->d_name,
-                               ".") != 0 && strcmp(dir_entry->d_name, "..") != 0) {
+                    if (strcmp(dir_entry.d_name,
+                               ".") != 0 && strcmp(dir_entry.d_name, "..") != 0) {
                         /* save string_path length to restore it later */
                         last_dir_string_path_lens[i] = strlen(string_path);
 
                         /* add new directory to string_path */
-                        sprintf(string_path, "%s/%s", string_path, dir_entry->d_name);
+                        sprintf(string_path, "%s/%s", string_path, dir_entry.d_name);
 
-                        vfs_stat(string_path, _stat);
+                        vfs_stat(string_path, &_stat);
 
-                        if (S_ISDIR(_stat->st_mode)) {
+                        if (S_ISDIR(_stat.st_mode)) {
                             /* close old directory */
-                            if (vfs_closedir(dirp) != 0) {
+                            if (vfs_closedir(&dirp) != 0) {
                                 DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
                             }
 
                             dir_entry_position = -1;
 
                             /* open new directory */
-                            if (vfs_opendir(dirp, string_path) != 0) {
+                            if (vfs_opendir(&dirp, string_path) != 0) {
                                 DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
                             }
 
@@ -170,7 +208,8 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *
                                 int int_path[int_path_len];
 
                                 /* try to convert string path to registry int path */
-                                if (_parse_string_path(string_path + strlen(mount_point), int_path,
+                                if (_parse_string_path(string_path + strlen(mount->mount_point),
+                                                       int_path,
                                                        &int_path_len) < 0) {
                                     DEBUG(
                                         "[registry storage_facility_vfs] load: Invalid registry path\n");
@@ -223,7 +262,7 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *
                 else {
                     /* if i == 0 it can't be further decreased => exit */
                     if (i == 0) {
-                        return 0;
+                        exit_folder_iteration = true;
                     }
 
                     /* move up one path back to the parent */
@@ -233,66 +272,18 @@ static int _load_recursive(vfs_DIR *dirp, vfs_dirent_t *dir_entry, struct stat *
                     string_path[last_dir_string_path_lens[i]] = '\0';
 
                     /* close old directory */
-                    if (vfs_closedir(dirp) != 0) {
+                    if (vfs_closedir(&dirp) != 0) {
                         DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
                     }
 
                     /* open new directory */
-                    if (vfs_opendir(dirp, string_path) != 0) {
+                    if (vfs_opendir(&dirp, string_path) != 0) {
                         DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
                     }
                 }
             }
         } while (res == 1);
     }
-
-
-
-    return 0;
-}
-
-static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg)
-{
-    (void)cb;
-    (void)cb_arg;
-    (void)store;
-
-    vfs_mount_t *mount = store->data;
-
-    /* mount */
-    _mount(mount);
-
-    /* create dir path */
-    char string_path[REGISTRY_MAX_DIR_LEN];
-
-    sprintf(string_path, "%s", mount->mount_point);
-
-    if (path.root_group_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.root_group_id);
-    }
-
-    if (path.schema_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.schema_id);
-    }
-
-    if (path.instance_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.instance_id);
-    }
-
-    /* read dirs */
-    vfs_DIR dirp;
-
-    if (vfs_opendir(&dirp, string_path) != 0) {
-        DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
-    }
-
-    struct stat _stat;
-    vfs_dirent_t dir_entry;
-    uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
-
-    _load_recursive(&dirp, &dir_entry, &_stat, mount->mount_point, value_buf, string_path, cb,
-                    cb_arg);
 
     if (vfs_closedir(&dirp) != 0) {
         DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
