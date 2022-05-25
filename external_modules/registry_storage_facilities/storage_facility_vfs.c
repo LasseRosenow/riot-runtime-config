@@ -178,8 +178,6 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                                 DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
                             }
 
-                            dir_entry_position = -1;
-
                             /* open new directory */
                             if (vfs_opendir(&dirp, string_path) != 0) {
                                 DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
@@ -187,6 +185,9 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
 
                             /* move on to next sub path */
                             i++;
+
+                            /* reset position within current dir, because the dir changed */
+                            dir_entry_position = -1;
                         }
                         else {
                             /* open file */
