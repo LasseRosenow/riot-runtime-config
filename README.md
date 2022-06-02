@@ -119,7 +119,7 @@ The RIOT Registry interacts with RIOT modules via
 devices via [Storage Facilities](#32-Storage-facilities). This way the
 functionality of the RIOT Registry is independent of the functionality of the module or storage device.
 
-In Figure 02 can be seen an example of two configuration schemas `(My app, LED Strip)` The application `My app` uses the custom `My app` CS to expose custom configuration parameters to the RIOT Registry and the drivers `WS2812, SK6812 and UCS1903` contain instances of the `LED Strip` CS to expose common LED Strip configuration parameters. Also, there are two Storage Facilities available: EEPROM and FAT.
+Figure 02 shows an example of two configuration schemas `(My app, LED Strip)` The application `My app` uses the custom `My app` CS to expose custom configuration parameters to the RIOT Registry and the drivers `WS2812, SK6812 and UCS1903` contain instances of the `LED Strip` CS to expose common LED Strip configuration parameters. Also, there are two Storage Facilities available: EEPROM and FAT.
 
 ![Figure 02](./doc/images/components.svg "The RIOT Registry components")
 <p align="center">
