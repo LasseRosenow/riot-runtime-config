@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
-        <mxGraphModel dx="1051" dy="1609" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="608" dy="1747" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -28,7 +28,7 @@
                 <mxCell id="196" value="&lt;b&gt;Name&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="40" y="-800" width="60" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="404" value="registry_value_t *" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                <mxCell id="404" value="Registry Value *" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
                     <mxGeometry x="100" y="-760" width="110" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="405" value="int" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
@@ -61,7 +61,7 @@
                 <mxCell id="469" value="value" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="359.5" y="-711.75" width="39.5" height="23.5" as="geometry"/>
                 </mxCell>
-                <mxCell id="470" value="registry_value_t" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="470" value="Registry Value" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="399" y="-711.75" width="100.5" height="23.5" as="geometry"/>
                 </mxCell>
                 <mxCell id="471" value="path" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -74,7 +74,7 @@
                     <mxGeometry x="359.5" y="-631.75" width="60.5" height="23.5" as="geometry"/>
                 </mxCell>
                 <mxCell id="474" value="function" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="420" y="-631.75" width="70" height="23.5" as="geometry"/>
+                    <mxGeometry x="420" y="-631.75" width="60" height="23.5" as="geometry"/>
                 </mxCell>
                 <mxCell id="476" value="int" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
                     <mxGeometry x="149.5" y="-440" width="60.5" height="40" as="geometry"/>
