@@ -4,6 +4,9 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
+                <mxCell id="528" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="-810" width="710" height="100" as="geometry"/>
+                </mxCell>
                 <mxCell id="196" value="&lt;b&gt;Name&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="40" y="-800" width="60" height="40" as="geometry"/>
                 </mxCell>
@@ -13,20 +16,32 @@
                 <mxCell id="502" value="&lt;b&gt;Returns&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="100" y="-800" width="110" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="513" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-                    <mxGeometry x="210" y="-760" width="300" height="40" as="geometry"/>
-                </mxCell>
-                <mxCell id="519" value="Save parameter values to storage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="1" vertex="1">
-                    <mxGeometry x="510" y="-760" width="220" height="40" as="geometry"/>
-                </mxCell>
-                <mxCell id="441" value="int" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="100" y="-760" width="110" height="40" as="geometry"/>
-                </mxCell>
-                <mxCell id="456" value="save" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
-                    <mxGeometry x="40" y="-760" width="60" height="40" as="geometry"/>
-                </mxCell>
                 <mxCell id="503" value="&lt;b&gt;Description&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
                     <mxGeometry x="510" y="-800" width="220" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="520" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="-760" width="300" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="521" value="int" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="-760" width="110" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="522" value="set" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="-760" width="60" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="523" value="path" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="-751.75" width="39.5" height="23.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="524" value="Registry Path" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="259.5" y="-751.75" width="90" height="23.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="525" value="value" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="359.5" y="-751.75" width="39.5" height="23.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="526" value="Registry Value" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="399" y="-751.75" width="100.5" height="23.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="527" value="Set a value of a parameter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="510" y="-760" width="220" height="40" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

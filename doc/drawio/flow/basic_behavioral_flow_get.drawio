@@ -1,98 +1,100 @@
 <mxfile host="65bd71144e">
     <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
-        <mxGraphModel dx="2785" dy="939" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+        <mxGraphModel dx="2543" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="274" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="-1110" y="50" width="1270" height="200" as="geometry"/>
+                    <mxGeometry x="-1110" y="50" width="1140" height="200" as="geometry"/>
                 </mxCell>
                 <mxCell id="189" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="166" target="188" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="166" value="registry_get_value(&lt;br&gt;&quot;sys/cord/0/rd_ip_addr&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-1100" y="60" width="220" height="60" as="geometry"/>
+                <mxCell id="166" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;registry_get_value(&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; &quot;sys/rgb_led/0/red&quot;&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1100" y="60" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="191" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="188" target="192" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-868" y="330" as="targetPoint"/>
+                        <mxPoint x="-958" y="330" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="188" value="Search for &quot;cord&quot; configuration schema&lt;br&gt;in &quot;sys&quot; root group" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-840" y="60" width="130" height="60" as="geometry"/>
+                <mxCell id="188" value="Search for &quot;rgb_led&quot; configuration schema&lt;br&gt;in &quot;sys&quot; root group" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-930" y="60" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="194" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="192" target="198" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-788" y="370" as="targetPoint"/>
+                        <mxPoint x="-878" y="370" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="200" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="192" target="208" edge="1">
                     <mxGeometry x="-0.2" relative="1" as="geometry">
-                        <mxPoint x="-868" y="440" as="targetPoint"/>
+                        <mxPoint x="-958" y="440" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="192" value="Found cs" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-670" y="50" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="-760" y="50" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="198" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-690" y="180" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-780" y="180" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="206" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="199" target="205" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-260" y="90" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="199" value="cs-&amp;gt;get(&quot;rd_ip_addr&quot;, si)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-260" y="60" width="130" height="60" as="geometry"/>
+                <mxCell id="199" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;cs-&amp;gt;get(&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; &quot;red&quot;, si&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-350" y="60" width="110" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="201" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="205" target="202" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-873" y="690" as="sourcePoint"/>
-                        <mxPoint x="-813" y="690" as="targetPoint"/>
+                        <mxPoint x="-983" y="690" as="sourcePoint"/>
+                        <mxPoint x="-923" y="690" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="202" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-110" y="180" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-220" y="180" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="203" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="205" target="204" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-1053" y="840" as="sourcePoint"/>
-                        <mxPoint x="-993" y="840" as="targetPoint"/>
+                        <mxPoint x="-1163" y="840" as="sourcePoint"/>
+                        <mxPoint x="-1103" y="840" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="204" value="Return value of &quot;rd_ip_addr&quot;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="30" y="60" width="120" height="60" as="geometry"/>
+                <mxCell id="204" value="Return value &lt;br&gt;of &quot;red&quot;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-80" y="60" width="100" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="205" value="Valid" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-90" y="50" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="-200" y="50" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="207" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="208" target="211" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-868" y="550" as="targetPoint"/>
+                        <mxPoint x="-958" y="550" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="208" value="Search for &quot;0&quot; schema instance" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-550" y="60" width="130" height="60" as="geometry"/>
+                    <mxGeometry x="-640" y="60" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="209" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="211" target="212" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-768" y="590" as="targetPoint"/>
+                        <mxPoint x="-858" y="590" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="210" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="211" target="199" edge="1">
                     <mxGeometry x="-0.25" relative="1" as="geometry">
-                        <mxPoint x="-868" y="660" as="targetPoint"/>
+                        <mxPoint x="-958" y="660" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="211" value="Found si" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-380" y="50" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="-470" y="50" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="212" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-400" y="180" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-490" y="180" width="120" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

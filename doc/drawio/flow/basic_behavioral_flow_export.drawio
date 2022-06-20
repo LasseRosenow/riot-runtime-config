@@ -1,14 +1,14 @@
 <mxfile host="65bd71144e">
     <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
-        <mxGraphModel dx="2064" dy="665" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+        <mxGraphModel dx="2543" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="274" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="-1160" y="10" width="1130" height="190" as="geometry"/>
+                    <mxGeometry x="-1160" y="10" width="1020" height="190" as="geometry"/>
                 </mxCell>
-                <mxCell id="185" value="registry_commit(&quot;sys/cord/0&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-1150" y="20" width="170" height="60" as="geometry"/>
+                <mxCell id="185" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;registry_commit(&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; &quot;sys/rgb_led/0&quot;&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1150" y="20" width="110" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="233" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="185" target="235" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -17,66 +17,66 @@
                 </mxCell>
                 <mxCell id="234" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="235" target="238" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-439" y="380" as="targetPoint"/>
+                        <mxPoint x="-499" y="380" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="235" value="Search for &quot;cord&quot; configuration schema&lt;br&gt;in &quot;sys&quot; root group" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-940" y="20" width="130" height="60" as="geometry"/>
+                <mxCell id="235" value="Search for &quot;rgb_led&quot; configuration schema&lt;br&gt;in &quot;sys&quot; root group" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1000" y="20" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="236" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="238" target="239" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-339" y="420" as="targetPoint"/>
+                        <mxPoint x="-399" y="420" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="237" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="238" target="248" edge="1">
                     <mxGeometry x="-0.122" relative="1" as="geometry">
-                        <mxPoint x="-439" y="490" as="targetPoint"/>
+                        <mxPoint x="-499" y="490" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="238" value="Found cs" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-770" y="10" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="-830" y="10" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="239" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-790" y="130" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-850" y="130" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="240" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="241" target="245" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-439" y="820" as="targetPoint"/>
+                        <mxPoint x="-499" y="820" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="241" value="si-&amp;gt;commit_cb(&quot;sys/cord/0&quot;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-360" y="20" width="160" height="60" as="geometry"/>
+                <mxCell id="241" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;si-&amp;gt;commit_cb(&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; &quot;sys/rgb_led/0&quot;&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-420" y="20" width="110" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="245" value="Configuration changes for &quot;sys/cord/0&quot; take effect&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-160" y="20" width="120" height="60" as="geometry"/>
+                <mxCell id="245" value="Configuration changes for &quot;sys/rgb_led/0&quot; take effect&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-270" y="20" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="247" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="248" target="251" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-439" y="600" as="targetPoint"/>
+                        <mxPoint x="-499" y="600" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="248" value="Search for &quot;0&quot; schema instance" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-649" y="20" width="130" height="60" as="geometry"/>
+                    <mxGeometry x="-709" y="20" width="130" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="249" value="No" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="251" target="252" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="-339" y="640" as="targetPoint"/>
+                        <mxPoint x="-399" y="640" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="250" value="Yes" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="251" target="241" edge="1">
                     <mxGeometry x="-0.15" relative="1" as="geometry">
-                        <mxPoint x="-439" y="710" as="targetPoint"/>
+                        <mxPoint x="-499" y="710" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="251" value="Found si" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-480" y="10" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="-540" y="10" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="252" value="Return&lt;br&gt;ENOTFOUND" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
-                    <mxGeometry x="-500" y="130" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="-560" y="130" width="120" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

@@ -1,0 +1,54 @@
+<mxfile host="65bd71144e">
+    <diagram id="fjN8D4Odn0497USpxgly" name="Page-1">
+        <mxGraphModel dx="2543" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="274" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="-1160" y="10" width="1010" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="184" value="registry_store_load(&lt;br&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; &quot;sys&quot;&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-1150" y="50" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="253" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="184" target="255" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-228" y="290" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="255" value="Call storage_facility-&amp;gt;load(&lt;br&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; path,&lt;/i&gt;&lt;/div&gt;&lt;i&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;i&gt;&amp;nbsp; &amp;nbsp; registry_set_value()&lt;/i&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/div&gt;&lt;/i&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-990" y="45" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="288" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="289" target="290" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-1019.7647058823529" y="630.2352941176471" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="289" value="" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="-790" y="30" width="350" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="290" value="All configurations are loaded from storage" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" parent="1" vertex="1">
+                    <mxGeometry x="-400" y="50" width="240" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="295" value="" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="297" target="296" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-614" y="123.75" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                        <mxPoint x="-673" y="121.75" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="296" value="registry_set_value(&lt;i&gt;key, value&lt;/i&gt;)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-620" y="60" width="170" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="297" value="Foreach stored configuration&amp;nbsp;as&lt;br&gt;&lt;b&gt;{key, value}&lt;/b&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+                    <mxGeometry x="-783" y="39.5" width="120" height="80.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="298" style="edgeStyle=elbowEdgeStyle;rounded=0;html=1;" parent="1" source="255" target="289" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-790" y="79.66" as="sourcePoint"/>
+                        <mxPoint x="-750" y="79.66" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
