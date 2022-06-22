@@ -196,11 +196,11 @@ int registry_cli_cmd(int argc, char **argv)
                 return 1;
             }
             else {
-                registry_store_load_one(path);
+                registry_load(path);
             }
         }
         else {
-            registry_store_load();
+            registry_load(_REGISTRY_PATH_0());
         }
 
         return 0;
@@ -212,7 +212,7 @@ int registry_cli_cmd(int argc, char **argv)
                 return 1;
             }
             else {
-                registry_store_save_one(path, NULL);
+                registry_store_save_one(path);
             }
         }
         else {

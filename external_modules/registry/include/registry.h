@@ -232,6 +232,7 @@ extern "C" {
  */
 typedef enum {
     REGISTRY_TYPE_NONE = 0,     /**< No type specified */
+    REGISTRY_TYPE_OPAQUE,       /**< OPAQUE */
     REGISTRY_TYPE_STRING,       /**< String */
     REGISTRY_TYPE_BOOL,         /**< Boolean */
 
@@ -543,7 +544,7 @@ void registry_init(void);
 /**
  * @brief Initializes the store module.
  */
-void registry_store_init(void);
+void registry_init_store(void);
 
 /**
  * @brief Registers a new sys schema for a configuration group.
@@ -562,7 +563,7 @@ int registry_register_schema(registry_root_group_id_t root_group_id, registry_sc
  *
  * @param[in] src Pointer to the storage to register as source.
  */
-void registry_store_register_src(registry_store_instance_t *src);
+void registry_register_store_src(registry_store_instance_t *src);
 
 /**
  * @brief Registers a new storage as a destination for saving configurations.
@@ -573,7 +574,7 @@ void registry_store_register_src(registry_store_instance_t *src);
  *
  * @param[in] dst Pointer to the storage to register
  */
-void registry_store_register_dst(registry_store_instance_t *dst);
+void registry_register_store_dst(registry_store_instance_t *dst);
 
 /**
  * @brief Adds a new instance of a schema.
@@ -582,8 +583,8 @@ void registry_store_register_dst(registry_store_instance_t *dst);
  * @param[in] schema_id ID of the schema.
  * @param[in] instance Pointer to instance structure.
  */
-int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id,
-                          registry_instance_t *instance);
+int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id,
+                                      registry_instance_t *instance);
 
 /**
  * @brief Sets the value of a parameter that belongs to a configuration group.
@@ -595,6 +596,7 @@ int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id,
  */
 int registry_set_value(const registry_path_t path, const registry_value_t val);
 
+int registry_set_opaque(const registry_path_t path, const void *val, const int val_len);
 int registry_set_string(const registry_path_t path, const char *val);
 int registry_set_bool(const registry_path_t path, bool val);
 int registry_set_uint8(const registry_path_t path, uint8_t val);
@@ -625,6 +627,7 @@ int registry_set_float64(const registry_path_t path, double val);
  */
 registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
 
+void *registry_get_opaque(const registry_path_t path, void *buf, int buf_len);
 char *registry_get_string(const registry_path_t path, char *buf, int buf_len);
 bool registry_get_bool(const registry_path_t path);
 uint8_t registry_get_uint8(const registry_path_t path);
@@ -726,23 +729,13 @@ char *registry_convert_str_from_value(registry_type_t type, const void *vp, char
 char *registry_convert_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len);
 
 /**
- * @brief Load all configuration parameters from the registered storage
- * facilities.
- *
- * @note This should be called after the storage facilities were registered.
- *
- * @return 0 on success, non-zero on failure
- */
-int registry_store_load(void);
-
-/**
- * @brief Load a specific configuration paramter from the registered storage
+ * @brief Load all configuration parameters that are included in the path from the registered storage
  * facility.
  *
- * @param[in] path Path of the configuration parameter
+ * @param[in] path Path of the configuration parameters
  * @return 0 on success, non-zero on failure
  */
-int registry_store_load_one(const registry_path_t path);
+int registry_load(const registry_path_t path);
 
 /**
  * @brief Save all configuration parameters of every configuration group to the
@@ -757,10 +750,9 @@ int registry_store_save(void);
  * facility.
  *
  * @param[in] path Path of the configuration parameter
- * @param[in] context Context of the schema instance
  * @return 0 on success, non-zero on failure
  */
-int registry_store_save_one(const registry_path_t path, void *context);
+int registry_store_save_one(const registry_path_t path);
 
 /**
  * @brief Export an specific or all configuration parameters using the

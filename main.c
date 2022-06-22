@@ -155,13 +155,16 @@ int main(void)
     registry_schemas_init();
 
     /* register store source and destination */
-    registry_store_register_src(&vfs_instance_1);
-    registry_store_register_dst(&vfs_instance_2);
+    registry_register_store_src(&vfs_instance_1);
+    registry_register_store_dst(&vfs_instance_2);
 
     /* add schema instances */
-    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_0);
-    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_1);
-    registry_add_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id, &rgb_led_instance_2);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_0);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_1);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_2);
 
     /* for the thread running the shell */
     // registry_coap_cli_init();
@@ -173,7 +176,7 @@ int main(void)
     // vfs_format(&_vfs_mount);
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
-    registry_store_load();
+    registry_load(_REGISTRY_PATH_0());
 
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 

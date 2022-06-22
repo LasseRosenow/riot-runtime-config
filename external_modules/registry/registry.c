@@ -34,6 +34,7 @@ static int _registry_cmp_schema_id(clist_node_t *current, void *id)
 static size_t _get_registry_parameter_data_len(registry_type_t type)
 {
     switch (type) {
+    case REGISTRY_TYPE_OPAQUE: return 0;
     case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
     case REGISTRY_TYPE_BOOL: return sizeof(bool);
 
@@ -115,7 +116,7 @@ static registry_instance_t *_instance_lookup(registry_schema_t *schema, int inst
 
 void registry_init(void)
 {
-    registry_store_init();
+    registry_init_store();
 }
 
 int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema)
@@ -163,8 +164,8 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
     return NULL;
 }
 
-int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id,
-                          registry_instance_t *instance)
+int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id,
+                                      registry_instance_t *instance)
 {
     assert(instance != NULL);
 
@@ -756,6 +757,11 @@ int registry_set_value(const registry_path_t path, const registry_value_t val)
     return _registry_set(path, val.buf, val.buf_len, val.type);
 }
 
+int registry_set_opaque(const registry_path_t path, const void *val, const int val_len)
+{
+    return _registry_set(path, val, val_len, REGISTRY_TYPE_OPAQUE);
+}
+
 int registry_set_string(const registry_path_t path, const char *val)
 {
     return _registry_set(path, val, strlen(val), REGISTRY_TYPE_STRING);
@@ -842,6 +848,11 @@ static void _registry_get_buf(const registry_path_t path, void *buf, int buf_len
     };
 
     _registry_get(path, &value, type);
+}
+void *registry_get_opaque(const registry_path_t path, void *buf, int buf_len)
+{
+    _registry_get_buf(path, buf, buf_len, REGISTRY_TYPE_OPAQUE);
+    return buf;
 }
 char *registry_get_string(const registry_path_t path, char *buf, int buf_len)
 {

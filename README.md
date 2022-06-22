@@ -237,9 +237,9 @@ Figure 07 - Behavioral flow of the "export" API
 
 ### Load and save configurations from/to storage
 
-At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_store_load` function) or *store* them in the SF destination (`registry_store_save` function).
+At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_load` function) or *store* them in the SF destination (`registry_store_save` function).
 
-As one could expect, `registry_store_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF *store* handler as callback.
+As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF *store* handler as callback.
 
 Figure 08 shows the above described processes.
 
@@ -268,7 +268,7 @@ Figure 09 - Behavioral flow of the registration of custom registry schemas
 /* Base */
 void registry_init(void);
 int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
-int registry_add_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
+int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
 int registry_set_value(const registry_path_t path, const registry_value_t val);
 registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
 int registry_commit(const registry_path_t path);
@@ -285,11 +285,10 @@ int registry_export(int (*export_func)(
 
 
 /* Store */
-void registry_store_init(void);
-void registry_store_register_src(registry_store_t *src);
-void registry_store_register_dst(registry_store_t *dst);
-int registry_store_load(void);
-int registry_store_load_one(const registry_path_t path);
+void registry_init_store(void);
+void registry_register_store_src(registry_store_t *src);
+void registry_register_store_dst(registry_store_t *dst);
+int registry_load(const registry_path_t path);
 int registry_store_save(void);
 int registry_store_save_one(const registry_path_t path, void *context);
 
@@ -550,9 +549,9 @@ int main(void)
     registry_init();
 
     /* add schema instances */
-    registry_add_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_0);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_0);
 
-    registry_add_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_1);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_APP, registry_schema_rgb_led.id, &rgb_led_instance_1);
 
     /* set value */
     registry_set_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE), 19);
