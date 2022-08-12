@@ -202,7 +202,7 @@ configuration value (`registry_get_value`), *set* a configuration value
 *export* configurations using a user-defined callback function
 (`registry_export`).
 
-Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_store_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
+Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
 
 The following diagrams show the process of each function. It's assumed there are 2 CS registered in the RIOT Registry: a *cord* configuration schema with a `rd_ip_addr` configuration parameter that is inside the *sys* root group and a *config* configuration schema that is inside the *app* root group and has a `foo` configuration parameter.
 A registry path usually consists of integers, but the diagrams below uses strings instead just for demonstration purposes only.
@@ -237,9 +237,9 @@ Figure 07 - Behavioral flow of the "export" API
 
 ### Load and save configurations from/to storage
 
-At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_load` function) or *store* them in the SF destination (`registry_store_save` function).
+At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_load` function) or *store* them in the SF destination (`registry_save` function).
 
-As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_store_save` will call `registry_export` on all CS with the SF *store* handler as callback.
+As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_save` will call `registry_export` on all CS with the SF *store* handler as callback.
 
 Figure 08 shows the above described processes.
 
@@ -267,8 +267,6 @@ Figure 09 - Behavioral flow of the registration of custom registry schemas
 ```c++
 /* Base */
 void registry_init(void);
-int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
-int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
 int registry_set_value(const registry_path_t path, const registry_value_t val);
 registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
 int registry_commit(const registry_path_t path);
@@ -282,19 +280,19 @@ int registry_export(int (*export_func)(
   ),
   const registry_path_t path, int recursion_depth, void *context
 );
+int registry_load(const registry_path_t path);
+int registry_save(const registry_path_t path);
 
 
 /* Store */
-void registry_init_store(void);
 void registry_register_store_src(registry_store_t *src);
 void registry_register_store_dst(registry_store_t *dst);
-int registry_load(const registry_path_t path);
-int registry_store_save(void);
-int registry_store_save_one(const registry_path_t path, void *context);
 
 
 /* Schemas */
 void registry_schemas_init(void);
+int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
+int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
 
 
 /* Set convenience functions */

@@ -120,15 +120,18 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
     sprintf(string_path, "%s", mount->mount_point);
 
     if (path.root_group_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.root_group_id);
+        // TODO
+        // sprintf(string_path, "%s/%d", string_path, *path.root_group_id);
     }
 
     if (path.schema_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.schema_id);
+        // TODO
+        // sprintf(string_path, "%s/%d", string_path, *path.schema_id);
     }
 
     if (path.instance_id != NULL) {
-        sprintf(string_path, "%s/%d", string_path, *path.instance_id);
+        // TODO
+        // sprintf(string_path, "%s/%d", string_path, *path.instance_id);
     }
 
     /* read dirs */
@@ -168,7 +171,8 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                         last_dir_string_path_lens[i] = strlen(string_path);
 
                         /* add new directory to string_path */
-                        sprintf(string_path, "%s/%s", string_path, dir_entry.d_name);
+                        // TODO
+                        // sprintf(string_path, "%s/%s", string_path, dir_entry.d_name);
 
                         vfs_stat(string_path, &_stat);
 
@@ -199,7 +203,13 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                                     fd);
                             }
 
+                            /* get filesize */
+                            vfs_fstat(fd, &_stat);
+
+                            printf("\n\nLOOOOOOOOOOOOOOOOOOOL: %ld\n\n", _stat.st_size);
+
                             /* read value from file */
+                            // TODO why read only sizeof(uint8_t)????? We need to get the size of the parameter that is being loaded right now.
                             if (vfs_read(fd, value_buf, sizeof(uint8_t)) < 0) {
                                 DEBUG(
                                     "[registry storage_facility_vfs] load: Can not read from file\n");
@@ -310,18 +320,22 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     /* create dir path */
     char string_path[REGISTRY_MAX_DIR_LEN];
 
-    sprintf(string_path, "%s/%d", mount->mount_point, *path.root_group_id);
+    // TODO
+    // sprintf(string_path, "%s/%d", mount->mount_point, *path.root_group_id);
     vfs_mkdir(string_path, 0);
 
-    sprintf(string_path, "%s/%d", string_path, *path.schema_id);
+    // TODO
+    // sprintf(string_path, "%s/%d", string_path, *path.schema_id);
     vfs_mkdir(string_path, 0);
 
-    sprintf(string_path, "%s/%d", string_path, *path.instance_id);
+    // TODO
+    // sprintf(string_path, "%s/%d", string_path, *path.instance_id);
     vfs_mkdir(string_path, 0);
 
     /* exclude the last element, as it will be the file name and not a folder */
     for (int i = 0; i < path.path_len - 1; i++) {
-        sprintf(string_path, "%s/%d", string_path, path.path[i]);
+        // TODO
+        // sprintf(string_path, "%s/%d", string_path, path.path[i]);
         int res = vfs_mkdir(string_path, 0);
         if (res != 0 && res != -EEXIST) {
             DEBUG("[registry storage_facility_vfs] save: Can not create dir: %d\n", res);
@@ -329,13 +343,16 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     }
 
     /* open file */
-    sprintf(string_path, "%s/%d", string_path, path.path[path.path_len - 1]);
+    // TODO
+    // sprintf(string_path, "%s/%d", string_path, path.path[path.path_len - 1]);
 
     int fd = vfs_open(string_path, O_CREAT | O_RDWR, 0);
 
     if (fd <= 0) {
         DEBUG("[registry storage_facility_vfs] save: Can not open file: %d\n", fd);
     }
+
+    printf("\n\nSAVEEEEEEEEEEEEEEEEEEEEEEEEE: %d\n\n", value.buf_len);
 
     if (vfs_write(fd, value.buf, value.buf_len) < 0) {
         DEBUG("[registry storage_facility_vfs] save: Can not write to file: %d\n", fd);

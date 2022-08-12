@@ -116,13 +116,12 @@ extern "C" {
  * @brief Creates and initializes a @ref registry_schema_t struct.
  *
  */
-#define REGISTRY_SCHEMA(_field_name, _id, _name, _description, _get, _set, ...) \
+#define REGISTRY_SCHEMA(_field_name, _id, _name, _description, _mapping, ...) \
     registry_schema_t _field_name = { \
         .id = _id, \
         .name = _name, \
         .description = _description, \
-        .get = _get, \
-        .set = _set, \
+        .mapping = _mapping, \
         .items = (registry_schema_item_t[]) { __VA_ARGS__ }, \
         .items_len = _REGISTRY_SCHEMA_ITEM_NUMARGS(__VA_ARGS__), \
     }
@@ -513,38 +512,20 @@ typedef struct {
     clist_node_t instances;         /**< Linked list of schema instances @ref registry_instance_t */
 
     /**
-     * @brief Handler to get the current value of a configuration parameter.
+     * @brief Mapping to connect configuration parameter IDs with the address in the storage.
      *
      * @param[in] param_id ID of the parameter that contains the value
      * @param[in] instance Pointer to the instance of the schema, that contains the parameter
-     * @param[out] buf Pointer to a buffer to store the current value
-     * @param[in] buf_len Length of the buffer to store the current value
-     * @param[in] context Context of the schema instance
+     * @param[in] val Pointer to buffer containing the new value
+     * @param[in] val_len Pointer to length of the buffer to store the current value
      */
-    void (*get)(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
-
-    /**
-     * @brief Handler to set a the value of a configuration parameter.
-     *
-     * @param[in] param_id ID of the parameter that contains the value
-     * @param[in] instance Pointer to the instance of the schema, that contains the parameter
-     * @param[in] val Buffer containing the new value
-     * @param[in] val_len Length of the buffer to store the current value
-     * @param[in] context Context of the schema instance
-     */
-    void (*set)(int param_id, registry_instance_t *instance, const void *val, int val_len,
-                void *context);
+    void (*mapping)(int param_id, registry_instance_t *instance, void **val, int *val_len);
 } registry_schema_t;
 
 /**
  * @brief Initializes the RIOT Registry and the store modules.
  */
 void registry_init(void);
-
-/**
- * @brief Initializes the store module.
- */
-void registry_init_store(void);
 
 /**
  * @brief Registers a new sys schema for a configuration group.
@@ -741,18 +722,10 @@ int registry_load(const registry_path_t path);
  * @brief Save all configuration parameters of every configuration group to the
  * registered storage facility.
  *
+ * @param[in] path Path of the configuration parameters
  * @return 0 on success, non-zero on failure
  */
-int registry_store_save(void);
-
-/**
- * @brief Save a specific configuration paramter to the registered storage
- * facility.
- *
- * @param[in] path Path of the configuration parameter
- * @return 0 on success, non-zero on failure
- */
-int registry_store_save_one(const registry_path_t path);
+int registry_save(const registry_path_t path);
 
 /**
  * @brief Export an specific or all configuration parameters using the

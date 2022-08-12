@@ -23,6 +23,34 @@ registry_root_group_t registry_root_group_app = {
     .schemas = { .next = NULL },
 };
 
+static registry_store_instance_t *store_dst;
+static clist_node_t store_srcs;
+
+static void _debug_print_path(const registry_path_t path)
+{
+    DEBUG("%d", *path.root_group_id);
+
+    if (path.schema_id != NULL) {
+        DEBUG("/%d", *path.schema_id);
+
+        if (path.instance_id != NULL) {
+            DEBUG("/%d", *path.instance_id);
+
+            if (path.path_len > 0) {
+                DEBUG("/");
+
+                for (int i = 0; i < path.path_len; i++) {
+                    DEBUG("%d", path.path[i]);
+
+                    if (i < path.path_len - 1) {
+                        DEBUG("/");
+                    }
+                }
+            }
+        }
+    }
+}
+
 static int _registry_cmp_schema_id(clist_node_t *current, void *id)
 {
     assert(current != NULL);
@@ -116,7 +144,7 @@ static registry_instance_t *_instance_lookup(registry_schema_t *schema, int inst
 
 void registry_init(void)
 {
-    registry_init_store();
+    store_srcs.next = NULL;
 }
 
 int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema)
@@ -227,6 +255,12 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
         return -EINVAL;
     }
 
+    /* get pointer to registry internal value buffer and length */
+    int intern_val_len;
+    void *intern_val = NULL;
+
+    schema->mapping(param_meta->id, instance, &intern_val, &intern_val_len);
+
     /* check if val_type is compatible with param_meta->value.parameter.type */
     if (val_type != param_meta->value.parameter.type) {
         int new_val_len = _get_registry_parameter_data_len(val_type);
@@ -236,7 +270,7 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
                                                                       param_meta->value.parameter.type);
         if (conversion_error_code == 0) {
             /* call handler to apply the new value to the correct parameter in the instance of the schema */
-            schema->set(param_meta->id, instance, new_val, new_val_len, instance->context);
+            memcpy(intern_val, new_val, intern_val_len);
         }
         else {
             return conversion_error_code;
@@ -244,7 +278,7 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
     }
     else {
         /* call handler to apply the new value to the correct parameter in the instance of the schema */
-        schema->set(param_meta->id, instance, val, val_len, instance->context);
+        memcpy(intern_val, val, intern_val_len);
     }
 
     return 0;
@@ -287,9 +321,10 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
     }
 
     /* call handler to get the parameter value from the instance of the schema */
-    uint8_t buf[REGISTRY_MAX_VAL_LEN];     /* max_val_len is the largest allowed size as a string => largest size in general */
+    int buf_len;
+    void *buf = NULL;
 
-    schema->get(param_meta->id, instance, buf, ARRAY_SIZE(buf), instance->context);
+    schema->mapping(param_meta->id, instance, &buf, &buf_len);
 
     /* check if val_type is requested and compatible with param_meta->value.parameter.type */
     if (val_type != REGISTRY_TYPE_NONE && val_type != param_meta->value.parameter.type) {
@@ -310,7 +345,7 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
     }
     else {
         /* copy buf to registry_value_t value */
-        memcpy(val->buf, buf, val->buf_len);
+        memcpy(val->buf, buf, buf_len);
     }
 
     return 0;
@@ -963,3 +998,144 @@ double registry_get_float64(const registry_path_t path)
     return buf;
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
+
+static void _registry_load_cb(const registry_path_t path, const registry_value_t val,
+                              void *cb_arg)
+{
+    (void)cb_arg;
+    DEBUG("[registry_store] Setting ");
+    _debug_print_path(path);
+
+    if (ENABLE_DEBUG) {
+        char value_string[REGISTRY_MAX_VAL_LEN];
+
+        registry_convert_str_from_value(val.type, val.buf, value_string, ARRAY_SIZE(
+                                            value_string));
+        DEBUG(" to %s\n", value_string);
+    }
+
+    registry_set_value(path, val);
+}
+
+void registry_register_store_src(registry_store_instance_t *src)
+{
+    assert(src != NULL);
+    clist_rpush(&store_srcs, &(src->node));
+}
+
+void registry_register_store_dst(registry_store_instance_t *dst)
+{
+    assert(dst != NULL);
+    store_dst = dst;
+}
+
+int registry_load(const registry_path_t path)
+{
+    clist_node_t *node = store_srcs.next;
+
+    if (!node) {
+        return -ENOENT;
+    }
+
+    do {
+        registry_store_instance_t *src;
+        src = container_of(node, registry_store_instance_t, node);
+        src->itf->load(src, path, _registry_load_cb, NULL);
+    } while (node != store_srcs.next);
+
+    return 0;
+}
+
+static void _registry_store_dup_check_cb(const registry_path_t path, const registry_value_t val,
+                                         void *cb_arg)
+{
+    assert(cb_arg != NULL);
+    registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
+
+    if (path.root_group_id != dup_arg->path.root_group_id ||
+        path.schema_id != dup_arg->path.schema_id ||
+        path.instance_id != dup_arg->path.instance_id) {
+        return;
+    }
+
+    for (int i = 0; i < path.path_len; i++) {
+        if (path.path[i] != dup_arg->path.path[i]) {
+            return;
+        }
+    }
+
+    if (memcmp(val.buf, dup_arg->val.buf, val.buf_len) == 0) {
+        dup_arg->is_dup = true;
+    }
+}
+
+static int _registry_save_export_func(const registry_path_t path,
+                                      const registry_schema_t *schema,
+                                      const registry_instance_t *instance,
+                                      const registry_schema_item_t *meta,
+                                      const registry_value_t *value,
+                                      void *context)
+{
+    (void)schema;
+    (void)meta;
+    (void)instance;
+    (void)context;
+    (void)_registry_store_dup_check_cb;
+
+    /* The registry also exports just the root group or just a schema, but the storage facility is only interested in paths with values */
+    if (value == NULL) {
+        return 0;
+    }
+
+    registry_store_instance_t *dst = store_dst;
+
+    DEBUG("[registry_store] Saving: ");
+    _debug_print_path(path);
+    if (ENABLE_DEBUG) {
+        char value_string[REGISTRY_MAX_VAL_LEN];
+
+        registry_convert_str_from_value(value->type, value->buf, value_string, ARRAY_SIZE(
+                                            value_string));
+        DEBUG(" = %s\n", value_string);
+    }
+
+    if (!dst) {
+        return -ENOENT;
+    }
+
+    // TODO use registry_load_one() to remove overhead
+    // registry_dup_check_arg_t dup = {
+    //     .path = path,
+    //     .val = *value,
+    //     .is_dup = false,
+    // };
+
+    // store_dst->itf->load(store_dst, _registry_store_dup_check_cb, &dup);
+
+    // if (dup.is_dup) {
+    //     return -EEXIST;
+    // }
+
+    return dst->itf->save(dst, path, *value);
+}
+
+int registry_save(const registry_path_t path)
+{
+    int res;
+
+    if (!store_dst) {
+        return -ENOENT;
+    }
+
+    if (store_dst->itf->save_start) {
+        store_dst->itf->save_start(store_dst);
+    }
+
+    res = registry_export(_registry_save_export_func, path, 0, NULL);
+
+    if (store_dst->itf->save_end) {
+        store_dst->itf->save_end(store_dst);
+    }
+
+    return res;
+}

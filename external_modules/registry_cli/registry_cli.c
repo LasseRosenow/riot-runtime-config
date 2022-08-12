@@ -212,11 +212,11 @@ int registry_cli_cmd(int argc, char **argv)
                 return 1;
             }
             else {
-                registry_store_save_one(path);
+                registry_save(path);
             }
         }
         else {
-            registry_store_save();
+            registry_save(_REGISTRY_PATH_0());
         }
 
         return 0;

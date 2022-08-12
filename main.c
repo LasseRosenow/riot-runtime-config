@@ -13,8 +13,8 @@
 #include "board.h"
 #include "mtd.h"
 #include "ps.h"
-#include "ws281x.h"
-#include "ws281x_params.h"
+// #include "ws281x.h"
+// #include "ws281x_params.h"
 
 #define SHELL_QUEUE_SIZE (8)
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
@@ -26,7 +26,7 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
-ws281x_t dev;
+// ws281x_t dev;
 
 int rgb_led_instance_0_commit_cb(const registry_path_t path, void *context)
 {
@@ -40,20 +40,20 @@ int rgb_led_instance_0_commit_cb(const registry_path_t path, void *context)
     }
     printf("\n");
 
-    uint8_t red =
-        registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
-                                             REGISTRY_SCHEMA_RGB_LED_RED));
-    uint8_t green =
-        registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
-                                             REGISTRY_SCHEMA_RGB_LED_GREEN));
-    uint8_t blue =
-        registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
-                                             REGISTRY_SCHEMA_RGB_LED_BLUE));
+    // uint8_t red =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
+    //                                          REGISTRY_SCHEMA_RGB_LED_RED));
+    // uint8_t green =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
+    //                                          REGISTRY_SCHEMA_RGB_LED_GREEN));
+    // uint8_t blue =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(*path.schema_id, *path.instance_id,
+    //                                          REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    color_rgb_t color = { .r = red, .g = green, .b = blue };
+    // color_rgb_t color = { .r = red, .g = green, .b = blue };
 
-    ws281x_set(&dev, 0, color);
-    ws281x_write(&dev);
+    // ws281x_set(&dev, 0, color);
+    // ws281x_write(&dev);
 
     return 0;
 }
@@ -172,7 +172,7 @@ int main(void)
 
     // registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    // registry_store_save();
+    // registry_save();
     // vfs_format(&_vfs_mount);
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
@@ -185,27 +185,27 @@ int main(void)
 
 
     // DEMO START
-    int retval;
+    // int retval;
 
-    if (0 != (retval = ws281x_init(&dev, &ws281x_params[0]))) {
-        printf("Initialization failed with error code %d\n", retval);
-        return retval;
-    }
+    // if (0 != (retval = ws281x_init(&dev, &ws281x_params[0]))) {
+    //     printf("Initialization failed with error code %d\n", retval);
+    //     return retval;
+    // }
 
-    uint8_t red =
-        registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
-                                             REGISTRY_SCHEMA_RGB_LED_RED));
-    uint8_t green =
-        registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
-                                             REGISTRY_SCHEMA_RGB_LED_GREEN));
-    uint8_t blue =
-        registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
-                                             REGISTRY_SCHEMA_RGB_LED_BLUE));
+    // uint8_t red =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
+    //                                          REGISTRY_SCHEMA_RGB_LED_RED));
+    // uint8_t green =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
+    //                                          REGISTRY_SCHEMA_RGB_LED_GREEN));
+    // uint8_t blue =
+    //     registry_get_uint8(REGISTRY_PATH_SYS(registry_schema_rgb_led.id, 0,
+    //                                          REGISTRY_SCHEMA_RGB_LED_BLUE));
 
-    color_rgb_t color = { .r = red, .g = green, .b = blue };
+    // color_rgb_t color = { .r = red, .g = green, .b = blue };
 
-    ws281x_set(&dev, 0, color);
-    ws281x_write(&dev);
+    // ws281x_set(&dev, 0, color);
+    // ws281x_write(&dev);
     // DEMO END
 
     msg_init_queue(_shell_queue, SHELL_QUEUE_SIZE);

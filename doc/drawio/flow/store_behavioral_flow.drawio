@@ -22,7 +22,7 @@
                 <mxCell id="166" value="registry_load()" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-1060" y="190" width="220" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="184" value="registry_store_save()" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="184" value="registry_save()" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-640" y="190" width="220" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="186" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;" parent="1" source="161" target="184" edge="1">
