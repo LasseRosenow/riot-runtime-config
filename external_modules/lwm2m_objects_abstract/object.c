@@ -59,7 +59,7 @@
 //
 //     if (*num_dataP == 0) {
 //         /* This list must contain all available resources */
-//         int len = userData->res_list_size;
+//         size_t len = userData->res_list_size;
 //
 //         *data_arrayP = lwm2m_data_new(len);
 //         if (*data_arrayP == NULL) {
@@ -67,7 +67,7 @@
 //         }
 //
 //         *num_dataP = len;
-//         for (int i = 0; i < len; i++) {
+//         for (size_t i = 0; i < len; i++) {
 //             (*data_arrayP)[i].id = i;
 //         }
 //     }
@@ -106,8 +106,8 @@
 //         }
 //
 //         /* Calculate readable res count and init data_arrayP */
-//         int data_arrayP_index = 0;
-//         for (int i = 0; i < res_len; i++) {
+//         size_t data_arrayP_index = 0;
+//         for (size_t i = 0; i < res_len; i++) {
 //             if (userData->res_list[i].operation_type == REG_DATA_OPERATION_TYPE_READ_WRITE) {
 //                 (*data_arrayP)[data_arrayP_index].id = i;
 //                 data_arrayP_index++;
@@ -117,8 +117,8 @@
 //     }
 //
 //     /* Get values and send them to lwm2m */
-//     for (int i = 0; i < *num_dataP; i++) {
-//         int index = (*data_arrayP)[i].id;
+//     for (size_t i = 0; i < *num_dataP; i++) {
+//         size_t index = (*data_arrayP)[i].id;
 //         if (index < userData->res_list_size) {
 //             char buf[REGISTRY_MAX_VAL_LEN];
 //             registry_get_value(userData->res_list[index].path, userData->res_list[index].path_len,
@@ -211,7 +211,7 @@
 //     (void)instance_id;
 //
 //     if (data_array[0].id < userData->res_list_size) {
-//         for (int i = 0; i < num_data; i++) {
+//         for (size_t i = 0; i < num_data; i++) {
 //             /* No multiple instance resources */
 //             if (data_array[i].type == LWM2M_TYPE_MULTIPLE_RESOURCE) {
 //                 result = COAP_404_NOT_FOUND;
@@ -393,12 +393,12 @@
 //     userData->res_list_size += 1;
 //
 //     /* Init the res_list */
-//     for (int i = 0; i < userData->hndlr->items_len; i++) {
+//     for (size_t i = 0; i < userData->hndlr->items_len; i++) {
 //         registry_schema_item_t schema = hndlr->items[i];
 //         registry_parameter_t parameter = hndlr->items[i].value.parameter;
 //
 //         // TODO this only works for 1 level paths. No nesting etc.
-//         int path_len = 2;
+//         size_t path_len = 2;
 //         int *path = malloc(2 * sizeof(int));
 //         path[0] = hndlr->id;
 //         path[1] = schema.id;

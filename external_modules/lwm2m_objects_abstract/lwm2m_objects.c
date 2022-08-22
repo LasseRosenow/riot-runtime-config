@@ -107,7 +107,7 @@ void lwm2m_objects_register_object(lwm2m_objects_object_t *object)
 //            printf("                <Description>Commit changes</Description>\n");
 //            printf("            </Item>\n");
 //
-//            for (int i = 0; i < hndlr->items_len; i++) {
+//            for (size_t i = 0; i < hndlr->items_len; i++) {
 //                registry_schema_item_t schema = hndlr->items[i];
 //                registry_parameter_t parameter = schema.value.parameter;
 //

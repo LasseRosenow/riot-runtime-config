@@ -284,7 +284,7 @@ typedef struct {
     int *schema_id;
     int *instance_id;
     int *path;
-    int path_len;
+    size_t path_len;
 } registry_path_t;
 
 #define _REGISTRY_PATH_NUMARGS(...)  (sizeof((int[]){ __VA_ARGS__ }) / \
@@ -366,8 +366,8 @@ typedef struct {
  */
 typedef struct {
     registry_type_t type;   /**< The type of the parameter */
-    void *buf;              /**< Pointer to the buffer containing the value of the parameter */
-    int buf_len;            /**< Length of the buffer */
+    const void *buf;        /**< Pointer to the buffer containing the value of the parameter */
+    size_t buf_len;         /**< Length of the buffer */
 } registry_value_t;
 
 /**
@@ -384,7 +384,7 @@ typedef struct _registry_schema_item_t registry_schema_item_t;
  */
 typedef struct {
     registry_schema_item_t *items;
-    int items_len;
+    size_t items_len;
 } registry_schema_group_t;
 
 typedef enum {
@@ -508,7 +508,7 @@ typedef struct {
     char *name;                     /**< String describing the configuration group */
     char *description;              /**< String describing the configuration group with more details */
     registry_schema_item_t *items;  /**< Array representing all the configuration parameters that belong to this group */
-    int items_len;                  /**< Size of items array */
+    size_t items_len;               /**< Size of items array */
     clist_node_t instances;         /**< Linked list of schema instances @ref registry_instance_t */
 
     /**
@@ -519,7 +519,7 @@ typedef struct {
      * @param[in] val Pointer to buffer containing the new value
      * @param[in] val_len Pointer to length of the buffer to store the current value
      */
-    void (*mapping)(int param_id, registry_instance_t *instance, void **val, int *val_len);
+    void (*mapping)(int param_id, registry_instance_t *instance, void **val, size_t *val_len);
 } registry_schema_t;
 
 /**
@@ -577,7 +577,7 @@ int registry_register_schema_instance(registry_root_group_id_t root_group_id, in
  */
 int registry_set_value(const registry_path_t path, const registry_value_t val);
 
-int registry_set_opaque(const registry_path_t path, const void *val, const int val_len);
+int registry_set_opaque(const registry_path_t path, const void *val, const size_t val_len);
 int registry_set_string(const registry_path_t path, const char *val);
 int registry_set_bool(const registry_path_t path, bool val);
 int registry_set_uint8(const registry_path_t path, uint8_t val);
@@ -604,30 +604,30 @@ int registry_set_float64(const registry_path_t path, double val);
  *        group, identified by @p path.
  * @param[in] path Path of the parameter to get the value of
  * @param[out] value Pointer to a uninitialized @ref registry_value_t struct
- * @return @p value. Use registry_get_<type>() to get values as a concrete type
+ * @return 0 on success, non-zero on failure
  */
-registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
+int registry_get_value(const registry_path_t path, registry_value_t *value);
 
-void *registry_get_opaque(const registry_path_t path, void *buf, int buf_len);
-char *registry_get_string(const registry_path_t path, char *buf, int buf_len);
-bool registry_get_bool(const registry_path_t path);
-uint8_t registry_get_uint8(const registry_path_t path);
-uint16_t registry_get_uint16(const registry_path_t path);
-uint32_t registry_get_uint32(const registry_path_t path);
+const void *registry_get_opaque(const registry_path_t path, size_t *buf_len);
+const char *registry_get_string(const registry_path_t path, size_t *buf_len);
+const bool *registry_get_bool(const registry_path_t path);
+const uint8_t *registry_get_uint8(const registry_path_t path);
+const uint16_t *registry_get_uint16(const registry_path_t path);
+const uint32_t *registry_get_uint32(const registry_path_t path);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-uint64_t registry_get_uint64(const registry_path_t path);
+const uint64_t *registry_get_uint64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-int8_t registry_get_int8(const registry_path_t path);
-int16_t registry_get_int16(const registry_path_t path);
-int32_t registry_get_int32(const registry_path_t path);
+const int8_t *registry_get_int8(const registry_path_t path);
+const int16_t *registry_get_int16(const registry_path_t path);
+const int32_t *registry_get_int32(const registry_path_t path);
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-int64_t registry_get_int64(const registry_path_t path);
+const int64_t *registry_get_int64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-float registry_get_float32(const registry_path_t path);
+const float *registry_get_float32(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-double registry_get_float64(const registry_path_t path);
+const double *registry_get_float64(const registry_path_t path);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
@@ -648,28 +648,27 @@ int registry_commit(const registry_path_t path);
  * To parse the string to bytes @ref registry_bytes_from_str() function must be
  * used.
  *
- * @param[in] val_str Pointer of the string containing the value
- * @param[in] type Type of the parameter to be parsed
- * @param[out] vp Pointer to store the parsed value
- * @param[in] maxlen Maximum length of the output buffer when the type of the
- * parameter is string.
+ * @param[in] src Pointer of the input value
+ * @param[in] dest Pointer to the output buffer
+ * @param[in] dest_len Length of @p dest
+ * @param[in] dest_type Type of the output value
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_value_from_str(char *val_str, registry_type_t type, void *vp, int maxlen);
+int registry_convert_str_to_value(const char *src, void *dest, size_t dest_len,
+                                  const registry_type_t dest_type);
 
 /**
  * @brief Convenience function to parse a configuration parameter value from
  * another value. The type of the parameter must be known.
  *
- * @param[in] val_in Pointer of the input value
- * @param[in] val_in_type Type of the input value
- * @param[in] val_out Pointer to the output buffer
- * @param[in] val_out_len Length of @p val_out
- * @param[in] val_out_type Type of the output value
+ * @param[in] src Pointer of the input value
+ * @param[in] dest Pointer to the output buffer
+ * @param[in] dest_len Length of @p dest
+ * @param[in] dest_type Type of the output value
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_value_from_value(const void *val_in, registry_type_t val_in_type,
-                                      void *val_out, int val_out_len, registry_type_t val_out_type);
+int registry_convert_value_to_value(const registry_value_t *src, void *dest,
+                                    const size_t dest_len, const registry_type_t dest_type);
 
 /**
  * @brief Convenience function to parse a configuration parameter value of
@@ -680,7 +679,7 @@ int registry_convert_value_from_value(const void *val_in, registry_type_t val_in
  * @param len Length of the output buffer
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_bytes_from_str(char *val_str, void *vp, int *len);
+int registry_convert_str_to_bytes(char *val_str, void *vp, size_t *len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value into
@@ -688,13 +687,13 @@ int registry_convert_bytes_from_str(char *val_str, void *vp, int *len);
  * @ref registry_str_from_bytes() should be used. This is used for example to
  * implement the `get` or `export` functions.
  *
- * @param[in] type Type of the parameter to be converted
- * @param[in] vp Pointer to the value to be converted
- * @param[out] buf Buffer to store the output string
- * @param[in] buf_len Length of @p buf
+ * @param[in] src Pointer to the value to be converted
+ * @param[out] dest Buffer to store the output string
+ * @param[in] dest_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_convert_str_from_value(registry_type_t type, const void *vp, char *buf, int buf_len);
+char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
+                                    const size_t dest_len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value of
@@ -707,7 +706,7 @@ char *registry_convert_str_from_value(registry_type_t type, const void *vp, char
  * @param[in] buf_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_convert_str_from_bytes(void *vp, int vp_len, char *buf, int buf_len);
+char *registry_convert_bytes_to_str(void *vp, size_t vp_len, char *buf, size_t buf_len);
 
 /**
  * @brief Load all configuration parameters that are included in the path from the registered storage

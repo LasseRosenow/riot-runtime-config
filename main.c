@@ -176,7 +176,8 @@ int main(void)
     // vfs_format(&_vfs_mount);
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
-    registry_load(_REGISTRY_PATH_0());
+    // registry_load(_REGISTRY_PATH_0());
+    // printf("HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 4\n");
 
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 

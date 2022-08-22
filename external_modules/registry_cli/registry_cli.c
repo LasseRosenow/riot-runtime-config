@@ -25,15 +25,15 @@ static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_g
 }
 
 
-static int _parse_string_path(char *string_path, int *buf, int *buf_len)
+static int _parse_string_path(char *string_path, int *buf, size_t *buf_len)
 {
-    int buf_index = 0;
+    size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
-    int curr_path_segment_index = 0;
+    size_t curr_path_segment_index = 0;
 
-    int path_len = strlen(string_path);
+    size_t path_len = strlen(string_path);
 
-    for (int i = 0; i <= path_len; i++) {
+    for (size_t i = 0; i <= path_len; i++) {
         if (string_path[i] == REGISTRY_NAME_SEPARATOR || i == path_len) {
             buf[buf_index++] = atoi(curr_path_segment);
             curr_path_segment_index = 0;
@@ -52,7 +52,7 @@ static int _parse_string_path(char *string_path, int *buf, int *buf_len)
 }
 
 static int _registry_path_from_string_path(char *string_path, int *int_path_buf,
-                                           int *int_path_buf_len, registry_path_t *registry_path)
+                                           size_t *int_path_buf_len, registry_path_t *registry_path)
 {
     int res = _parse_string_path(string_path, int_path_buf, int_path_buf_len);
 
@@ -60,7 +60,7 @@ static int _registry_path_from_string_path(char *string_path, int *int_path_buf,
         return res;
     }
     else {
-        for (int i = 0; i < *int_path_buf_len; i++) {
+        for (size_t i = 0; i < *int_path_buf_len; i++) {
             switch (i) {
             case 0: registry_path->root_group_id = (registry_root_group_id_t *)&int_path_buf[i];
                 break;
@@ -84,7 +84,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 
     registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
 
-    int path_len = path.path_len;
+    size_t path_len = path.path_len;
 
     if (path.root_group_id != NULL) {
         path_len++;
@@ -126,7 +126,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 
 int registry_cli_cmd(int argc, char **argv)
 {
-    int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
+    size_t int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
     int int_path[int_path_len];
     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
     // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
@@ -143,9 +143,52 @@ int registry_cli_cmd(int argc, char **argv)
             return 1;
         }
 
-        char buf[REGISTRY_MAX_VAL_LEN];
-        registry_get_string(path, buf, ARRAY_SIZE(buf));
-        printf("%s\n", buf);
+        registry_value_t value;
+        int res = registry_get_value(path, &value);
+
+        if (res != 0) {
+            printf("error: %d\n", res);
+            return 1;
+        }
+
+        switch (value.type) {
+        case REGISTRY_TYPE_NONE: break;
+        case REGISTRY_TYPE_OPAQUE: {
+            printf("opaque (hex): \n");
+            for (size_t i = 0; i < value.buf_len; i++) {
+                printf("%02x\n", ((uint8_t *)value.buf)[i]);
+            }
+            break;
+        }
+        case REGISTRY_TYPE_STRING: printf("string: %s", (char *)value.buf); break;
+        case REGISTRY_TYPE_BOOL: printf("bool: %d", *(bool *)value.buf); break;
+
+        case REGISTRY_TYPE_UINT8: printf("uint8: %d", *(uint8_t *)value.buf); break;
+        case REGISTRY_TYPE_UINT16: printf("uint16: %d", *(uint16_t *)value.buf); break;
+        case REGISTRY_TYPE_UINT32: printf("uint32: %d", *(uint32_t *)value.buf); break;
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+        case REGISTRY_TYPE_UINT64: printf("uint64: %lld", *(uint64_t *)value.buf); break;
+#endif // CONFIG_REGISTRY_USE_UINT64
+
+        case REGISTRY_TYPE_INT8: printf("int8: %d", *(int8_t *)value.buf); break;
+        case REGISTRY_TYPE_INT16: printf("int16: %d", *(int16_t *)value.buf); break;
+        case REGISTRY_TYPE_INT32: printf("int32: %d", *(int32_t *)value.buf); break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64)
+        case REGISTRY_TYPE_INT64: printf("int64: %lld", *(int64_t *)value.buf); break;
+#endif // CONFIG_REGISTRY_USE_INT64
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+        case REGISTRY_TYPE_FLOAT32: printf("f32: %f\n", *(float *)value.buf); break;
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+        case REGISTRY_TYPE_FLOAT64: printf("f64: %f\n", *(double *)value.buf); break;
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+        }
+
+        printf("\n");
+
         return 0;
     }
     else if (strcmp(argv[1], "set") == 0) {
@@ -167,7 +210,7 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "export") == 0) {
-        /* If the path is invalid, it can also just be non existend, so other arguments like -r need to be checked */
+        /* If the path is invalid, it can also just be non existent, so other arguments like -r need to be checked */
         bool invalid_path = false;
         if (_registry_path_from_string_path(argv[2], int_path, &int_path_len, &path) < 0) {
             invalid_path = true;

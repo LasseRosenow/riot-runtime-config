@@ -39,7 +39,7 @@ static void _debug_print_path(const registry_path_t path)
             if (path.path_len > 0) {
                 DEBUG("/");
 
-                for (int i = 0; i < path.path_len; i++) {
+                for (size_t i = 0; i < path.path_len; i++) {
                     DEBUG("%d", path.path[i]);
 
                     if (i < path.path_len - 1) {
@@ -168,10 +168,10 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
 {
     registry_schema_item_t *schema_item;
     registry_schema_item_t *schema_items = schema->items;
-    int schema_items_len = schema->items_len;
+    size_t schema_items_len = schema->items_len;
 
-    for (int path_index = 0; path_index < path.path_len; path_index++) {
-        for (int i = 0; i < schema_items_len; i++) {
+    for (size_t path_index = 0; path_index < path.path_len; path_index++) {
+        for (size_t i = 0; i < schema_items_len; i++) {
             schema_item = &schema->items[i];
 
             if (schema_item->id == path.path[path_index]) {
@@ -256,18 +256,23 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
     }
 
     /* get pointer to registry internal value buffer and length */
-    int intern_val_len;
+    size_t intern_val_len;
     void *intern_val = NULL;
 
     schema->mapping(param_meta->id, instance, &intern_val, &intern_val_len);
 
     /* check if val_type is compatible with param_meta->value.parameter.type */
     if (val_type != param_meta->value.parameter.type) {
-        int new_val_len = _get_registry_parameter_data_len(val_type);
+        size_t new_val_len = _get_registry_parameter_data_len(val_type);
         uint8_t new_val[new_val_len];
-        int conversion_error_code = registry_convert_value_from_value(val, val_type,
-                                                                      new_val, new_val_len,
-                                                                      param_meta->value.parameter.type);
+        registry_value_t old_val = {
+            .type = val_type,
+            .buf = val,
+            .buf_len = val_len,
+        };
+        int conversion_error_code = registry_convert_value_to_value(&old_val, new_val,
+                                                                    new_val_len,
+                                                                    param_meta->value.parameter.type);
         if (conversion_error_code == 0) {
             /* call handler to apply the new value to the correct parameter in the instance of the schema */
             memcpy(intern_val, new_val, intern_val_len);
@@ -284,8 +289,8 @@ static int _registry_set(const registry_path_t path, const void *val, int val_le
     return 0;
 }
 
-static int _registry_get(const registry_path_t path, registry_value_t *val,
-                         registry_type_t val_type)
+static int _registry_get(const registry_path_t path, const registry_type_t requested_val_type,
+                         registry_value_t *val_buf)
 {
     /* lookup root_group */
     registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
@@ -316,37 +321,22 @@ static int _registry_get(const registry_path_t path, registry_value_t *val,
     }
 
     /* if no specific type was requested, set the registry_value_t type to the type of the schema param */
-    if (val_type == REGISTRY_TYPE_NONE) {
-        val->type = param_meta->value.parameter.type;
+    if (requested_val_type == REGISTRY_TYPE_NONE) {
+        val_buf->type = param_meta->value.parameter.type;
+    }
+    /* check if the requested val_type is compatible with the actual type of the parameter */
+    else if (requested_val_type != param_meta->value.parameter.type) {
+        return -EINVAL;
     }
 
     /* call handler to get the parameter value from the instance of the schema */
-    int buf_len;
     void *buf = NULL;
+    size_t buf_len;
 
     schema->mapping(param_meta->id, instance, &buf, &buf_len);
 
-    /* check if val_type is requested and compatible with param_meta->value.parameter.type */
-    if (val_type != REGISTRY_TYPE_NONE && val_type != param_meta->value.parameter.type) {
-        int new_buf_len = _get_registry_parameter_data_len(val_type);
-        uint8_t new_buf[new_buf_len];
-        int conversion_error_code = registry_convert_value_from_value(buf,
-                                                                      param_meta->value.parameter.type,
-                                                                      new_buf, new_buf_len,
-                                                                      val_type);
-
-        if (conversion_error_code == 0) {
-            /* call handler to apply the new value to the correct parameter in the instance of the schema */
-            memcpy(val->buf, new_buf, new_buf_len);
-        }
-        else {
-            return conversion_error_code;
-        }
-    }
-    else {
-        /* copy buf to registry_value_t value */
-        memcpy(val->buf, buf, buf_len);
-    }
+    /* update buf pointer in registry_value_t to point to the value inside the registry */
+    val_buf->buf = buf;
 
     return 0;
 }
@@ -483,14 +473,14 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
                                                        void *context),
                                     const registry_path_t current_path, registry_schema_t *schema,
                                     registry_instance_t *instance, registry_schema_item_t *schema_items,
-                                    int schema_items_len, int recursion_depth, void *context)
+                                    size_t schema_items_len, int recursion_depth, void *context)
 {
-    for (int i = 0; i < schema_items_len; i++) {
+    for (size_t i = 0; i < schema_items_len; i++) {
         registry_schema_item_t schema_item = schema_items[i];
 
         /* create new path including the current schema_item */
         int _new_path_path[current_path.path_len + 1];
-        for (int j = 0; j < current_path.path_len; j++) {
+        for (size_t j = 0; j < current_path.path_len; j++) {
             _new_path_path[j] = current_path.path[j];
         }
         _new_path_path[ARRAY_SIZE(_new_path_path) - 1] = schema_item.id;
@@ -505,11 +495,7 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
         /* check if the current schema_item is a group or a parameter */
         if (schema_item.type == REGISTRY_SCHEMA_TYPE_PARAMETER) {
             /* parameter found => export */
-            char val_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
-            registry_value_t val = {
-                .buf = val_buf,
-                .buf_len = ARRAY_SIZE(val_buf),
-            };
+            registry_value_t val;
             registry_get_value(new_path, &val);
             export_func(new_path, schema, instance, &schema_item, &val, context);
         }
@@ -557,7 +543,7 @@ static int _registry_export_instance(int (*export_func)(const registry_path_t pa
 
         /* create a new path which does not include the last value, because _registry_export_params will add it inside */
         int _new_path_path[path.path_len - 1];
-        for (int j = 0; j < path.path_len; j++) {
+        for (size_t j = 0; j < path.path_len; j++) {
             _new_path_path[j] = path.path[j];
         }
         registry_path_t new_path = {
@@ -749,7 +735,7 @@ int registry_export(int (*export_func)(const registry_path_t path,
     int rc = 0;
 
     DEBUG("[registry export] exporting all in ");
-    for (int i = 0; i < path.path_len; i++) {
+    for (size_t i = 0; i < path.path_len; i++) {
         DEBUG("/%d", path.path[i]);
     }
     DEBUG("\n");
@@ -792,7 +778,7 @@ int registry_set_value(const registry_path_t path, const registry_value_t val)
     return _registry_set(path, val.buf, val.buf_len, val.type);
 }
 
-int registry_set_opaque(const registry_path_t path, const void *val, const int val_len)
+int registry_set_opaque(const registry_path_t path, const void *val, const size_t val_len)
 {
     return _registry_set(path, val, val_len, REGISTRY_TYPE_OPAQUE);
 }
@@ -867,135 +853,87 @@ int registry_set_float64(const registry_path_t path, double val)
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /* registry_get functions */
-registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value)
+int registry_get_value(const registry_path_t path, registry_value_t *value)
 {
-    _registry_get(path, value, REGISTRY_TYPE_NONE);
-
-    return value;
+    return _registry_get(path, REGISTRY_TYPE_NONE, value);
 }
 
-static void _registry_get_buf(const registry_path_t path, void *buf, int buf_len,
-                              registry_type_t type)
+static const void *_registry_get_buf(const registry_path_t path,
+                                     const registry_type_t requested_val_type, size_t *buf_len)
 {
-    registry_value_t value = {
-        .buf = buf,
-        .buf_len = buf_len,
-    };
+    registry_value_t value;
 
-    _registry_get(path, &value, type);
+    _registry_get(path, requested_val_type, &value);
+
+    *buf_len = value.buf_len;
+    return value.buf;
 }
-void *registry_get_opaque(const registry_path_t path, void *buf, int buf_len)
+const void *registry_get_opaque(const registry_path_t path, size_t *buf_len)
 {
-    _registry_get_buf(path, buf, buf_len, REGISTRY_TYPE_OPAQUE);
-    return buf;
+    return _registry_get_buf(path, REGISTRY_TYPE_OPAQUE, buf_len);
 }
-char *registry_get_string(const registry_path_t path, char *buf, int buf_len)
+const char *registry_get_string(const registry_path_t path, size_t *buf_len)
 {
-    _registry_get_buf(path, buf, buf_len, REGISTRY_TYPE_STRING);
-    return buf;
+    return _registry_get_buf(path, REGISTRY_TYPE_STRING, buf_len);
 }
-bool registry_get_bool(const registry_path_t path)
+const bool *registry_get_bool(const registry_path_t path)
 {
-    bool buf;
-
-    _registry_get_buf(path, &buf, sizeof(bool), REGISTRY_TYPE_BOOL);
-
-    return buf;
+    return (const bool *)_registry_get_buf(path, REGISTRY_TYPE_BOOL, NULL);
 }
-uint8_t registry_get_uint8(const registry_path_t path)
+const uint8_t *registry_get_uint8(const registry_path_t path)
 {
-    uint8_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(uint8_t), REGISTRY_TYPE_UINT8);
-
-    return buf;
+    return (const uint8_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT8, NULL);
 }
-uint16_t registry_get_uint16(const registry_path_t path)
+const uint16_t *registry_get_uint16(const registry_path_t path)
 {
-    uint16_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(uint16_t), REGISTRY_TYPE_UINT16);
-
-    return buf;
+    return (const uint16_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT16, NULL);
 }
 
-uint32_t registry_get_uint32(const registry_path_t path)
+const uint32_t *registry_get_uint32(const registry_path_t path)
 {
-    uint32_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
-
-    return buf;
+    return (const uint32_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT32, NULL);
 }
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-uint64_t registry_get_uint64(const registry_path_t path)
+const uint64_t *registry_get_uint64(const registry_path_t path)
 {
-    uint64_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(uint64_t), REGISTRY_TYPE_UINT64);
-
-    return buf;
+    return (uint64_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT64, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-int8_t registry_get_int8(const registry_path_t path)
+const int8_t *registry_get_int8(const registry_path_t path)
 {
-    int8_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(int8_t), REGISTRY_TYPE_INT8);
-
-    return buf;
+    return (int8_t *)_registry_get_buf(path, REGISTRY_TYPE_INT8, NULL);
 }
 
-int16_t registry_get_int16(const registry_path_t path)
+const int16_t *registry_get_int16(const registry_path_t path)
 {
-    int16_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(int16_t), REGISTRY_TYPE_INT16);
-
-    return buf;
+    return (int16_t *)_registry_get_buf(path, REGISTRY_TYPE_INT16, NULL);
 }
 
-int32_t registry_get_int32(const registry_path_t path)
+const int32_t *registry_get_int32(const registry_path_t path)
 {
-    int32_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(int32_t), REGISTRY_TYPE_INT32);
-
-    return buf;
+    return (int32_t *)_registry_get_buf(path, REGISTRY_TYPE_INT32, NULL);
 }
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
-int64_t registry_get_int64(const registry_path_t path)
+const int64_t *registry_get_int64(const registry_path_t path)
 {
-    int64_t buf;
-
-    _registry_get_buf(path, &buf, sizeof(int64_t), REGISTRY_TYPE_INT64);
-
-    return buf;
+    return (int64_t *)_registry_get_buf(path, REGISTRY_TYPE_INT64, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-float registry_get_float32(const registry_path_t path)
+const float *registry_get_float32(const registry_path_t path)
 {
-    float buf;
-
-    _registry_get_buf(path, &buf, sizeof(float), REGISTRY_TYPE_FLOAT32);
-
-    return buf;
+    return (float *)_registry_get_buf(path, REGISTRY_TYPE_FLOAT32, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-double registry_get_float64(const registry_path_t path)
+const double *registry_get_float64(const registry_path_t path)
 {
-    double buf;
-
-    _registry_get_buf(path, &buf, sizeof(double), REGISTRY_TYPE_FLOAT64);
-
-    return buf;
+    return (double *)_registry_get_buf(path, REGISTRY_TYPE_FLOAT64, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
@@ -1009,8 +947,7 @@ static void _registry_load_cb(const registry_path_t path, const registry_value_t
     if (ENABLE_DEBUG) {
         char value_string[REGISTRY_MAX_VAL_LEN];
 
-        registry_convert_str_from_value(val.type, val.buf, value_string, ARRAY_SIZE(
-                                            value_string));
+        registry_convert_value_to_str(&val, value_string, ARRAY_SIZE(value_string));
         DEBUG(" to %s\n", value_string);
     }
 
@@ -1058,7 +995,7 @@ static void _registry_store_dup_check_cb(const registry_path_t path, const regis
         return;
     }
 
-    for (int i = 0; i < path.path_len; i++) {
+    for (size_t i = 0; i < path.path_len; i++) {
         if (path.path[i] != dup_arg->path.path[i]) {
             return;
         }
@@ -1094,8 +1031,7 @@ static int _registry_save_export_func(const registry_path_t path,
     if (ENABLE_DEBUG) {
         char value_string[REGISTRY_MAX_VAL_LEN];
 
-        registry_convert_str_from_value(value->type, value->buf, value_string, ARRAY_SIZE(
-                                            value_string));
+        registry_convert_value_to_str(value, value_string, ARRAY_SIZE(value_string));
         DEBUG(" = %s\n", value_string);
     }
 

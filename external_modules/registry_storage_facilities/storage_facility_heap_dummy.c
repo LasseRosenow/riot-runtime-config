@@ -23,7 +23,7 @@ typedef struct {
     int schema_id;
     int instance_id;
     int path[REGISTRY_MAX_DIR_DEPTH];
-    int path_len;
+    size_t path_len;
     uint8_t val[REGISTRY_MAX_VAL_LEN];
 } dummy_store_storage_t;
 
@@ -48,7 +48,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
     registry_path_t new_path;
     uint8_t val[REGISTRY_MAX_VAL_LEN];
 
-    for (int i = 0; i < DUMMY_STORE_CAPACITY; i++) {
+    for (size_t i = 0; i < DUMMY_STORE_CAPACITY; i++) {
         if (dummy_store[i].path_len > 0) {
             new_path = (registry_path_t) {
                 .root_group_id = &dummy_store[i].root_group_id,
@@ -87,10 +87,10 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
         return -EINVAL;
     }
 
-    for (int i = 0; i < DUMMY_STORE_CAPACITY; i++) {
+    for (size_t i = 0; i < DUMMY_STORE_CAPACITY; i++) {
         if (dummy_store[i].path_len > 0) {
             if (dummy_store[i].path_len == path.path_len) {
-                for (int j = 0; j < dummy_store[i].path_len; j++) {
+                for (size_t j = 0; j < dummy_store[i].path_len; j++) {
                     if (dummy_store[i].path[j] != path.path[j]) {
                         break;
                     }

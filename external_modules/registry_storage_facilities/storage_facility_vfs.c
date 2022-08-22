@@ -22,15 +22,15 @@ registry_store_t registry_store_vfs = {
     .save = save,
 };
 
-static int _parse_string_path(char *path, int *buf, int *buf_len)
+static int _parse_string_path(char *path, int *buf, size_t *buf_len)
 {
-    int buf_index = 0;
+    size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
-    int curr_path_segment_index = 0;
+    size_t curr_path_segment_index = 0;
 
-    int path_len = strlen(path);
+    size_t path_len = strlen(path);
 
-    int i = 0;
+    size_t i = 0;
 
     if (path[0] == REGISTRY_NAME_SEPARATOR) {
         i = 1;
@@ -146,21 +146,21 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
     uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
 
 
-    int i = 0;
-    int last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
-    int last_dir_string_path_lens[REGISTRY_MAX_DIR_DEPTH] = { 0 };
+    size_t i = 0;
+    size_t last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
+    size_t last_dir_string_path_lens[REGISTRY_MAX_DIR_DEPTH] = { 0 };
     int res = 0;
     bool exit_folder_iteration = false;
 
     while (exit_folder_iteration == false) {
-        int dir_entry_position = -1;
+        size_t dir_entry_position = -1;
         do {
             res = vfs_readdir(&dirp, &dir_entry);
             dir_entry_position++;
 
             if (dir_entry_position > last_dir_entry_positions[i]) {
                 last_dir_entry_positions[i] = dir_entry_position;
-                for (int j = i + 1; j < REGISTRY_MAX_DIR_DEPTH; j++) {
+                for (size_t j = i + 1; j < REGISTRY_MAX_DIR_DEPTH; j++) {
                     last_dir_entry_positions[j] = -1;
                 }
 
@@ -206,8 +206,6 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                             /* get filesize */
                             vfs_fstat(fd, &_stat);
 
-                            printf("\n\nLOOOOOOOOOOOOOOOOOOOL: %ld\n\n", _stat.st_size);
-
                             /* read value from file */
                             // TODO why read only sizeof(uint8_t)????? We need to get the size of the parameter that is being loaded right now.
                             if (vfs_read(fd, value_buf, sizeof(uint8_t)) < 0) {
@@ -215,7 +213,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                                     "[registry storage_facility_vfs] load: Can not read from file\n");
                             }
                             else {
-                                int int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
+                                size_t int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
                                 int int_path[int_path_len];
 
                                 /* try to convert string path to registry int path */
@@ -230,7 +228,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
                                     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
                                     // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
                                     registry_path_t path = _REGISTRY_PATH_0();
-                                    for (int i = 0; i < int_path_len; i++) {
+                                    for (size_t i = 0; i < int_path_len; i++) {
                                         switch (i) {
                                         case 0: path.root_group_id =
                                             (registry_root_group_id_t *)&int_path[i];
@@ -333,7 +331,7 @@ static int save(registry_store_instance_t *store, const registry_path_t path,
     vfs_mkdir(string_path, 0);
 
     /* exclude the last element, as it will be the file name and not a folder */
-    for (int i = 0; i < path.path_len - 1; i++) {
+    for (size_t i = 0; i < path.path_len - 1; i++) {
         // TODO
         // sprintf(string_path, "%s/%d", string_path, path.path[i]);
         int res = vfs_mkdir(string_path, 0);

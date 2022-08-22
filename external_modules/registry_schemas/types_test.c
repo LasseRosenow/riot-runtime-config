@@ -7,7 +7,7 @@
 #include "registry.h"
 #include "registry_schemas.h"
 
-static void mapping(int param_id, registry_instance_t *instance, void **val, int *val_len);
+static void mapping(int param_id, registry_instance_t *instance, void **val, size_t *val_len);
 
 REGISTRY_SCHEMA(
     registry_schema_types_test,
@@ -65,7 +65,7 @@ REGISTRY_SCHEMA(
 
     );
 
-static void mapping(int param_id, registry_instance_t *instance, void **val, int *val_len)
+static void mapping(int param_id, registry_instance_t *instance, void **val, size_t *val_len)
 {
     registry_schema_types_test_t *_instance = (registry_schema_types_test_t *)instance->data;
 
