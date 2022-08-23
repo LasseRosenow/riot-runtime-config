@@ -28,7 +28,7 @@ static const shell_command_t shell_commands[] = {
 
 // ws281x_t dev;
 
-int rgb_led_instance_0_commit_cb(const registry_path_t path, void *context)
+int rgb_led_instance_0_commit_cb(const registry_path_t path, const void *context)
 {
     (void)context;
     printf("RGB instance commit_cb was executed: %d", *path.root_group_id);

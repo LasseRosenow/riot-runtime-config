@@ -12,7 +12,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_group_id)
+static registry_root_group_t *_root_group_lookup(const registry_root_group_id_t root_group_id)
 {
     switch (root_group_id) {
     case REGISTRY_ROOT_GROUP_SYS:
@@ -25,7 +25,7 @@ static registry_root_group_t *_root_group_lookup(registry_root_group_id_t root_g
 }
 
 
-static int _parse_string_path(char *string_path, int *buf, size_t *buf_len)
+static int _parse_string_path(const char *string_path, int *buf, size_t *buf_len)
 {
     size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -51,7 +51,7 @@ static int _parse_string_path(char *string_path, int *buf, size_t *buf_len)
     return 0;
 }
 
-static int _registry_path_from_string_path(char *string_path, int *int_path_buf,
+static int _registry_path_from_string_path(const char *string_path, int *int_path_buf,
                                            size_t *int_path_buf_len, registry_path_t *registry_path)
 {
     int res = _parse_string_path(string_path, int_path_buf, int_path_buf_len);
@@ -77,7 +77,7 @@ static int _registry_path_from_string_path(char *string_path, int *int_path_buf,
 
 static int _export_func(const registry_path_t path, const registry_schema_t *schema,
                         const registry_instance_t *instance, const registry_schema_item_t *meta,
-                        const registry_value_t *value, void *context)
+                        const registry_value_t *value, const void *context)
 {
     (void)value;
     (void)context;

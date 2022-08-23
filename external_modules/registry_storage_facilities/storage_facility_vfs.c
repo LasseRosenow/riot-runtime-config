@@ -12,9 +12,9 @@
 #include "debug.h"
 #include "ps.h"
 
-static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg);
-static int save(registry_store_instance_t *store, const registry_path_t path,
+static int load(const registry_store_instance_t *store, const registry_path_t path,
+                const load_cb_t cb, const void *cb_arg);
+static int save(const registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value);
 
 registry_store_t registry_store_vfs = {
@@ -102,8 +102,8 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg)
+static int load(const registry_store_instance_t *store, const registry_path_t path,
+                const load_cb_t cb, const void *cb_arg)
 {
     (void)cb;
     (void)cb_arg;
@@ -304,7 +304,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
     return 0;
 }
 
-static int save(registry_store_instance_t *store, const registry_path_t path,
+static int save(const registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value)
 {
     (void)path;

@@ -8,9 +8,9 @@
 #define DUMMY_STORE_CAPACITY 100
 
 /* The store argument is the descriptor of the storage facility */
-static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg);
-static int save(registry_store_instance_t *store, const registry_path_t path,
+static int load(const registry_store_instance_t *store, const registry_path_t path,
+                const load_cb_t cb, const void *cb_arg);
+static int save(const registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value);
 
 /*
@@ -39,8 +39,8 @@ registry_store_t registry_store_heap_dummy = {
 
 /* Implementation of `load`. Execute a `cb` callback for each configuration
    found in the dummy storage array */
-static int load(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg)
+static int load(const registry_store_instance_t *store, const registry_path_t path,
+                const load_cb_t cb, const void *cb_arg)
 {
     // TODO implement "path" parameter!!
     (void)store;
@@ -72,7 +72,7 @@ static int load(registry_store_instance_t *store, const registry_path_t path, lo
 
 /* Implementation of `store`. Save parameter with given name and value in
    the dummy storage array */
-static int save(registry_store_instance_t *store, const registry_path_t path,
+static int save(const registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value)
 {
     int free_slot = -1;

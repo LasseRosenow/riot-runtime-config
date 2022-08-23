@@ -407,7 +407,8 @@ struct _registry_schema_item_t {
  * @brief Prototype of a callback function for the load action of a store
  * interface
  */
-typedef void (*load_cb_t)(const registry_path_t path, const registry_value_t val, void *cb_arg);
+typedef void (*load_cb_t)(const registry_path_t path, const registry_value_t val,
+                          const void *cb_arg);
 
 /**
  * @brief Descriptor used to check duplications in store facilities
@@ -443,8 +444,8 @@ struct _registry_store_t {
      * @param[in] cb_arg Argument passed to @p cb function
      * @return 0 on success, non-zero on failure
      */
-    int (*load)(registry_store_instance_t *store, const registry_path_t path, load_cb_t cb,
-                void *cb_arg);
+    int (*load)(const registry_store_instance_t *store, const registry_path_t path,
+                const load_cb_t cb, const void *cb_arg);
 
     /**
      * @brief If implemented, it is used for any preparation the storage may
@@ -453,7 +454,7 @@ struct _registry_store_t {
      * @param[in] store Storage facility descriptor
      * @return 0 on success, non-zero on failure
      */
-    int (*save_start)(registry_store_instance_t *store);
+    int (*save_start)(const registry_store_instance_t *store);
 
     /**
      * @brief Saves a parameter into storage.
@@ -463,7 +464,7 @@ struct _registry_store_t {
      * @param[in] value Struct representing the value of the parameter
      * @return 0 on success, non-zero on failure
      */
-    int (*save)(registry_store_instance_t *store, const registry_path_t path,
+    int (*save)(const registry_store_instance_t *store, const registry_path_t path,
                 const registry_value_t value);
 
     /**
@@ -473,7 +474,7 @@ struct _registry_store_t {
      * @param[in] store Storage facility descriptor
      * @return 0 on success, non-zero on failure
      */
-    int (*save_end)(registry_store_instance_t *store);
+    int (*save_end)(const registry_store_instance_t *store);
 };
 
 /**
@@ -491,7 +492,7 @@ typedef struct {
      * @param[in] context Context of the instance
      * @return 0 on success, non-zero on failure
      */
-    int (*commit_cb)(const registry_path_t path, void *context);
+    int (*commit_cb)(const registry_path_t path, const void *context);
 
     void *context; /**< Optional context used by the instance */
 } registry_instance_t;
@@ -519,7 +520,8 @@ typedef struct {
      * @param[in] val Pointer to buffer containing the new value
      * @param[in] val_len Pointer to length of the buffer to store the current value
      */
-    void (*mapping)(int param_id, registry_instance_t *instance, void **val, size_t *val_len);
+    void (*mapping)(const int param_id, const registry_instance_t *instance, void **val,
+                    size_t *val_len);
 } registry_schema_t;
 
 /**
@@ -533,7 +535,8 @@ void registry_init(void);
  * @param[in] root_group_id ID of the root_group.
  * @param[in] schema Pointer to the schema structure.
  */
-int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
+int registry_register_schema(const registry_root_group_id_t root_group_id,
+                             const registry_schema_t *schema);
 
 /**
  * @brief Registers a new storage as a source of configurations. Multiple
@@ -544,7 +547,7 @@ int registry_register_schema(registry_root_group_id_t root_group_id, registry_sc
  *
  * @param[in] src Pointer to the storage to register as source.
  */
-void registry_register_store_src(registry_store_instance_t *src);
+void registry_register_store_src(const registry_store_instance_t *src);
 
 /**
  * @brief Registers a new storage as a destination for saving configurations.
@@ -555,7 +558,7 @@ void registry_register_store_src(registry_store_instance_t *src);
  *
  * @param[in] dst Pointer to the storage to register
  */
-void registry_register_store_dst(registry_store_instance_t *dst);
+void registry_register_store_dst(const registry_store_instance_t *dst);
 
 /**
  * @brief Adds a new instance of a schema.
@@ -564,8 +567,9 @@ void registry_register_store_dst(registry_store_instance_t *dst);
  * @param[in] schema_id ID of the schema.
  * @param[in] instance Pointer to instance structure.
  */
-int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id,
-                                      registry_instance_t *instance);
+int registry_register_schema_instance(const registry_root_group_id_t root_group_id,
+                                      const int schema_id,
+                                      const registry_instance_t *instance);
 
 /**
  * @brief Sets the value of a parameter that belongs to a configuration group.
@@ -579,24 +583,24 @@ int registry_set_value(const registry_path_t path, const registry_value_t val);
 
 int registry_set_opaque(const registry_path_t path, const void *val, const size_t val_len);
 int registry_set_string(const registry_path_t path, const char *val);
-int registry_set_bool(const registry_path_t path, bool val);
-int registry_set_uint8(const registry_path_t path, uint8_t val);
-int registry_set_uint16(const registry_path_t path, uint16_t val);
-int registry_set_uint32(const registry_path_t path, uint32_t val);
+int registry_set_bool(const registry_path_t path, const bool val);
+int registry_set_uint8(const registry_path_t path, const uint8_t val);
+int registry_set_uint16(const registry_path_t path, const uint16_t val);
+int registry_set_uint32(const registry_path_t path, const uint32_t val);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-int registry_set_uint64(const registry_path_t path, uint64_t val);
+int registry_set_uint64(const registry_path_t path, const uint64_t val);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-int registry_set_int8(const registry_path_t path, int8_t val);
-int registry_set_int16(const registry_path_t path, int16_t val);
-int registry_set_int32(const registry_path_t path, int32_t val);
+int registry_set_int8(const registry_path_t path, const int8_t val);
+int registry_set_int16(const registry_path_t path, const int16_t val);
+int registry_set_int32(const registry_path_t path, const int32_t val);
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-int registry_set_int64(const registry_path_t path, int64_t val);
+int registry_set_int64(const registry_path_t path, const int64_t val);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-int registry_set_float32(const registry_path_t path, float val);
+int registry_set_float32(const registry_path_t path, const float val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-int registry_set_float64(const registry_path_t path, double val);
+int registry_set_float64(const registry_path_t path, const double val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**
@@ -649,12 +653,12 @@ int registry_commit(const registry_path_t path);
  * used.
  *
  * @param[in] src Pointer of the input value
- * @param[in] dest Pointer to the output buffer
+ * @param[out] dest Pointer to the output buffer
  * @param[in] dest_len Length of @p dest
  * @param[in] dest_type Type of the output value
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_str_to_value(const char *src, void *dest, size_t dest_len,
+int registry_convert_str_to_value(const char *src, void *dest, const size_t dest_len,
                                   const registry_type_t dest_type);
 
 /**
@@ -662,7 +666,7 @@ int registry_convert_str_to_value(const char *src, void *dest, size_t dest_len,
  * another value. The type of the parameter must be known.
  *
  * @param[in] src Pointer of the input value
- * @param[in] dest Pointer to the output buffer
+ * @param[out] dest Pointer to the output buffer
  * @param[in] dest_len Length of @p dest
  * @param[in] dest_type Type of the output value
  * @return 0 on success, non-zero on failure
@@ -674,12 +678,12 @@ int registry_convert_value_to_value(const registry_value_t *src, void *dest,
  * @brief Convenience function to parse a configuration parameter value of
  * `bytes` type from a string.
  *
- * @param[in] val_str Pointer of the string containing the value
- * @param[out] vp Pointer to store the parsed value
- * @param len Length of the output buffer
+ * @param[in] src Pointer of the string containing the value
+ * @param[out] dest Pointer to store the parsed value
+ * @param[in out] len Length of the output buffer
  * @return 0 on success, non-zero on failure
  */
-int registry_convert_str_to_bytes(char *val_str, void *vp, size_t *len);
+int registry_convert_str_to_bytes(const char *src, void *dest, size_t *len);
 
 /**
  * @brief Convenience function to transform a configuration parameter value into
@@ -700,13 +704,14 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
  * `bytes` type into a string. This is used for example to implement the `get`
  * or `export` schemas.
  *
- * @param[in] vp Pointer to the value to be converted
- * @param[in] vp_len Length of @p vp
- * @param[out] buf Buffer to store the output string
- * @param[in] buf_len Length of @p buf
+ * @param[in] src Pointer to the value to be converted
+ * @param[in] src_len Length of @p vp
+ * @param[out] dest Buffer to store the output string
+ * @param[in] dest_len Length of @p buf
  * @return Pointer to the output string
  */
-char *registry_convert_bytes_to_str(void *vp, size_t vp_len, char *buf, size_t buf_len);
+char *registry_convert_bytes_to_str(const void *src, const size_t src_len, char *dest,
+                                    const size_t dest_len);
 
 /**
  * @brief Load all configuration parameters that are included in the path from the registered storage
@@ -743,8 +748,8 @@ int registry_export(int (*export_func)(const registry_path_t path,
                                        const registry_instance_t *instance,
                                        const registry_schema_item_t *meta,
                                        const registry_value_t *value,
-                                       void *context),
-                    const registry_path_t path, int recursion_depth, void *context);
+                                       const void *context),
+                    const registry_path_t path, const int recursion_depth, const void *context);
 
 #ifdef __cplusplus
 }
