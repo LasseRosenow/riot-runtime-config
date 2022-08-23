@@ -143,8 +143,6 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
 
     struct stat _stat;
     vfs_dirent_t dir_entry;
-    uint8_t value_buf[REGISTRY_MAX_VAL_LEN] = { 0 };
-
 
     size_t i = 0;
     size_t last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
@@ -206,50 +204,45 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
                             /* get filesize */
                             vfs_fstat(fd, &_stat);
 
-                            /* read value from file */
-                            // TODO why read only sizeof(uint8_t)????? We need to get the size of the parameter that is being loaded right now.
-                            if (vfs_read(fd, value_buf, sizeof(uint8_t)) < 0) {
+                            /* try to convert string path to registry int path */
+                            size_t int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
+                            int int_path[int_path_len];
+                            if (_parse_string_path(string_path + strlen(mount->mount_point),
+                                                   int_path,
+                                                   &int_path_len) < 0) {
                                 DEBUG(
-                                    "[registry storage_facility_vfs] load: Can not read from file\n");
+                                    "[registry storage_facility_vfs] load: Invalid registry path\n");
                             }
                             else {
-                                size_t int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
-                                int int_path[int_path_len];
+                                /* convert int path to registry_path_t */
+                                // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
+                                // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+                                registry_path_t path = _REGISTRY_PATH_0();
+                                for (size_t i = 0; i < int_path_len; i++) {
+                                    switch (i) {
+                                    case 0: path.root_group_id =
+                                        (registry_root_group_id_t *)&int_path[i];
+                                        break;
+                                    case 1: path.schema_id = &int_path[i]; break;
+                                    case 2: path.instance_id = &int_path[i]; break;
+                                    case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
+                                    default: path.path_len++; break;
+                                    }
+                                }
 
-                                /* try to convert string path to registry int path */
-                                if (_parse_string_path(string_path + strlen(mount->mount_point),
-                                                       int_path,
-                                                       &int_path_len) < 0) {
+                                /* get registry meta data of configuration parameter */
+                                registry_value_t value;
+                                registry_get_value(path, &value);
+
+                                /* read value from file */
+                                uint8_t new_value_buf[value.buf_len];
+                                if (vfs_read(fd, new_value_buf, value.buf_len) < 0) {
                                     DEBUG(
-                                        "[registry storage_facility_vfs] load: Invalid registry path\n");
+                                        "[registry storage_facility_vfs] load: Can not read from file\n");
                                 }
                                 else {
-                                    /* convert int path to registry_path_t */
-                                    // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
-                                    // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
-                                    registry_path_t path = _REGISTRY_PATH_0();
-                                    for (size_t i = 0; i < int_path_len; i++) {
-                                        switch (i) {
-                                        case 0: path.root_group_id =
-                                            (registry_root_group_id_t *)&int_path[i];
-                                            break;
-                                        case 1: path.schema_id = &int_path[i]; break;
-                                        case 2: path.instance_id = &int_path[i]; break;
-                                        case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
-                                        default: path.path_len++; break;
-                                        }
-                                    }
-
-                                    /* get registry meta data of configuration parameter */
-                                    static char buf[REGISTRY_MAX_VAL_LEN];
-                                    registry_value_t value = {
-                                        .buf = buf,
-                                        .buf_len = ARRAY_SIZE(buf),
-                                    };
-                                    registry_get_value(path, &value);
-
                                     /* add read value to value */
-                                    value.buf = value_buf;
+                                    value.buf = new_value_buf;
 
                                     /* call callback with value and path */
                                     cb(path, value, cb_arg);

@@ -12,6 +12,45 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
+static void _print_registry_value(const registry_value_t *value)
+{
+    switch (value->type) {
+    case REGISTRY_TYPE_NONE: break;
+    case REGISTRY_TYPE_OPAQUE: {
+        printf("opaque (hex): ");
+        for (size_t i = 0; i < value->buf_len; i++) {
+            printf("%02x", ((uint8_t *)value->buf)[i]);
+        }
+        break;
+    }
+    case REGISTRY_TYPE_STRING: printf("string: %s", (char *)value->buf); break;
+    case REGISTRY_TYPE_BOOL: printf("bool: %d", *(bool *)value->buf); break;
+
+    case REGISTRY_TYPE_UINT8: printf("uint8: %d", *(uint8_t *)value->buf); break;
+    case REGISTRY_TYPE_UINT16: printf("uint16: %d", *(uint16_t *)value->buf); break;
+    case REGISTRY_TYPE_UINT32: printf("uint32: %d", *(uint32_t *)value->buf); break;
+#if defined(CONFIG_REGISTRY_USE_UINT64)
+    case REGISTRY_TYPE_UINT64: printf("uint64: %lld", *(uint64_t *)value->buf); break;
+#endif // CONFIG_REGISTRY_USE_UINT64
+
+    case REGISTRY_TYPE_INT8: printf("int8: %d", *(int8_t *)value->buf); break;
+    case REGISTRY_TYPE_INT16: printf("int16: %d", *(int16_t *)value->buf); break;
+    case REGISTRY_TYPE_INT32: printf("int32: %d", *(int32_t *)value->buf); break;
+
+#if defined(CONFIG_REGISTRY_USE_INT64)
+    case REGISTRY_TYPE_INT64: printf("int64: %lld", *(int64_t *)value->buf); break;
+#endif // CONFIG_REGISTRY_USE_INT64
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+    case REGISTRY_TYPE_FLOAT32: printf("f32: %f", *(float *)value->buf); break;
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+
+#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+    case REGISTRY_TYPE_FLOAT64: printf("f64: %f", *(double *)value->buf); break;
+#endif // CONFIG_REGISTRY_USE_FLOAT32
+    }
+}
+
 static registry_root_group_t *_root_group_lookup(const registry_root_group_id_t root_group_id)
 {
     switch (root_group_id) {
@@ -151,42 +190,7 @@ int registry_cli_cmd(int argc, char **argv)
             return 1;
         }
 
-        switch (value.type) {
-        case REGISTRY_TYPE_NONE: break;
-        case REGISTRY_TYPE_OPAQUE: {
-            printf("opaque (hex): \n");
-            for (size_t i = 0; i < value.buf_len; i++) {
-                printf("%02x\n", ((uint8_t *)value.buf)[i]);
-            }
-            break;
-        }
-        case REGISTRY_TYPE_STRING: printf("string: %s", (char *)value.buf); break;
-        case REGISTRY_TYPE_BOOL: printf("bool: %d", *(bool *)value.buf); break;
-
-        case REGISTRY_TYPE_UINT8: printf("uint8: %d", *(uint8_t *)value.buf); break;
-        case REGISTRY_TYPE_UINT16: printf("uint16: %d", *(uint16_t *)value.buf); break;
-        case REGISTRY_TYPE_UINT32: printf("uint32: %d", *(uint32_t *)value.buf); break;
-#if defined(CONFIG_REGISTRY_USE_UINT64)
-        case REGISTRY_TYPE_UINT64: printf("uint64: %lld", *(uint64_t *)value.buf); break;
-#endif // CONFIG_REGISTRY_USE_UINT64
-
-        case REGISTRY_TYPE_INT8: printf("int8: %d", *(int8_t *)value.buf); break;
-        case REGISTRY_TYPE_INT16: printf("int16: %d", *(int16_t *)value.buf); break;
-        case REGISTRY_TYPE_INT32: printf("int32: %d", *(int32_t *)value.buf); break;
-
-#if defined(CONFIG_REGISTRY_USE_INT64)
-        case REGISTRY_TYPE_INT64: printf("int64: %lld", *(int64_t *)value.buf); break;
-#endif // CONFIG_REGISTRY_USE_INT64
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
-        case REGISTRY_TYPE_FLOAT32: printf("f32: %f\n", *(float *)value.buf); break;
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
-        case REGISTRY_TYPE_FLOAT64: printf("f64: %f\n", *(double *)value.buf); break;
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-        }
-
+        _print_registry_value(&value);
         printf("\n");
 
         return 0;

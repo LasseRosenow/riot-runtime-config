@@ -92,11 +92,6 @@ extern "C" {
 #define REGISTRY_MAX_DIR_NAME_LEN  10 /* a path is a i32 and i32 MAX has 10 digits. */
 
 /**
- * @brief Maximum length of a value when converted to string
- */
-#define REGISTRY_MAX_VAL_LEN       64
-
-/**
  * @brief Maximum length of a configuration name.
  * @{
  */
@@ -707,11 +702,11 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
  * @param[in] src Pointer to the value to be converted
  * @param[in] src_len Length of @p vp
  * @param[out] dest Buffer to store the output string
- * @param[in] dest_len Length of @p buf
+ * @param[in out] dest_len Length of @p buf
  * @return Pointer to the output string
  */
 char *registry_convert_bytes_to_str(const void *src, const size_t src_len, char *dest,
-                                    const size_t dest_len);
+                                    size_t *dest_len);
 
 /**
  * @brief Load all configuration parameters that are included in the path from the registered storage

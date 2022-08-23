@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel_defines.h>
 #include "errno.h"
 
@@ -24,7 +25,8 @@ typedef struct {
     int instance_id;
     int path[REGISTRY_MAX_DIR_DEPTH];
     size_t path_len;
-    uint8_t val[REGISTRY_MAX_VAL_LEN];
+    void *buf;
+    size_t buf_len;
 } dummy_store_storage_t;
 
 /* This will be our "storage device" */
@@ -46,7 +48,6 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
     (void)store;
     (void)path;
     registry_path_t new_path;
-    uint8_t val[REGISTRY_MAX_VAL_LEN];
 
     for (size_t i = 0; i < DUMMY_STORE_CAPACITY; i++) {
         if (dummy_store[i].path_len > 0) {
@@ -60,8 +61,8 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
 
             registry_value_t value = {
                 .type = REGISTRY_TYPE_NONE,
-                .buf = dummy_store[i].val,
-                .buf_len = ARRAY_SIZE(val),
+                .buf = dummy_store[i].buf,
+                .buf_len = dummy_store[i].buf_len,
             };
 
             cb(new_path, value, cb_arg);
@@ -96,7 +97,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
                     }
                     else if (j == dummy_store[i].path_len - 1) {
                         // All ids within the path matched and this was the last one.
-                        memcpy(dummy_store[i].val, value.buf, value.buf_len);
+                        memcpy(dummy_store[i].buf, value.buf, value.buf_len);
                         return 0;
                     }
                 }
@@ -117,7 +118,9 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
     dummy_store[free_slot].schema_id = *path.schema_id;
     dummy_store[free_slot].instance_id = *path.instance_id;
     memcpy(dummy_store[free_slot].path, path.path, path.path_len * sizeof(int));
-    memcpy(dummy_store[free_slot].val, value.buf, value.buf_len);
     dummy_store[free_slot].path_len = path.path_len;
+    dummy_store[free_slot].buf = malloc(value.buf_len);
+    memcpy(dummy_store[free_slot].buf, value.buf, value.buf_len);
+    dummy_store[free_slot].buf_len = value.buf_len;
     return 0;
 }

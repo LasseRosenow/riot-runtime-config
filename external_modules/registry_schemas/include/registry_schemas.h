@@ -22,7 +22,7 @@ extern registry_schema_t registry_schema_types_test;
 typedef struct {
     clist_node_t node;
 
-    char string[REGISTRY_MAX_VAL_LEN];
+    char string[50];
     bool boolean;
 
     uint8_t u8;

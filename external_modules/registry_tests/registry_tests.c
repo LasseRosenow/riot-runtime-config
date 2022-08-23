@@ -11,6 +11,9 @@
 
 #include "registry_tests.h"
 
+#define FLOAT_MAX_CHAR_COUNT ((FLT_MAX_10_EXP + 1) + 1 + 1 + 6)     // (FLT_MAX_10_EXP + 1) + sign + dot + 6 decimal places
+#define DOUBLE_MAX_CHAR_COUNT ((DBL_MAX_10_EXP + 1) + 1 + 1 + 6)    // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
+
 int test_instance_0_commit_cb(const registry_path_t path, const void *context)
 {
     (void)context;
@@ -161,8 +164,8 @@ static void tests_registry_all_min_values(void)
     path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F32);
     registry_set_float32(path, -FLT_MAX);
     const float *output_f32 = registry_get_float32(path);
-    char input_f32_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-    char output_f32_string[REGISTRY_MAX_VAL_LEN] = { 0 };
+    char input_f32_string[FLOAT_MAX_CHAR_COUNT + 1] = { 0 };
+    char output_f32_string[FLOAT_MAX_CHAR_COUNT + 1] = { 0 };
     sprintf(input_f32_string, "%f", -FLT_MAX);
     sprintf(output_f32_string, "%f", *output_f32);
     TEST_ASSERT_EQUAL_STRING(input_f32_string, output_f32_string);
@@ -170,16 +173,14 @@ static void tests_registry_all_min_values(void)
 
     // f64
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    if (REGISTRY_MAX_VAL_LEN >= (DBL_MAX_10_EXP + 1) + 1 + 1 + 6) { // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
-        path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
-        registry_set_float64(path, -DBL_MAX);
-        const double *output_f64 = registry_get_float64(path);
-        char input_f64_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-        char output_f64_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-        sprintf(input_f64_string, "%f", -DBL_MAX);
-        sprintf(output_f64_string, "%f", *output_f64);
-        TEST_ASSERT_EQUAL_STRING(input_f64_string, output_f64_string);
-    }
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
+    registry_set_float64(path, -DBL_MAX);
+    const double *output_f64 = registry_get_float64(path);
+    char input_f64_string[DOUBLE_MAX_CHAR_COUNT + 1] = { 0 };
+    char output_f64_string[DOUBLE_MAX_CHAR_COUNT + 1] = { 0 };
+    sprintf(input_f64_string, "%f", -DBL_MAX);
+    sprintf(output_f64_string, "%f", *output_f64);
+    TEST_ASSERT_EQUAL_STRING(input_f64_string, output_f64_string);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 }
 
@@ -189,9 +190,9 @@ static void tests_registry_all_max_values(void)
 
     // string
     path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_STRING);
-    char input_string[REGISTRY_MAX_VAL_LEN] = { 0 };
+    char input_string[50] = { 0 };
 
-    for (size_t i = 0; i < REGISTRY_MAX_VAL_LEN - 1; i++) {
+    for (size_t i = 0; i < 50 - 1; i++) {
         input_string[i] = 'a';
     }
 
@@ -271,8 +272,8 @@ static void tests_registry_all_max_values(void)
     path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F32);
     registry_set_float32(path, FLT_MAX);
     const float *output_f32 = registry_get_float32(path);
-    char input_f32_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-    char output_f32_string[REGISTRY_MAX_VAL_LEN] = { 0 };
+    char input_f32_string[FLOAT_MAX_CHAR_COUNT + 1] = { 0 };
+    char output_f32_string[FLOAT_MAX_CHAR_COUNT + 1] = { 0 };
     sprintf(input_f32_string, "%f", FLT_MAX);
     sprintf(output_f32_string, "%f", *output_f32);
     TEST_ASSERT_EQUAL_STRING(input_f32_string, output_f32_string);
@@ -280,16 +281,14 @@ static void tests_registry_all_max_values(void)
 
     // f64
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    if (REGISTRY_MAX_VAL_LEN >= (DBL_MAX_10_EXP + 1) + 1 + 1 + 6) { // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
-        path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
-        registry_set_float64(path, DBL_MAX);
-        const double *output_f64 = registry_get_float64(path);
-        char input_f64_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-        char output_f64_string[REGISTRY_MAX_VAL_LEN] = { 0 };
-        sprintf(input_f64_string, "%f", DBL_MAX);
-        sprintf(output_f64_string, "%f", *output_f64);
-        TEST_ASSERT_EQUAL_STRING(input_f64_string, output_f64_string);
-    }
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
+    registry_set_float64(path, DBL_MAX);
+    const double *output_f64 = registry_get_float64(path);
+    char input_f64_string[DOUBLE_MAX_CHAR_COUNT + 1] = { 0 };
+    char output_f64_string[DOUBLE_MAX_CHAR_COUNT + 1] = { 0 };
+    sprintf(input_f64_string, "%f", DBL_MAX);
+    sprintf(output_f64_string, "%f", *output_f64);
+    TEST_ASSERT_EQUAL_STRING(input_f64_string, output_f64_string);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 }
 

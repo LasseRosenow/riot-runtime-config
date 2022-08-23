@@ -28,25 +28,68 @@ static clist_node_t store_srcs;
 
 static void _debug_print_path(const registry_path_t path)
 {
-    DEBUG("%d", *path.root_group_id);
+    if (ENABLE_DEBUG) {
+        DEBUG("%d", *path.root_group_id);
 
-    if (path.schema_id != NULL) {
-        DEBUG("/%d", *path.schema_id);
+        if (path.schema_id != NULL) {
+            DEBUG("/%d", *path.schema_id);
 
-        if (path.instance_id != NULL) {
-            DEBUG("/%d", *path.instance_id);
+            if (path.instance_id != NULL) {
+                DEBUG("/%d", *path.instance_id);
 
-            if (path.path_len > 0) {
-                DEBUG("/");
+                if (path.path_len > 0) {
+                    DEBUG("/");
 
-                for (size_t i = 0; i < path.path_len; i++) {
-                    DEBUG("%d", path.path[i]);
+                    for (size_t i = 0; i < path.path_len; i++) {
+                        DEBUG("%d", path.path[i]);
 
-                    if (i < path.path_len - 1) {
-                        DEBUG("/");
+                        if (i < path.path_len - 1) {
+                            DEBUG("/");
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+static void _debug_print_value(const registry_value_t *value)
+{
+    if (ENABLE_DEBUG) {
+        switch (value->type) {
+        case REGISTRY_TYPE_NONE: break;
+        case REGISTRY_TYPE_OPAQUE: {
+            DEBUG("opaque (hex): ");
+            for (size_t i = 0; i < value->buf_len; i++) {
+                DEBUG("%02x", ((uint8_t *)value->buf)[i]);
+            }
+            break;
+        }
+        case REGISTRY_TYPE_STRING: DEBUG("string: %s", (char *)value->buf); break;
+        case REGISTRY_TYPE_BOOL: DEBUG("bool: %d", *(bool *)value->buf); break;
+
+        case REGISTRY_TYPE_UINT8: DEBUG("uint8: %d", *(uint8_t *)value->buf); break;
+        case REGISTRY_TYPE_UINT16: DEBUG("uint16: %d", *(uint16_t *)value->buf); break;
+        case REGISTRY_TYPE_UINT32: DEBUG("uint32: %d", *(uint32_t *)value->buf); break;
+    #if defined(CONFIG_REGISTRY_USE_UINT64)
+        case REGISTRY_TYPE_UINT64: DEBUG("uint64: %lld", *(uint64_t *)value->buf); break;
+    #endif // CONFIG_REGISTRY_USE_UINT64
+
+        case REGISTRY_TYPE_INT8: DEBUG("int8: %d", *(int8_t *)value->buf); break;
+        case REGISTRY_TYPE_INT16: DEBUG("int16: %d", *(int16_t *)value->buf); break;
+        case REGISTRY_TYPE_INT32: DEBUG("int32: %d", *(int32_t *)value->buf); break;
+
+    #if defined(CONFIG_REGISTRY_USE_INT64)
+        case REGISTRY_TYPE_INT64: DEBUG("int64: %lld", *(int64_t *)value->buf); break;
+    #endif // CONFIG_REGISTRY_USE_INT64
+
+    #if defined(CONFIG_REGISTRY_USE_FLOAT32)
+        case REGISTRY_TYPE_FLOAT32: DEBUG("f32: %f", *(float *)value->buf); break;
+    #endif // CONFIG_REGISTRY_USE_FLOAT32
+
+    #if defined(CONFIG_REGISTRY_USE_FLOAT64)
+        case REGISTRY_TYPE_FLOAT64: DEBUG("f64: %f", *(double *)value->buf); break;
+    #endif // CONFIG_REGISTRY_USE_FLOAT32
         }
     }
 }
@@ -57,40 +100,6 @@ static int _registry_cmp_schema_id(clist_node_t *current, void *id)
     registry_schema_t *schema = container_of(current, registry_schema_t, node);
 
     return !(schema->id - *(int *)id);
-}
-
-static size_t _get_registry_parameter_data_len(const registry_type_t type)
-{
-    switch (type) {
-    case REGISTRY_TYPE_OPAQUE: return 0;
-    case REGISTRY_TYPE_STRING: return REGISTRY_MAX_VAL_LEN;
-    case REGISTRY_TYPE_BOOL: return sizeof(bool);
-
-    case REGISTRY_TYPE_UINT8: return sizeof(uint8_t);
-    case REGISTRY_TYPE_UINT16: return sizeof(uint16_t);
-    case REGISTRY_TYPE_UINT32: return sizeof(uint32_t);
-#if defined(CONFIG_REGISTRY_USE_UINT64)
-    case REGISTRY_TYPE_UINT64: return sizeof(uint64_t);
-#endif // CONFIG_REGISTRY_USE_UINT64
-
-    case REGISTRY_TYPE_INT8: return sizeof(int8_t);
-    case REGISTRY_TYPE_INT16: return sizeof(int16_t);
-    case REGISTRY_TYPE_INT32: return sizeof(int32_t);
-
-#if defined(CONFIG_REGISTRY_USE_INT64)
-    case REGISTRY_TYPE_INT64: return sizeof(int64_t);
-#endif // CONFIG_REGISTRY_USE_INT64
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
-    case REGISTRY_TYPE_FLOAT32: return sizeof(float);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    case REGISTRY_TYPE_FLOAT64: return sizeof(double);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
-
-    default: return 0;
-    }
 }
 
 static registry_root_group_t *_root_group_lookup(const registry_root_group_id_t root_group_id)
@@ -267,15 +276,14 @@ static int _registry_set(const registry_path_t path, const void *val, const int 
 
     /* check if val_type is compatible with param_meta->value.parameter.type */
     if (val_type != param_meta->value.parameter.type) {
-        size_t new_val_len = _get_registry_parameter_data_len(val_type);
-        uint8_t new_val[new_val_len];
+        uint8_t new_val[intern_val_len];
         registry_value_t old_val = {
             .type = val_type,
             .buf = val,
             .buf_len = val_len,
         };
         int conversion_error_code = registry_convert_value_to_value(&old_val, new_val,
-                                                                    new_val_len,
+                                                                    intern_val_len,
                                                                     param_meta->value.parameter.type);
         if (conversion_error_code == 0) {
             /* call handler to apply the new value to the correct parameter in the instance of the schema */
@@ -947,21 +955,20 @@ const double *registry_get_float64(const registry_path_t path)
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
-static void _registry_load_cb(const registry_path_t path, const registry_value_t val,
+static void _registry_load_cb(const registry_path_t path, const registry_value_t value,
                               const void *cb_arg)
 {
     (void)cb_arg;
-    DEBUG("[registry_store] Setting ");
-    _debug_print_path(path);
 
     if (ENABLE_DEBUG) {
-        char value_string[REGISTRY_MAX_VAL_LEN];
-
-        registry_convert_value_to_str(&val, value_string, ARRAY_SIZE(value_string));
-        DEBUG(" to %s\n", value_string);
+        DEBUG("[registry_store] Loading: ");
+        _debug_print_path(path);
+        DEBUG(" = ");
+        _debug_print_value(&value);
+        DEBUG("\n");
     }
 
-    registry_set_value(path, val);
+    registry_set_value(path, value);
 }
 
 void registry_register_store_src(const registry_store_instance_t *src)
@@ -1036,13 +1043,12 @@ static int _registry_save_export_func(const registry_path_t path,
 
     const registry_store_instance_t *dst = store_dst;
 
-    DEBUG("[registry_store] Saving: ");
-    _debug_print_path(path);
     if (ENABLE_DEBUG) {
-        char value_string[REGISTRY_MAX_VAL_LEN];
-
-        registry_convert_value_to_str(value, value_string, ARRAY_SIZE(value_string));
-        DEBUG(" = %s\n", value_string);
+        DEBUG("[registry_store] Saving: ");
+        _debug_print_path(path);
+        DEBUG(" = ");
+        _debug_print_value(value);
+        DEBUG("\n");
     }
 
     if (!dst) {
