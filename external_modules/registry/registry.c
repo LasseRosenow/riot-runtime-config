@@ -347,8 +347,9 @@ static int _registry_get(const registry_path_t path, const registry_type_t reque
 
     schema->mapping(param_meta->id, instance, &buf, &buf_len);
 
-    /* update buf pointer in registry_value_t to point to the value inside the registry */
+    /* update buf pointer in registry_value_t to point to the value inside the registry and set buf_len */
     val_buf->buf = buf;
+    val_buf->buf_len = buf_len;
 
     return 0;
 }

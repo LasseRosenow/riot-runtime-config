@@ -324,24 +324,30 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
     sprintf(string_path, "%s", mount->mount_point);
 
     _string_path_append_int(string_path, *path.root_group_id);
-    if (vfs_mkdir(string_path, 0) < 0) {
+    int res = vfs_mkdir(string_path, 0);
+
+    if (res < 0 && res != -EEXIST) {
         DEBUG("[registry storage_facility_vfs] save: Can not make dir: %s\n", string_path);
     }
 
     _string_path_append_int(string_path, *path.schema_id);
-    if (vfs_mkdir(string_path, 0) < 0) {
+    res = vfs_mkdir(string_path, 0);
+
+    if (res < 0 && res != -EEXIST) {
         DEBUG("[registry storage_facility_vfs] save: Can not make dir: %s\n", string_path);
     }
 
     _string_path_append_int(string_path, *path.instance_id);
-    if (vfs_mkdir(string_path, 0) < 0) {
+    res = vfs_mkdir(string_path, 0);
+
+    if (res < 0 && res != -EEXIST) {
         DEBUG("[registry storage_facility_vfs] save: Can not make dir: %s\n", string_path);
     }
 
     /* exclude the last element, as it will be the file name and not a folder */
     for (size_t i = 0; i < path.path_len - 1; i++) {
         _string_path_append_int(string_path, path.path[i]);
-        int res = vfs_mkdir(string_path, 0);
+        res = vfs_mkdir(string_path, 0);
         if (res != 0 && res != -EEXIST) {
             DEBUG("[registry storage_facility_vfs] save: Can not create dir: %d\n", res);
         }
