@@ -50,12 +50,16 @@ static int _get_string_len(const registry_value_t *value)
     return 0;
 }
 
+
+
 int registry_convert_str_to_value(const char *src, void *dest, const size_t dest_len,
                                   const registry_type_t dest_type)
 {
     assert(src != NULL);
+
 #if defined(CONFIG_REGISTRY_USE_INT64)
     int64_t val_i = 0;
+
 #else /* CONFIG_REGISTRY_USE_INT64 */
     int32_t val_i = 0;
 #endif
@@ -265,7 +269,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         else if (src->type == REGISTRY_TYPE_UINT32) {
             val_u = *(uint32_t *)src->buf;
         }
-        snprintf(dest, dest_len, "%" PRIu32, val_u);
+        snprintf(dest, dest_len, " %" PRIu32, val_u);
         return dest;
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
@@ -296,7 +300,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         else if (src->type == REGISTRY_TYPE_BOOL) {
             val_i = *(bool *)src->buf;
         }
-        snprintf(dest, dest_len, "%" PRId32, val_i);
+        snprintf(dest, dest_len, " %" PRId32, val_i);
         return dest;
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
@@ -313,7 +317,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32:
-        sprintf(dest, "%f", *(float *)src->buf);
+        sprintf(dest, " %f", *(float *)src->buf);
         len = strlen(dest);
         if (len > dest_len - 1) {
             return NULL;
@@ -323,7 +327,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64:
-        sprintf(dest, "%f", *(double *)src->buf);
+        sprintf(dest, " %f", *(double *)src->buf);
         len = strlen(dest);
         if (len > dest_len - 1) {
             return NULL;
