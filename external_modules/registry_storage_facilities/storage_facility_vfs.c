@@ -67,7 +67,7 @@ static int _parse_string_path(char *path, int *buf, size_t *buf_len)
 
 static int _format(vfs_mount_t *mount)
 {
-    DEBUG("formating %s....\t", mount->mount_point);
+    DEBUG("formatting %s....\t", mount->mount_point);
     if (vfs_format(mount) < 0) {
         DEBUG("[Failed]\n");
         return 1;
@@ -153,13 +153,13 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
         vfs_dirent_t dir_entry;
 
         size_t i = 0;
-        size_t last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
+        int last_dir_entry_positions[REGISTRY_MAX_DIR_DEPTH] = { -1 };
         size_t last_dir_string_path_lens[REGISTRY_MAX_DIR_DEPTH] = { 0 };
         int res = 0;
         bool exit_folder_iteration = false;
 
         while (exit_folder_iteration == false) {
-            size_t dir_entry_position = -1;
+            int dir_entry_position = -1;
             do {
                 res = vfs_readdir(&dirp, &dir_entry);
                 dir_entry_position++;
