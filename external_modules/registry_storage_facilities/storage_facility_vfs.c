@@ -8,7 +8,7 @@
 #include "errno.h"
 #include "vfs.h"
 #include <fcntl.h>
-#define ENABLE_DEBUG (1)
+#define ENABLE_DEBUG (0)
 #include "debug.h"
 #include "ps.h"
 
