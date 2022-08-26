@@ -275,21 +275,22 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
                         if (i == 0) {
                             exit_folder_iteration = true;
                         }
+                        else {
+                            /* move up one path back to the parent */
+                            i--;
 
-                        /* move up one path back to the parent */
-                        i--;
+                            /* restore old string_path */
+                            string_path[last_dir_string_path_lens[i]] = '\0';
 
-                        /* restore old string_path */
-                        string_path[last_dir_string_path_lens[i]] = '\0';
+                            /* close old directory */
+                            if (vfs_closedir(&dirp) != 0) {
+                                DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
+                            }
 
-                        /* close old directory */
-                        if (vfs_closedir(&dirp) != 0) {
-                            DEBUG("[registry storage_facility_vfs] load: Can not close dir\n");
-                        }
-
-                        /* open new directory */
-                        if (vfs_opendir(&dirp, string_path) != 0) {
-                            DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
+                            /* open new directory */
+                            if (vfs_opendir(&dirp, string_path) != 0) {
+                                DEBUG("[registry storage_facility_vfs] load: Can not open dir\n");
+                            }
                         }
                     }
                 }
