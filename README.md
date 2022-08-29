@@ -292,7 +292,7 @@ void registry_register_store_dst(const registry_store_instance_t *dst);
 /* Schemas */
 void registry_schemas_init(void);
 int registry_register_schema(const registry_root_group_id_t root_group_id, const registry_schema_t *schema);
-nt registry_register_schema_instance(const registry_root_group_id_t root_group_id, const int schema_id, const registry_instance_t *instance);
+int registry_register_schema_instance(const registry_root_group_id_t root_group_id, const int schema_id, const registry_instance_t *instance);
 
 
 
