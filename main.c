@@ -176,16 +176,15 @@ int main(void)
     // vfs_format(&_vfs_mount);
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
-    // registry_load(_REGISTRY_PATH_0());
-    // printf("HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 4\n");
+    registry_load(_REGISTRY_PATH_0());
 
     // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     /* test registry */
-    // registry_tests_run();
+    registry_tests_run();
 
 
-    // DEMO START
+    /* DEMO START */
     // int retval;
 
     // if (0 != (retval = ws281x_init(&dev, &ws281x_params[0]))) {

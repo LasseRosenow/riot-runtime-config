@@ -607,26 +607,26 @@ int registry_set_float64(const registry_path_t path, const double val);
  */
 int registry_get_value(const registry_path_t path, registry_value_t *value);
 
-const void *registry_get_opaque(const registry_path_t path, size_t *buf_len);
-const char *registry_get_string(const registry_path_t path, size_t *buf_len);
-const bool *registry_get_bool(const registry_path_t path);
-const uint8_t *registry_get_uint8(const registry_path_t path);
-const uint16_t *registry_get_uint16(const registry_path_t path);
-const uint32_t *registry_get_uint32(const registry_path_t path);
+int registry_get_opaque(const registry_path_t path, const void **buf, size_t *buf_len);
+int registry_get_string(const registry_path_t path, const char **buf, size_t *buf_len);
+int registry_get_bool(const registry_path_t path, const bool **buf);
+int registry_get_uint8(const registry_path_t path, const uint8_t **buf);
+int registry_get_uint16(const registry_path_t path, const uint16_t **buf);
+int registry_get_uint32(const registry_path_t path, const uint32_t **buf);
 #if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
-const uint64_t *registry_get_uint64(const registry_path_t path);
+int registry_get_uint64(const registry_path_t path, const uint64_t **buf);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
-const int8_t *registry_get_int8(const registry_path_t path);
-const int16_t *registry_get_int16(const registry_path_t path);
-const int32_t *registry_get_int32(const registry_path_t path);
+int registry_get_int8(const registry_path_t path, const int8_t **buf);
+int registry_get_int16(const registry_path_t path, const int16_t **buf);
+int registry_get_int32(const registry_path_t path, const int32_t **buf);
 #if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
-const int64_t *registry_get_int64(const registry_path_t path);
+int registry_get_int64(const registry_path_t path, const int64_t **buf);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
-const float *registry_get_float32(const registry_path_t path);
+int registry_get_float32(const registry_path_t path, const float **buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
-const double *registry_get_float64(const registry_path_t path);
+int registry_get_float64(const registry_path_t path, const double **buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
 /**

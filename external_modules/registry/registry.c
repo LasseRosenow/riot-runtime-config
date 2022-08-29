@@ -877,82 +877,89 @@ int registry_get_value(const registry_path_t path, registry_value_t *value)
     return _registry_get(path, REGISTRY_TYPE_NONE, value);
 }
 
-static const void *_registry_get_buf(const registry_path_t path,
-                                     const registry_type_t requested_val_type, size_t *buf_len)
+static int _registry_get_buf(const registry_path_t path,
+                             const registry_type_t requested_val_type,
+                             const void **buf,
+                             size_t *buf_len)
 {
     registry_value_t value;
 
-    _registry_get(path, requested_val_type, &value);
+    int res = _registry_get(path, requested_val_type, &value);
 
-    *buf_len = value.buf_len;
-    return value.buf;
+    *buf = value.buf;
+
+    if (buf_len != NULL) {
+        *buf_len = value.buf_len;
+    }
+
+    return res;
 }
-const void *registry_get_opaque(const registry_path_t path, size_t *buf_len)
+int registry_get_opaque(const registry_path_t path, const void **buf, size_t *buf_len)
 {
-    return _registry_get_buf(path, REGISTRY_TYPE_OPAQUE, buf_len);
+    return _registry_get_buf(path, REGISTRY_TYPE_OPAQUE, buf, buf_len);
 }
-const char *registry_get_string(const registry_path_t path, size_t *buf_len)
+int registry_get_string(const registry_path_t path, const char **buf, size_t *buf_len)
 {
-    return _registry_get_buf(path, REGISTRY_TYPE_STRING, buf_len);
+    return _registry_get_buf(path, REGISTRY_TYPE_STRING, (const void **)buf, buf_len);
 }
-const bool *registry_get_bool(const registry_path_t path)
+int registry_get_bool(const registry_path_t path, const bool **buf)
 {
-    return (const bool *)_registry_get_buf(path, REGISTRY_TYPE_BOOL, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_BOOL, (const void **)buf, NULL);
 }
-const uint8_t *registry_get_uint8(const registry_path_t path)
+int registry_get_uint8(const registry_path_t path, const uint8_t **buf)
 {
-    return (const uint8_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT8, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_UINT8, (const void **)buf, NULL);
 }
-const uint16_t *registry_get_uint16(const registry_path_t path)
+int registry_get_uint16(const registry_path_t path, const uint16_t **buf)
 {
-    return (const uint16_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT16, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_UINT16, (const void **)buf, NULL);
 }
 
-const uint32_t *registry_get_uint32(const registry_path_t path)
+int registry_get_uint32(const registry_path_t path, const uint32_t **buf)
 {
-    return (const uint32_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT32, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_UINT32, (const void **)buf, NULL);
 }
 
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-const uint64_t *registry_get_uint64(const registry_path_t path)
+int registry_get_uint64(const registry_path_t path, const uint64_t **buf)
 {
-    return (uint64_t *)_registry_get_buf(path, REGISTRY_TYPE_UINT64, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_UINT64, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-const int8_t *registry_get_int8(const registry_path_t path)
+int registry_get_int8(const registry_path_t path, const int8_t **buf)
 {
-    return (int8_t *)_registry_get_buf(path, REGISTRY_TYPE_INT8, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_INT8, (const void **)buf, NULL);
 }
 
-const int16_t *registry_get_int16(const registry_path_t path)
+int registry_get_int16(const registry_path_t path, const int16_t **buf)
 {
-    return (int16_t *)_registry_get_buf(path, REGISTRY_TYPE_INT16, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_INT16, (const void **)buf, NULL);
 }
 
-const int32_t *registry_get_int32(const registry_path_t path)
+int registry_get_int32(const registry_path_t path, const int32_t **buf)
 {
-    return (int32_t *)_registry_get_buf(path, REGISTRY_TYPE_INT32, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_INT32, (const void **)buf, NULL);
 }
 
 #if defined(CONFIG_REGISTRY_USE_INT64)
-const int64_t *registry_get_int64(const registry_path_t path)
+int registry_get_int64(const registry_path_t path, const int64_t **buf)
 {
-    return (int64_t *)_registry_get_buf(path, REGISTRY_TYPE_INT64, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_INT64, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-const float *registry_get_float32(const registry_path_t path)
+int registry_get_float32(const registry_path_t path, const float **buf)
 {
-    return (float *)_registry_get_buf(path, REGISTRY_TYPE_FLOAT32, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_FLOAT32, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-const double *registry_get_float64(const registry_path_t path)
+int registry_get_float64(const registry_path_t path, const double **buf)
 {
-    return (double *)_registry_get_buf(path, REGISTRY_TYPE_FLOAT64, NULL);
+    return _registry_get_buf(path, REGISTRY_TYPE_FLOAT64, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
