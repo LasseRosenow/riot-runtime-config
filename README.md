@@ -268,7 +268,7 @@ Figure 09 - Behavioral flow of the registration of custom registry schemas
 /* Base */
 void registry_init(void);
 int registry_set_value(const registry_path_t path, const registry_value_t val);
-registry_value_t *registry_get_value(const registry_path_t path, registry_value_t *value);
+int registry_get_value(const registry_path_t path, registry_value_t *value);
 int registry_commit(const registry_path_t path);
 int registry_export(int (*export_func)(
     const registry_path_t path,
@@ -276,53 +276,56 @@ int registry_export(int (*export_func)(
     const registry_instance_t *instance,
     const registry_schema_item_t *meta,
     const registry_value_t *value,
-    void *context
+    const void *context
   ),
-  const registry_path_t path, int recursion_depth, void *context
+  const registry_path_t path, const int recursion_depth, const void *context
 );
 int registry_load(const registry_path_t path);
 int registry_save(const registry_path_t path);
 
 
 /* Store */
-void registry_register_store_src(registry_store_t *src);
-void registry_register_store_dst(registry_store_t *dst);
+void registry_register_store_src(const registry_store_instance_t *src);
+void registry_register_store_dst(const registry_store_instance_t *dst);
 
 
 /* Schemas */
 void registry_schemas_init(void);
-int registry_register_schema(registry_root_group_id_t root_group_id, registry_schema_t *schema);
-int registry_register_schema_instance(registry_root_group_id_t root_group_id, int schema_id, registry_instance_t *instance);
+int registry_register_schema(const registry_root_group_id_t root_group_id, const registry_schema_t *schema);
+nt registry_register_schema_instance(const registry_root_group_id_t root_group_id, const int schema_id, const registry_instance_t *instance);
+
 
 
 /* Set convenience functions */
+int registry_set_opaque(const registry_path_t path, const void *val, const size_t val_len);
 int registry_set_string(const registry_path_t path, const char *val);
-int registry_set_bool(const registry_path_t path, bool val);
-int registry_set_uint8(const registry_path_t path, uint8_t val);
-int registry_set_uint16(const registry_path_t path, uint16_t val);
-int registry_set_uint32(const registry_path_t path, uint32_t val);
-int registry_set_uint64(const registry_path_t path, uint64_t val);
-int registry_set_int8(const registry_path_t path, int8_t val);
-int registry_set_int16(const registry_path_t path, int16_t val);
-int registry_set_int32(const registry_path_t path, int32_t val);
-int registry_set_int64(const registry_path_t path, int64_t val);
-int registry_set_float32(const registry_path_t path, float val);
-int registry_set_float64(const registry_path_t path, double val);
+int registry_set_bool(const registry_path_t path, const bool val);
+int registry_set_uint8(const registry_path_t path, const uint8_t val);
+int registry_set_uint16(const registry_path_t path, const uint16_t val);
+int registry_set_uint32(const registry_path_t path, const uint32_t val);
+int registry_set_uint64(const registry_path_t path, const uint64_t val);
+int registry_set_int8(const registry_path_t path, const int8_t val);
+int registry_set_int16(const registry_path_t path, const int16_t val);
+int registry_set_int32(const registry_path_t path, const int32_t val);
+int registry_set_int64(const registry_path_t path, const int64_t val);
+int registry_set_float32(const registry_path_t path, const float val);
+int registry_set_float64(const registry_path_t path, const double val);
 
 
 /* Get convenience functions */
-char *registry_get_string(const registry_path_t path, char *buf, int buf_len);
-bool registry_get_bool(const registry_path_t path);
-uint8_t registry_get_uint8(const registry_path_t path);
-uint16_t registry_get_uint16(const registry_path_t path);
-uint32_t registry_get_uint32(const registry_path_t path);
-uint64_t registry_get_uint64(const registry_path_t path);
-int8_t registry_get_int8(const registry_path_t path);
-int16_t registry_get_int16(const registry_path_t path);
-int32_t registry_get_int32(const registry_path_t path);
-int64_t registry_get_int64(const registry_path_t path);
-float registry_get_float32(const registry_path_t path);
-double registry_get_float64(const registry_path_t path);
+int registry_get_opaque(const registry_path_t path, const void **buf, size_t *buf_len);
+int registry_get_string(const registry_path_t path, const char **buf, size_t *buf_len);
+int registry_get_bool(const registry_path_t path, const bool **buf);
+int registry_get_uint8(const registry_path_t path, const uint8_t **buf);
+int registry_get_uint16(const registry_path_t path, const uint16_t **buf);
+int registry_get_uint32(const registry_path_t path, const uint32_t **buf);
+int registry_get_uint64(const registry_path_t path, const uint64_t **buf);
+int registry_get_int8(const registry_path_t path, const int8_t **buf);
+int registry_get_int16(const registry_path_t path, const int16_t **buf);
+int registry_get_int32(const registry_path_t path, const int32_t **buf);
+int registry_get_int64(const registry_path_t path, const int64_t **buf);
+int registry_get_float32(const registry_path_t path, const float **buf);
+int registry_get_float64(const registry_path_t path, const double **buf);
 ```
 
 # 4. Integrating external Configuration Managers
@@ -436,15 +439,14 @@ typedef enum {
 #include "registry.h"
 #include "rgb_led.h"
 
-static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len, void *context);
-static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
-                void *context);
+static void mapping(const int param_id, const registry_instance_t *instance, void **val,
+                    size_t *val_len);
 
 REGISTRY_SCHEMA(
     registry_schema_rgb_led,
     REGISTRY_SCHEMA_RGB_LED,
     "rgb", "Representation of an rgb color.",
-    get, set,
+    mapping,
 
     REGISTRY_PARAMETER_UINT8(
         REGISTRY_SCHEMA_RGB_LED_RED,
@@ -460,48 +462,25 @@ REGISTRY_SCHEMA(
 
     );
 
-static void get(int param_id, registry_instance_t *instance, void *buf, int buf_len,
-                void *context)
+static void mapping(const int param_id, const registry_instance_t *instance, void **val,
+                    size_t *val_len)
 {
-    (void)buf_len;
-    (void)context;
-
     registry_schema_rgb_led_t *_instance = (registry_schema_rgb_led_t *)instance->data;
 
     switch (param_id) {
     case REGISTRY_SCHEMA_RGB_LED_RED:
-        memcpy(buf, &_instance->red, sizeof(_instance->red));
+        *val = &_instance->red;
+        *val_len = sizeof(_instance->red);
         break;
 
     case REGISTRY_SCHEMA_RGB_LED_GREEN:
-        memcpy(buf, &_instance->green, sizeof(_instance->green));
+        *val = &_instance->green;
+        *val_len = sizeof(_instance->green);
         break;
 
     case REGISTRY_SCHEMA_RGB_LED_BLUE:
-        memcpy(buf, &_instance->blue, sizeof(_instance->blue));
-        break;
-    }
-}
-
-static void set(int param_id, registry_instance_t *instance, const void *val, int val_len,
-                void *context)
-{
-    (void)val_len;
-    (void)context;
-
-    registry_schema_rgb_led_t *_instance = (registry_schema_rgb_led_t *)instance->data;
-
-    switch (param_id) {
-    case REGISTRY_SCHEMA_RGB_LED_RED:
-        memcpy(&_instance->red, val, sizeof(_instance->red));
-        break;
-
-    case REGISTRY_SCHEMA_RGB_LED_GREEN:
-        memcpy(&_instance->green, val, sizeof(_instance->green));
-        break;
-
-    case REGISTRY_SCHEMA_RGB_LED_BLUE:
-        memcpy(&_instance->blue, val, sizeof(_instance->blue));
+        *val = &_instance->blue;
+        *val_len = sizeof(_instance->blue);
         break;
     }
 }
@@ -555,7 +534,8 @@ int main(void)
     registry_set_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE), 19);
 
     /* get value */
-    registry_get_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
+    const uint8_t *value;
+    registry_get_uint8(REGISTRY_PATH_APP(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE), &value);
 
     return 0;
 }
