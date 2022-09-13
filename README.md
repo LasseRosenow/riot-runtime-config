@@ -90,7 +90,7 @@ The proposed RCS architecture, as shown in Figure 01, is formed by one or more
 [Configuration Managers](#4-configuration-managers) and the
 [RIOT Registry](#3-the-riot-registry).
 
-The RIOT Registry acts as common interface to access Runtime Configurations and
+The RIOT Registry acts as a common interface to access Runtime Configurations and
 store them in non-volatile devices.
 
 All runtime configuration can be accessed either from the RIOT Application or
@@ -295,7 +295,6 @@ int registry_register_schema(const registry_root_group_id_t root_group_id, const
 int registry_register_schema_instance(const registry_root_group_id_t root_group_id, const int schema_id, const registry_instance_t *instance);
 
 
-
 /* Set convenience functions */
 int registry_set_opaque(const registry_path_t path, const void *val, const size_t val_len);
 int registry_set_string(const registry_path_t path, const char *val);
@@ -332,13 +331,13 @@ int registry_get_float64(const registry_path_t path, const double **buf);
 
 ## 4.1. Simple Configuration Managers
 
-Simple Configuration Managers are ways to use the RIOT Registry without the need to maintaining adapters. Those managers would only be implemented once and mirror the internal structure of the RIOT Registry.
-This can be quite powerful within RIOT only environments, but is not as powerful in terms of its "plug and play"ness
+Simple Configuration Managers are ways to use the RIOT Registry without the need to maintain adapters. Those managers would only be implemented once and mirror the internal structure of the RIOT Registry.
+This can be quite powerful within RIOT-only environments, but is not as powerful in terms of its "plug and play"ness
 
 ### 4.1.1. CLI
 
-The RIOT cli can be extended with a `registry` command, which is followed by `set | get | commit | export`.\
-Each of those have their own api:
+The RIOT CLI can be extended with a `registry` command, which is followed by a sub-command `set | get | commit | export`.\
+Each sub-command has a specific CLI interface:
 
 - get: `<path>`
 - set: `<path> <value>`
@@ -364,8 +363,8 @@ The `commit` command is less trivial as there is no equivalent construct within 
 ### 4.1.2. MQTT
 
 The MQTT integration uses the RIOT internal registry structure and does not come with its own schema structure. But is limited to only having events with or without data.\
-So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event notifies the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
-The `export` command is not necessary because the MQTT broker gets a initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
+So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event will notify the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
+The `export` command is not necessary because the MQTT broker gets an initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
 Because one MQTT broker can have multiple RIOT nodes, it is necessary to prefix the topic of each message with a device_id. For example: `device_id/root_group_id/schema_id/...`\
 Less trivial is how `commit` can be exposed to MQTT. But here are some ideas:
 
@@ -392,7 +391,7 @@ Then each external configuration manager has to implement its own `adapter` modu
 
 ### 4.2.1. LwM2M
 
-LwM2M is a relatively new protocol which is similar to the RIOT registry as to that it specifies official (and inofficial) `object models` that define which information can be found where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
+LwM2M is a relatively new protocol that is similar to the RIOT registry in that it specifies official (and unofficial) `object models` that define which information can be found where. It internally uses CoAP and has a concept of `instances` as well. A typical LwM2M `path` looks like this:\
 `object_id/instance_id/parameter_id`\
 The `object_id` is similar to RIOTs `schema_id`, the `instance_id` is the same as in RIOT and the `parameter_id` is also the same as in RIOT except LwM2M does not know anything about nesting, so there are no paths longer than `3`.\
 To integrate LwM2M to the RIOT Registry it is necessary to write an adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
@@ -439,8 +438,7 @@ typedef enum {
 #include "registry.h"
 #include "rgb_led.h"
 
-static void mapping(const int param_id, const registry_instance_t *instance, void **val,
-                    size_t *val_len);
+static void mapping(const int param_id, const registry_instance_t *instance, void **val, size_t *val_len);
 
 REGISTRY_SCHEMA(
     registry_schema_rgb_led,
@@ -462,8 +460,7 @@ REGISTRY_SCHEMA(
 
     );
 
-static void mapping(const int param_id, const registry_instance_t *instance, void **val,
-                    size_t *val_len)
+static void mapping(const int param_id, const registry_instance_t *instance, void **val, size_t *val_len)
 {
     registry_schema_rgb_led_t *_instance = (registry_schema_rgb_led_t *)instance->data;
 
