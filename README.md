@@ -187,7 +187,7 @@ As described in the flow in Figure 03, modules add their __Schema Instances (SI)
 
 <center>
 
-![Figure 03](./doc/images/boot_flow.svg "Usage flow of the RIOT Registry")
+![Figure 03](./doc/images/behavioral_flow_boot.svg "Usage flow of the RIOT Registry")
 
 </center>
 <p align="center">
@@ -209,28 +209,28 @@ A registry path usually consists of integers, but the diagrams below uses string
 
 #### Behavioral flow of the `get` function
 
-![Figure 04](./doc/images/basic_behavioral_flow_get.svg "Behavioral flow of the get API")
+![Figure 04](./doc/images/behavioral_flow_get.svg "Behavioral flow of the get API")
 <p align="center">
 Figure 04 - Behavioral flow of the "get" API
 </p>
 
 #### Behavioral flow of the `set` function
 
-![Figure 05](./doc/images/basic_behavioral_flow_set.svg "Behavioral flow of the set API")
+![Figure 05](./doc/images/behavioral_flow_set.svg "Behavioral flow of the set API")
 <p align="center">
 Figure 05 - Behavioral flow of the "set" API
 </p>
 
 #### Behavioral flow of the `commit` function
 
-![Figure 06](./doc/images/basic_behavioral_flow_commit.svg "Behavioral flow of the commit API")
+![Figure 06](./doc/images/behavioral_flow_commit.svg "Behavioral flow of the commit API")
 <p align="center">
 Figure 06 - Behavioral flow of the "commit" API
 </p>
 
 #### Behavioral flow of the `export` function
 
-![Figure 07](./doc/images/basic_behavioral_flow_export.svg "Behavioral flow of the export API")
+![Figure 07](./doc/images/behavioral_flow_export.svg "Behavioral flow of the export API")
 <p align="center">
 Figure 07 - Behavioral flow of the "export" API
 </p>
@@ -243,7 +243,7 @@ As one could expect, `registry_load` will call the SF `load` handler with `regis
 
 Figure 08 shows the above described processes.
 
-![Figure 08](./doc/images/store_behavioral_flow.svg "Behavioral flow of the store_load and store_save calls")
+![Figure 08](./doc/images/behavioral_flow_store.svg "Behavioral flow of the store_load and store_save calls")
 <p align="center">
 Figure 08 - Behavioral flow of the store_load and store_save calls
 </p>
@@ -255,14 +255,14 @@ One MUST NOT register a custom schema within the `sys` root configuration group,
 
 Below is a diagram that shows the behavioral flow of adding a custom schema:
 
-![Figure 09](./doc/images/register_custom_schema_flow.svg "Behavioral flow of the registration of custom registry schemas")
+![Figure 09](./doc/images/behavioral_flow_register_custom_schema.svg "Behavioral flow of the registration of custom registry schemas")
 <p align="center">
 Figure 09 - Behavioral flow of the registration of custom registry schemas
 </p>
 
 ## 3.4. RIOT Registry API
 
-![Figure 10](./doc/images/api.svg "RIOT Registry API")
+![Figure 10](./doc/images/api_structure.svg "RIOT Registry API")
 
 ```c++
 /* Base */
@@ -375,7 +375,7 @@ For example: `commit/device_id/root_group_id/schema_id/...`
 
 <center>
 
-![Figure 11](./doc/images/mqtt_integration_flow.svg "MQTT integration")
+![Figure 11](./doc/images/behavioral_flow_mqtt_integration.svg "MQTT integration")
 
 </center>
 
@@ -397,7 +397,7 @@ The `object_id` is similar to RIOTs `schema_id`, the `instance_id` is the same a
 To integrate LwM2M to the RIOT Registry it is necessary to write an adapter that maps the `LwM2M Object Models` to the `RIOT Registry Schemas`.\
 An example of how this adapter would handle a `set` call can be seen below:
 
-![Figure 12](./doc/images/lwm2m_integration_flow.svg "LwM2M integration")
+![Figure 12](./doc/images/behavioral_flow_lwm2m_integration.svg "LwM2M integration")
 
 # 5. Appendix
 
