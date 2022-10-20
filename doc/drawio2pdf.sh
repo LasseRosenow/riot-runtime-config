@@ -1,1 +1,0 @@
-drawio --export --format pdf --recursive --crop --embed-svg-images --output pdfs/ drawio/
