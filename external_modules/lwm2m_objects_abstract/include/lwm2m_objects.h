@@ -36,7 +36,7 @@ extern clist_node_t lwm2m_objects;
 
 
 /* LwM2M Objects */
-#ifdef CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420
+#if IS_ACTIVE(CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420)
 extern lwm2m_objects_object_t lwm2m_object_3420;
 #endif /* CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420 */
 

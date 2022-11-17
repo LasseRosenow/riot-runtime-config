@@ -74,6 +74,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "kernel_defines.h"
 #include "clist.h"
 
 /**
@@ -152,16 +153,16 @@ extern "C" {
         }, \
     },
 
-#if defined(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD) && \
-    defined(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
+#if IS_ACTIVE(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD) && \
+    IS_ACTIVE(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
 /* no name and no description */
 # define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
     REGISTRY_PARAMETER(_id, "", "", _type)
-#elif defined(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD)
+#elif IS_ACTIVE(CONFIG_REGISTRY_DISABLE_SCHEMA_NAME_FIELD)
 /* no name */
 # define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
     REGISTRY_PARAMETER(_id, "", _description, _type)
-#elif defined(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
+#elif IS_ACTIVE(CONFIG_REGISTRY_DISABLE_SCHEMA_DESCRIPTION_FIELD)
 /* no description */
 # define _REGISTRY_PARAMETER(_id, _name, _description, _type) \
     REGISTRY_PARAMETER(_id, _name, "", _type)
@@ -182,7 +183,7 @@ extern "C" {
 #define REGISTRY_PARAMETER_UINT32(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT32)
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64) || IS_ACTIVE(DOXYGEN)
 # define REGISTRY_PARAMETER_UINT64(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_UINT64)
 #else
@@ -196,21 +197,21 @@ extern "C" {
 #define REGISTRY_PARAMETER_INT32(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT32)
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || IS_ACTIVE(DOXYGEN)
 # define REGISTRY_PARAMETER_INT64(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_INT64)
 #else
 # define REGISTRY_PARAMETER_INT64(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32) || IS_ACTIVE(DOXYGEN)
 # define REGISTRY_PARAMETER_FLOAT32(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT32)
 #else
 # define REGISTRY_PARAMETER_FLOAT32(_id, _name, _description)
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64) || IS_ACTIVE(DOXYGEN)
 # define REGISTRY_PARAMETER_FLOAT64(_id, _name, _description) \
     _REGISTRY_PARAMETER(_id, _name, _description, REGISTRY_TYPE_FLOAT64)
 #else
@@ -234,7 +235,7 @@ typedef enum {
     REGISTRY_TYPE_UINT16,       /**< 16-bits unsigned integer */
     REGISTRY_TYPE_UINT32,       /**< 32-bits unsigned integer */
 
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64) || IS_ACTIVE(DOXYGEN)
     REGISTRY_TYPE_UINT64,     /**< 64-bits unsigned integer */
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
@@ -242,15 +243,15 @@ typedef enum {
     REGISTRY_TYPE_INT16,        /**< 16-bits signed integer */
     REGISTRY_TYPE_INT32,        /**< 32-bits signed integer */
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || IS_ACTIVE(DOXYGEN)
     REGISTRY_TYPE_INT64,     /**< 64-bits signed integer */
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32) || IS_ACTIVE(DOXYGEN)
     REGISTRY_TYPE_FLOAT32,     /**< 32-bits float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64) || IS_ACTIVE(DOXYGEN)
     REGISTRY_TYPE_FLOAT64,     /**< 64-bits float */
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 } registry_type_t;
@@ -582,19 +583,19 @@ int registry_set_bool(const registry_path_t path, const bool val);
 int registry_set_uint8(const registry_path_t path, const uint8_t val);
 int registry_set_uint16(const registry_path_t path, const uint16_t val);
 int registry_set_uint32(const registry_path_t path, const uint32_t val);
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64) || IS_ACTIVE(DOXYGEN)
 int registry_set_uint64(const registry_path_t path, const uint64_t val);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 int registry_set_int8(const registry_path_t path, const int8_t val);
 int registry_set_int16(const registry_path_t path, const int16_t val);
 int registry_set_int32(const registry_path_t path, const int32_t val);
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || IS_ACTIVE(DOXYGEN)
 int registry_set_int64(const registry_path_t path, const int64_t val);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32) || IS_ACTIVE(DOXYGEN)
 int registry_set_float32(const registry_path_t path, const float val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64) || IS_ACTIVE(DOXYGEN)
 int registry_set_float64(const registry_path_t path, const double val);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 
@@ -613,19 +614,19 @@ int registry_get_bool(const registry_path_t path, const bool **buf);
 int registry_get_uint8(const registry_path_t path, const uint8_t **buf);
 int registry_get_uint16(const registry_path_t path, const uint16_t **buf);
 int registry_get_uint32(const registry_path_t path, const uint32_t **buf);
-#if defined(CONFIG_REGISTRY_USE_UINT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64) || IS_ACTIVE(DOXYGEN)
 int registry_get_uint64(const registry_path_t path, const uint64_t **buf);
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 int registry_get_int8(const registry_path_t path, const int8_t **buf);
 int registry_get_int16(const registry_path_t path, const int16_t **buf);
 int registry_get_int32(const registry_path_t path, const int32_t **buf);
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || IS_ACTIVE(DOXYGEN)
 int registry_get_int64(const registry_path_t path, const int64_t **buf);
 #endif /* CONFIG_REGISTRY_USE_INT64 */
-#if defined(CONFIG_REGISTRY_USE_FLOAT32) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32) || IS_ACTIVE(DOXYGEN)
 int registry_get_float32(const registry_path_t path, const float **buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
-#if defined(CONFIG_REGISTRY_USE_FLOAT64) || defined(DOXYGEN)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64) || IS_ACTIVE(DOXYGEN)
 int registry_get_float64(const registry_path_t path, const double **buf);
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 

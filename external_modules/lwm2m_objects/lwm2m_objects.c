@@ -39,9 +39,9 @@ void lwm2m_objects_init(void)
     }
 
     /* LwM2M objects */
-#ifdef CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420
-    _register_lwm2m_object(&lwm2m_object_3420);
-#endif /* CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420 */
+    if (IS_ACTIVE(CONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420)) {
+        _register_lwm2m_object(&lwm2m_object_3420);
+    }
 
     /* start the lwm2m client */
     lwm2m_client_run(&client_data, obj_list, obj_list_counter);

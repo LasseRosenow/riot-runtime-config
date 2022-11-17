@@ -71,7 +71,7 @@ static void _debug_print_value(const registry_value_t *value)
         case REGISTRY_TYPE_UINT8: DEBUG("uint8: %d", *(uint8_t *)value->buf); break;
         case REGISTRY_TYPE_UINT16: DEBUG("uint16: %d", *(uint16_t *)value->buf); break;
         case REGISTRY_TYPE_UINT32: DEBUG("uint32: %d", *(uint32_t *)value->buf); break;
-    #if defined(CONFIG_REGISTRY_USE_UINT64)
+    #if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
         case REGISTRY_TYPE_UINT64: DEBUG("uint64: %lld", *(uint64_t *)value->buf); break;
     #endif // CONFIG_REGISTRY_USE_UINT64
 
@@ -79,15 +79,15 @@ static void _debug_print_value(const registry_value_t *value)
         case REGISTRY_TYPE_INT16: DEBUG("int16: %d", *(int16_t *)value->buf); break;
         case REGISTRY_TYPE_INT32: DEBUG("int32: %d", *(int32_t *)value->buf); break;
 
-    #if defined(CONFIG_REGISTRY_USE_INT64)
+    #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
         case REGISTRY_TYPE_INT64: DEBUG("int64: %lld", *(int64_t *)value->buf); break;
     #endif // CONFIG_REGISTRY_USE_INT64
 
-    #if defined(CONFIG_REGISTRY_USE_FLOAT32)
+    #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
         case REGISTRY_TYPE_FLOAT32: DEBUG("f32: %f", *(float *)value->buf); break;
     #endif // CONFIG_REGISTRY_USE_FLOAT32
 
-    #if defined(CONFIG_REGISTRY_USE_FLOAT64)
+    #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
         case REGISTRY_TYPE_FLOAT64: DEBUG("f64: %f", *(double *)value->buf); break;
     #endif // CONFIG_REGISTRY_USE_FLOAT32
         }
@@ -827,7 +827,7 @@ int registry_set_uint32(const registry_path_t path, const uint32_t val)
     return _registry_set(path, &val, sizeof(uint32_t), REGISTRY_TYPE_UINT32);
 }
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
 int registry_set_uint64(const registry_path_t path, const uint64_t val)
 {
     return _registry_set(path, &val, sizeof(uint16_t), REGISTRY_TYPE_UINT64);
@@ -850,21 +850,21 @@ int registry_set_int32(const registry_path_t path, const int32_t val)
     return _registry_set(path, &val, sizeof(int32_t), REGISTRY_TYPE_INT32);
 }
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
 int registry_set_int64(const registry_path_t path, const int64_t val)
 {
     return _registry_set(path, &val, sizeof(int64_t), REGISTRY_TYPE_INT64);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
 int registry_set_float32(const registry_path_t path, const float val)
 {
     return _registry_set(path, &val, sizeof(float), REGISTRY_TYPE_FLOAT32);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
 int registry_set_float64(const registry_path_t path, const double val)
 {
     return _registry_set(path, &val, sizeof(double), REGISTRY_TYPE_FLOAT64);
@@ -920,7 +920,7 @@ int registry_get_uint32(const registry_path_t path, const uint32_t **buf)
     return _registry_get_buf(path, REGISTRY_TYPE_UINT32, (const void **)buf, NULL);
 }
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
 int registry_get_uint64(const registry_path_t path, const uint64_t **buf)
 {
     return _registry_get_buf(path, REGISTRY_TYPE_UINT64, (const void **)buf, NULL);
@@ -942,21 +942,21 @@ int registry_get_int32(const registry_path_t path, const int32_t **buf)
     return _registry_get_buf(path, REGISTRY_TYPE_INT32, (const void **)buf, NULL);
 }
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
 int registry_get_int64(const registry_path_t path, const int64_t **buf)
 {
     return _registry_get_buf(path, REGISTRY_TYPE_INT64, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
 int registry_get_float32(const registry_path_t path, const float **buf)
 {
     return _registry_get_buf(path, REGISTRY_TYPE_FLOAT32, (const void **)buf, NULL);
 }
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
 int registry_get_float64(const registry_path_t path, const double **buf)
 {
     return _registry_get_buf(path, REGISTRY_TYPE_FLOAT64, (const void **)buf, NULL);

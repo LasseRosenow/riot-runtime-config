@@ -149,7 +149,7 @@
 //                 break;
 //             }
 //
-// #if defined(CONFIG_REGISTRY_USE_INT64)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
 //             case REGISTRY_TYPE_INT64: {
 //                 int value;
 //                 registry_value_from_str(buf, REGISTRY_TYPE_INT64, &value, 0);
@@ -169,7 +169,7 @@
 //                 break;
 //             }
 //
-// #if defined(CONFIG_REGISTRY_USE_FLOAT32)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
 //             case REGISTRY_TYPE_FLOAT32: {
 //                 float value;
 //                 registry_value_from_str(buf, REGISTRY_TYPE_FLOAT32, &value, 0);
@@ -178,7 +178,7 @@
 //             }
 // #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 //
-// #if defined(CONFIG_REGISTRY_USE_FLOAT64)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
 //             case REGISTRY_TYPE_FLOAT64: {
 //                 float value;
 //                 registry_value_from_str(buf, REGISTRY_TYPE_FLOAT64, &value, 0);
@@ -232,7 +232,7 @@
 //                 case REGISTRY_TYPE_INT8:
 //                 case REGISTRY_TYPE_INT16:
 //                 case REGISTRY_TYPE_INT32:
-// #if defined(CONFIG_REGISTRY_USE_INT64)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
 //                 case REGISTRY_TYPE_INT64:
 // #endif /* CONFIG_REGISTRY_USE_INT64 */
 //                 {
@@ -254,7 +254,7 @@
 //                     break;
 //                 }
 //
-// #if defined(CONFIG_REGISTRY_USE_FLOAT32)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
 //                 case REGISTRY_TYPE_FLOAT32: {
 //                     double value;
 //                     lwm2m_data_decode_float(&data_array[i], &value);
@@ -263,7 +263,7 @@
 //                 }
 // #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 //
-// #if defined(CONFIG_REGISTRY_USE_FLOAT64)
+// #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
 //                 case REGISTRY_TYPE_FLOAT64: {
 //                     double value;
 //                     lwm2m_data_decode_float(&data_array[i], &value);

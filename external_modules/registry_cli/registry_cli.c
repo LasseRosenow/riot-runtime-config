@@ -29,7 +29,7 @@ static void _print_registry_value(const registry_value_t *value)
     case REGISTRY_TYPE_UINT8: printf("uint8: %d", *(uint8_t *)value->buf); break;
     case REGISTRY_TYPE_UINT16: printf("uint16: %d", *(uint16_t *)value->buf); break;
     case REGISTRY_TYPE_UINT32: printf("uint32: %d", *(uint32_t *)value->buf); break;
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64: printf("uint64: %lld", *(uint64_t *)value->buf); break;
 #endif // CONFIG_REGISTRY_USE_UINT64
 
@@ -37,15 +37,15 @@ static void _print_registry_value(const registry_value_t *value)
     case REGISTRY_TYPE_INT16: printf("int16: %d", *(int16_t *)value->buf); break;
     case REGISTRY_TYPE_INT32: printf("int32: %d", *(int32_t *)value->buf); break;
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64: printf("int64: %lld", *(int64_t *)value->buf); break;
 #endif // CONFIG_REGISTRY_USE_INT64
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32: printf("f32: %f", *(float *)value->buf); break;
 #endif // CONFIG_REGISTRY_USE_FLOAT32
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64: printf("f64: %f", *(double *)value->buf); break;
 #endif // CONFIG_REGISTRY_USE_FLOAT32
     }

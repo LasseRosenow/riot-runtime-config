@@ -11,7 +11,7 @@
 
 #include "registry.h"
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_UINT64)
 #include <fmt.h>
 #endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_UINT64 */
 
@@ -26,7 +26,7 @@ static int _get_string_len(const registry_value_t *value)
     case REGISTRY_TYPE_UINT8: return snprintf(NULL, 0, "%d", *(uint8_t *)value->buf);
     case REGISTRY_TYPE_UINT16: return snprintf(NULL, 0, "%d", *(uint16_t *)value->buf);
     case REGISTRY_TYPE_UINT32: return snprintf(NULL, 0, "%d", *(uint32_t *)value->buf);
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64: return snprintf(NULL, 0, "%lld", *(uint64_t *)value->buf);
 #endif // CONFIG_REGISTRY_USE_UINT64
 
@@ -34,15 +34,15 @@ static int _get_string_len(const registry_value_t *value)
     case REGISTRY_TYPE_INT16: return snprintf(NULL, 0, "%d", *(int16_t *)value->buf);
     case REGISTRY_TYPE_INT32: return snprintf(NULL, 0, "%d", *(int32_t *)value->buf);
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64: return snprintf(NULL, 0, "%lld", *(int64_t *)value->buf);
 #endif // CONFIG_REGISTRY_USE_INT64
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32: return snprintf(NULL, 0, "%f", *(float *)value->buf);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64: return snprintf(NULL, 0, "%f", *(double *)value->buf);
 #endif // CONFIG_REGISTRY_USE_FLOAT32
     }
@@ -57,22 +57,22 @@ int registry_convert_str_to_value(const char *src, void *dest, const size_t dest
 {
     assert(src != NULL);
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     int64_t val_i = 0;
 
 #else /* CONFIG_REGISTRY_USE_INT64 */
     int32_t val_i = 0;
 #endif
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     uint64_t val_u = 0;
 #else /* CONFIG_REGISTRY_USE_UINT64 */
     uint32_t val_u = 0;
 #endif
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     double val_f;
-#elif defined(CONFIG_REGISTRY_USE_FLOAT32)
+#elif IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     float val_f;
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 || CONFIG_REGISTRY_USE_FLOAT32 */
 
@@ -115,7 +115,7 @@ int registry_convert_str_to_value(const char *src, void *dest, const size_t dest
         }
         break;
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64:
         val_u = strtoull(src, &eptr, 0);
         if (*eptr != '\0') {
@@ -156,7 +156,7 @@ int registry_convert_str_to_value(const char *src, void *dest, const size_t dest
         }
         break;
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64:
         val_i = strtoull(src, &eptr, 0);
         if (*eptr != '\0') {
@@ -166,7 +166,7 @@ int registry_convert_str_to_value(const char *src, void *dest, const size_t dest
         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32:
         val_f = strtof(src, &eptr);
         if (*eptr != '\0') {
@@ -176,7 +176,7 @@ int registry_convert_str_to_value(const char *src, void *dest, const size_t dest
         break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64:
         val_f = strtod(src, &eptr);
         if (*eptr != '\0') {
@@ -228,16 +228,16 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
 {
     assert(src != NULL);
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     int64_t val_u64 = 0;
 #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     int64_t val_i64 = 0;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_FLOAT32) || \
-    defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32) || \
+    IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     size_t len;
 #endif /* CONFIG_REGISTRY_USE_INT64 || CONFIG_REGISTRY_USE_FLOAT32 || CONFIG_REGISTRY_USE_FLOAT64 */
 
@@ -272,7 +272,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         snprintf(dest, dest_len, " %" PRIu32, val_u);
         return dest;
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64:
         val_u64 = *(uint64_t *)src->buf;
         len = fmt_u64_dec(NULL, val_u64);
@@ -303,7 +303,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         snprintf(dest, dest_len, " %" PRId32, val_i);
         return dest;
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64:
         val_i64 = *(int64_t *)src->buf;
         len = fmt_s64_dec(NULL, val_i64);
@@ -315,7 +315,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         return dest;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32:
         sprintf(dest, " %f", *(float *)src->buf);
         len = strlen(dest);
@@ -325,7 +325,7 @@ char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
         return dest;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64:
         sprintf(dest, " %f", *(double *)src->buf);
         len = strlen(dest);

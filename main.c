@@ -114,13 +114,13 @@ registry_instance_t rgb_led_instance_4 = {
 };
 
 // Littlefs2
-#if defined(MODULE_LITTLEFS2)
+#if IS_USED(MODULE_LITTLEFS2)
 #include "fs/littlefs2_fs.h"
 #define FS_DRIVER littlefs2_file_system
 static littlefs2_desc_t fs_desc = {
     .lock = MUTEX_INIT,
 };
-#elif defined(MODULE_FATFS_VFS)
+#elif IS_USED(MODULE_FATFS_VFS)
 #include "fs/fatfs.h"
 #define FS_DRIVER fatfs_file_system
 static fatfs_desc_t fs_desc;
@@ -146,9 +146,9 @@ registry_store_instance_t vfs_instance_2 = {
 
 int main(void)
 {
-// #if defined(MODULE_LITTLEFS2)
-    fs_desc.dev = MTD_0;
-// #endif
+    if (IS_USED(MODULE_LITTLEFS2)) {
+        fs_desc.dev = MTD_0;
+    }
 
     /* init registry */
     registry_init();

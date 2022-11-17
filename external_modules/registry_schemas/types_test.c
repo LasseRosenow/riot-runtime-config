@@ -97,7 +97,7 @@ static void mapping(const int param_id, const registry_instance_t *instance, voi
         *val_len = sizeof(_instance->u32);
         break;
 
-#if defined(CONFIG_REGISTRY_USE_UINT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_SCHEMA_TYPES_TEST_U64:
         *val = &_instance->u64;
         *val_len = sizeof(_instance->u64);
@@ -119,21 +119,21 @@ static void mapping(const int param_id, const registry_instance_t *instance, voi
         *val_len = sizeof(_instance->i32);
         break;
 
-#if defined(CONFIG_REGISTRY_USE_INT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_SCHEMA_TYPES_TEST_I64:
         *val = &_instance->i64;
         *val_len = sizeof(_instance->i64);
         break;
 #endif /* CONFIG_REGISTRY_USE_INT64 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT32)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_SCHEMA_TYPES_TEST_F32:
         *val = &_instance->f32;
         *val_len = sizeof(_instance->f32);
         break;
 #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
-#if defined(CONFIG_REGISTRY_USE_FLOAT64)
+#if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_SCHEMA_TYPES_TEST_F64:
         *val = &_instance->f64;
         *val_len = sizeof(_instance->f64);
