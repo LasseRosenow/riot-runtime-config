@@ -22,7 +22,7 @@ RIOTBASE ?= $(CURDIR)/RIOT
 
 # Add also the shell, some shell commands
 USEMODULE += shell
-USEMODULE += shell_commands
+USEMODULE += shell_cmds_default
 USEMODULE += ps
 
 # Unit tests
