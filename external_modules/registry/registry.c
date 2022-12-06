@@ -206,7 +206,7 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
 }
 
 int registry_register_schema_instance(const registry_root_group_id_t root_group_id,
-                                      const int schema_id, const registry_instance_t *instance)
+                                      const registry_path_item_t schema_id, const registry_instance_t *instance)
 {
     assert(instance != NULL);
 
@@ -492,7 +492,7 @@ static void _registry_export_params(int (*export_func)(const registry_path_t pat
         registry_schema_item_t schema_item = schema_items[i];
 
         /* create new path including the current schema_item */
-        int _new_path_path[current_path.path_len + 1];
+        registry_path_item_t _new_path_path[current_path.path_len + 1];
         for (size_t j = 0; j < current_path.path_len; j++) {
             _new_path_path[j] = current_path.path[j];
         }
@@ -555,7 +555,7 @@ static int _registry_export_instance(int (*export_func)(const registry_path_t pa
         registry_schema_item_t *schema_item = _parameter_meta_lookup(path, schema);
 
         /* create a new path which does not include the last value, because _registry_export_params will add it inside */
-        int _new_path_path[path.path_len - 1];
+        registry_path_item_t _new_path_path[path.path_len - 1];
         for (size_t j = 0; j < path.path_len; j++) {
             _new_path_path[j] = path.path[j];
         }
@@ -638,7 +638,7 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
                 return -EINVAL;
             }
 
-            int instance_id = 0;
+            registry_path_item_t instance_id = 0;
 
             do {
                 instance_node = instance_node->next;

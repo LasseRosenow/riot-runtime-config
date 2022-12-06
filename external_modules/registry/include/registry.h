@@ -90,7 +90,7 @@ extern "C" {
 /**
  * @brief Maximum amount of characters per level in configurations names.
  */
-#define REGISTRY_MAX_DIR_NAME_LEN  10 /* a path is a i32 and i32 MAX has 10 digits. */
+#define REGISTRY_MAX_DIR_NAME_LEN  10 /* a path is an uint32_t and uint32_t MAX has 10 digits. */
 
 /**
  * @brief Maximum length of a configuration name.
@@ -275,16 +275,18 @@ typedef struct {
 extern registry_root_group_t registry_root_group_sys;
 extern registry_root_group_t registry_root_group_app;
 
+typedef uint32_t registry_path_item_t;
+
 typedef struct {
     registry_root_group_id_t *root_group_id;
-    int *schema_id;
-    int *instance_id;
-    int *path;
+    registry_path_item_t *schema_id;
+    registry_path_item_t *instance_id;
+    registry_path_item_t *path;
     size_t path_len;
 } registry_path_t;
 
-#define _REGISTRY_PATH_NUMARGS(...)  (sizeof((int[]){ __VA_ARGS__ }) / \
-                                      sizeof(int))
+#define _REGISTRY_PATH_NUMARGS(...)  (sizeof((registry_path_item_t[]){ __VA_ARGS__ }) / \
+                                      sizeof(registry_path_item_t))
 
 #define _REGISTRY_PATH_0() \
     (registry_path_t) { \
@@ -307,7 +309,7 @@ typedef struct {
 #define _REGISTRY_PATH_2(_root_group_id, _schema_id) \
     (registry_path_t) { \
         .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
-        .schema_id = (int[]) { _schema_id }, \
+        .schema_id = (registry_path_item_t[]) { _schema_id }, \
         .instance_id = NULL, \
         .path = NULL, \
         .path_len = 0, \
@@ -316,8 +318,8 @@ typedef struct {
 #define _REGISTRY_PATH_3(_root_group_id, _schema_id, _instance_id) \
     (registry_path_t) { \
         .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
-        .schema_id = (int[]) { _schema_id }, \
-        .instance_id = (int[]) { _instance_id }, \
+        .schema_id = (registry_path_item_t[]) { _schema_id }, \
+        .instance_id = (registry_path_item_t[]) { _instance_id }, \
         .path = NULL, \
         .path_len = 0, \
     }
@@ -325,9 +327,9 @@ typedef struct {
 #define _REGISTRY_PATH_4_AND_MORE(_root_group_id, _schema_id, _instance_id, ...) \
     (registry_path_t) { \
         .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
-        .schema_id = (int[]) { _schema_id }, \
-        .instance_id = (int[]) { _instance_id }, \
-        .path = (int[]) { __VA_ARGS__ }, \
+        .schema_id = (registry_path_item_t[]) { _schema_id }, \
+        .instance_id = (registry_path_item_t[]) { _instance_id }, \
+        .path = (registry_path_item_t[]) { __VA_ARGS__ }, \
         .path_len = _REGISTRY_PATH_NUMARGS(__VA_ARGS__), \
     }
 
@@ -389,7 +391,7 @@ typedef enum {
 } registry_schema_type_t;
 
 struct _registry_schema_item_t {
-    int id;                                     /**< Integer representing the path id of the schema item */
+    registry_path_item_t id;                    /**< Integer representing the path id of the schema item */
     char *name;                                 /**< String describing the schema item */
     char *description;                          /**< String describing the schema item with more details */
     registry_schema_type_t type;                /**< Type of the schema item (group or parameter) */
@@ -501,7 +503,7 @@ typedef struct {
  */
 typedef struct {
     clist_node_t node;              /**< Linked list node */
-    int id;                         /**< Integer representing the configuration group */
+    registry_path_item_t id;        /**< Integer representing the configuration group */
     char *name;                     /**< String describing the configuration group */
     char *description;              /**< String describing the configuration group with more details */
     registry_schema_item_t *items;  /**< Array representing all the configuration parameters that belong to this group */
@@ -516,7 +518,7 @@ typedef struct {
      * @param[in] val Pointer to buffer containing the new value
      * @param[in] val_len Pointer to length of the buffer to store the current value
      */
-    void (*mapping)(const int param_id, const registry_instance_t *instance, void **val,
+    void (*mapping)(const registry_path_item_t param_id, const registry_instance_t *instance, void **val,
                     size_t *val_len);
 } registry_schema_t;
 
@@ -564,7 +566,7 @@ void registry_register_store_dst(const registry_store_instance_t *dst);
  * @param[in] instance Pointer to instance structure.
  */
 int registry_register_schema_instance(const registry_root_group_id_t root_group_id,
-                                      const int schema_id,
+                                      const registry_path_item_t schema_id,
                                       const registry_instance_t *instance);
 
 /**

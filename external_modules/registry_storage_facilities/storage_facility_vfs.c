@@ -22,7 +22,7 @@ registry_store_t registry_store_vfs = {
     .save = save,
 };
 
-static void _string_path_append_int(char *dest, int number)
+static void _string_path_append_item(char *dest, registry_path_item_t number)
 {
     int size = snprintf(NULL, 0, "/%d", number);
 
@@ -33,7 +33,7 @@ static void _string_path_append_int(char *dest, int number)
     strcat(dest, buf);
 }
 
-static int _parse_string_path(char *path, int *buf, size_t *buf_len)
+static int _parse_string_path(char *path, registry_path_item_t *buf, size_t *buf_len)
 {
     size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -131,15 +131,15 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
     sprintf(string_path, "%s", mount->mount_point);
 
     if (path.root_group_id != NULL) {
-        _string_path_append_int(string_path, *path.root_group_id);
+        _string_path_append_item(string_path, *path.root_group_id);
     }
 
     if (path.schema_id != NULL) {
-        _string_path_append_int(string_path, *path.schema_id);
+        _string_path_append_item(string_path, *path.schema_id);
     }
 
     if (path.instance_id != NULL) {
-        _string_path_append_int(string_path, *path.instance_id);
+        _string_path_append_item(string_path, *path.instance_id);
     }
 
     /* read dirs */
@@ -214,11 +214,11 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
                                 vfs_fstat(fd, &_stat);
 
                                 /* try to convert string path to registry int path */
-                                size_t int_path_len = REGISTRY_MAX_DIR_DEPTH + 3;
-                                int int_path[int_path_len];
+                                size_t path_items_len = REGISTRY_MAX_DIR_DEPTH + 3;
+                                registry_path_item_t path_items[path_items_len];
                                 if (_parse_string_path(string_path + strlen(mount->mount_point),
-                                                       int_path,
-                                                       &int_path_len) < 0) {
+                                                       path_items,
+                                                       &path_items_len) < 0) {
                                     DEBUG(
                                         "[registry storage_facility_vfs] load: Invalid registry path\n");
                                 }
@@ -227,14 +227,14 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
                                     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
                                     // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
                                     registry_path_t path = _REGISTRY_PATH_0();
-                                    for (size_t i = 0; i < int_path_len; i++) {
+                                    for (size_t i = 0; i < path_items_len; i++) {
                                         switch (i) {
                                         case 0: path.root_group_id =
-                                            (registry_root_group_id_t *)&int_path[i];
+                                            (registry_root_group_id_t *)&path_items[i];
                                             break;
-                                        case 1: path.schema_id = &int_path[i]; break;
-                                        case 2: path.instance_id = &int_path[i]; break;
-                                        case 3: path.path = &int_path[i]; path.path_len++; break; // Add path.path to correct position in int_path array
+                                        case 1: path.schema_id = &path_items[i]; break;
+                                        case 2: path.instance_id = &path_items[i]; break;
+                                        case 3: path.path = &path_items[i]; path.path_len++; break; // Add path.path to correct position in path_items array
                                         default: path.path_len++; break;
                                         }
                                     }
@@ -324,21 +324,21 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
 
     sprintf(string_path, "%s", mount->mount_point);
 
-    _string_path_append_int(string_path, *path.root_group_id);
+    _string_path_append_item(string_path, *path.root_group_id);
     int res = vfs_mkdir(string_path, 0);
 
     if (res < 0 && res != -EEXIST) {
         DEBUG("[registry storage_facility_vfs] save: Can not make dir: %s\n", string_path);
     }
 
-    _string_path_append_int(string_path, *path.schema_id);
+    _string_path_append_item(string_path, *path.schema_id);
     res = vfs_mkdir(string_path, 0);
 
     if (res < 0 && res != -EEXIST) {
         DEBUG("[registry storage_facility_vfs] save: Can not make dir: %s\n", string_path);
     }
 
-    _string_path_append_int(string_path, *path.instance_id);
+    _string_path_append_item(string_path, *path.instance_id);
     res = vfs_mkdir(string_path, 0);
 
     if (res < 0 && res != -EEXIST) {
@@ -347,7 +347,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
 
     /* exclude the last element, as it will be the file name and not a folder */
     for (size_t i = 0; i < path.path_len - 1; i++) {
-        _string_path_append_int(string_path, path.path[i]);
+        _string_path_append_item(string_path, path.path[i]);
         res = vfs_mkdir(string_path, 0);
         if (res != 0 && res != -EEXIST) {
             DEBUG("[registry storage_facility_vfs] save: Can not create dir: %d\n", res);
@@ -355,7 +355,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
     }
 
     /* open file */
-    _string_path_append_int(string_path, path.path[path.path_len - 1]);
+    _string_path_append_item(string_path, path.path[path.path_len - 1]);
 
     int fd = vfs_open(string_path, O_CREAT | O_RDWR, 0);
 
