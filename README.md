@@ -107,7 +107,7 @@ Figure 01 - Runtime Configuration System architecture
 The diagram differentiates between 2 different kinds of Configuration Managers:
 
 - `Basic Configuration Managers`: These Configuration Managers are a simple representation of the default configuration structure of the RIOT registry. They only expose the parameters paths as is and do not map to any special structure.
-- `Advanced Configuration Managers`: These Configuration Managers have their own configuration structure (custom pre defined object models etc.) and can not automatically be mapped to from the RIOT Registry itself. To make them work, a custom mapping module needs to be implemented, which maps each configuration parameter from the registry to the correct format of the configuration manager.
+- `Advanced Configuration Managers`: These Configuration Managers have their own configuration structure (custom predefined object models etc.) and can not automatically be mapped to from the RIOT Registry itself. To make them work, a custom mapping module needs to be implemented, which maps each configuration parameter from the registry to the correct format of the configuration manager.
 
 # 3. The RIOT Registry
 
@@ -183,7 +183,7 @@ A conceptual example of a SF can be found in the [Appendix](#Appendix).
 
 ### 3.3.1. Registry Initialization
 
-As described in the flow in Figure 03, modules add their __Schema Instances (SI)__ to pre defined __Configuration Schemas (CS)__ or declare and register their own __CS__ for configuration groups in the RIOT Registry. __Storage facilities (SF)__ are registered as sources and/or destinations of configurations in the RIOT Registry.
+As described in the flow in Figure 03, modules add their __Schema Instances (SI)__ to predefined __Configuration Schemas (CS)__ or declare and register their own __CS__ for configuration groups in the RIOT Registry. __Storage facilities (SF)__ are registered as sources and/or destinations of configurations in the RIOT Registry.
 
 <center>
 
