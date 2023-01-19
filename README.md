@@ -57,12 +57,12 @@ and the following acronyms and definitions:
 
 ### Definitions
 
-- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which root configuration group, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is a regex example showing how the configuration path is structured. All path elements have to be integers:
- `root_group_id/schema_id/instance_id/(group_id/)*parameter_name`\
+- __Configuration Path__: A complete configuration path (CP) is a unique identifier of a configuration parameter. It is used to tell the registry, which configuration namespace, configuration schema, schema instance etc. are currently addressed. The registry needs this information, so that it knows where to look for the requested values etc. Below is a regex example showing how the configuration path is structured. All path elements have to be integers:
+ `namespace_id/schema_id/instance_id/(group_id/)*parameter_name`\
 In reality the amount of "group_ids" is limited to 8 and can be changed with a `define`, so the regex is a bit simplified.
 
-- __Root Configuration Group__: A root group, that splits configuration schemas in 2 categories: `SYS=0` and `APP=1`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
-The `APP` root configuration group must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
+- __Root Configuration Group__: A namespace, that splits configuration schemas in 2 categories: `SYS=0` and `APP=1`. Configuration schemas that are part of `SYS` are RIOT internal configuration schemas that are used to abstract common configuration structures within RIOT like `IEEE802154` etc.
+The `APP` configuration namespace must not be used by RIOT itself, but only by the application. This is to prevent application specific schemas from clashing with RIOT internal schemas, if RIOT gets updated.
 
 - __Configuration Schema__: A descriptor that acts as an interface between the RIOT Registry and a module that exposes configurations. It provides a common interface to `get` and `set` configurations of a given instance and provides Meta-Data for each configuration parameter `(type, name, description, ...)` as a tree structure. A CS can have multiple Schema Instances (SI).
 
@@ -204,7 +204,7 @@ configuration value (`registry_get_value`), *set* a configuration value
 
 Note these functions don't interact with the SF, so configuration changes are not reflected in the non-volatile storage devices unless `registry_save` is called (see [Load and save configurations](#load-and-save-configurations-fromto-storage))
 
-The following diagrams show the process of each function. It's assumed there are 2 CS registered in the RIOT Registry: a *cord* configuration schema with a `rd_ip_addr` configuration parameter that is inside the *sys* root group and a *config* configuration schema that is inside the *app* root group and has a `foo` configuration parameter.
+The following diagrams show the process of each function. It's assumed there are 2 CS registered in the RIOT Registry: a *cord* configuration schema with a `rd_ip_addr` configuration parameter that is inside the *sys* namespace and a *config* configuration schema that is inside the *app* namespace and has a `foo` configuration parameter.
 A registry path usually consists of integers, but the diagrams below uses strings instead just for demonstration purposes only.
 
 #### Behavioral flow of the `get` function
@@ -250,8 +250,8 @@ Figure 08 - Behavioral flow of the store_load and store_save calls
 
 ### Add custom schema to the registry
 
-The registry itself already comes with many configuration schemas that live within the `sys` root configuration group. But sometimes an application needs some custom runtime configurations that are too specific for the registry to abstract, so it is possible to register a custom CS within the `app` root configuration group.
-One MUST NOT register a custom schema within the `sys` root configuration group, as this is a reserved space and using it would almost certainly result in conflicts whenever RIOT gets updated.
+The registry itself already comes with many configuration schemas that live within the `sys` configuration namespace. But sometimes an application needs some custom runtime configurations that are too specific for the registry to abstract, so it is possible to register a custom CS within the `app` configuration namespace.
+One MUST NOT register a custom schema within the `sys` configuration namespace, as this is a reserved space and using it would almost certainly result in conflicts whenever RIOT gets updated.
 
 Below is a diagram that shows the behavioral flow of adding a custom schema:
 
@@ -291,8 +291,8 @@ void registry_register_store_dst(const registry_store_instance_t *dst);
 
 /* Schemas */
 void registry_schemas_init(void);
-int registry_register_schema(const registry_root_group_id_t root_group_id, const registry_schema_t *schema);
-int registry_register_schema_instance(const registry_root_group_id_t root_group_id, const int schema_id, const registry_instance_t *instance);
+int registry_register_schema(const registry_namespace_id_t namespace_id, const registry_schema_t *schema);
+int registry_register_schema_instance(const registry_namespace_id_t namespace_id, const int schema_id, const registry_instance_t *instance);
 
 
 /* Set convenience functions */
@@ -352,12 +352,12 @@ The export command also has the additional `-r <recursion depth>` flag. It defau
 
 ### 4.1.1. CoAP
 
-The CoAP integration uses the RIOT internal registry structure and does not come with its own schema structure. But CoAP only has `get` and `set`, but no `export` or `commit`. So the get and set command of the RIOT registry will just be mapped to the get and set of CoAP. For example: `GET /root_group_id/schema_id/...` or `SET /root_group_id/schema_id/... -> new_value`
+The CoAP integration uses the RIOT internal registry structure and does not come with its own schema structure. But CoAP only has `get` and `set`, but no `export` or `commit`. So the get and set command of the RIOT registry will just be mapped to the get and set of CoAP. For example: `GET /namespace_id/schema_id/...` or `SET /namespace_id/schema_id/... -> new_value`
 The `export` command can be realized through the `GET /.well-known/core` endpoint.
 The `commit` command is less trivial as there is no equivalent construct within CoAP itself. But here are some ideas:
 
-- Make a get request which path has a `commit` prefix like: `GET /commit/root_group_id/schema_id/...`
-- Have a dedicated `commit` endpoint, which can be set to a specific path, which then will be committed. For example: `SET /commit -> /root_group_id/schema_id/...`
+- Make a get request which path has a `commit` prefix like: `GET /commit/namespace_id/schema_id/...`
+- Have a dedicated `commit` endpoint, which can be set to a specific path, which then will be committed. For example: `SET /commit -> /namespace_id/schema_id/...`
 - Don't implement the `commit` concept at all, but rather commit every `set` message and allow to send values to whole groups / schemas with the complete group / schema or parts of it. For example in the CBOR or JSON format. This way it still is possible to change multiple values at once.
 
 ### 4.1.2. MQTT
@@ -365,12 +365,12 @@ The `commit` command is less trivial as there is no equivalent construct within 
 The MQTT integration uses the RIOT internal registry structure and does not come with its own schema structure. But is limited to only having events with or without data.\
 So there are no `commands` like `set`, `get`, `commit` or `export`. Values will be set, by sending a `publish` event containing the new value and subscribing to the same event will notify the subscriber whenever a new value is available. This way `set` and `get` can be realized.\
 The `export` command is not necessary because the MQTT broker gets an initial publish for each parameter when the device boots. So it knows about all existing topics and can expose them.\
-Because one MQTT broker can have multiple RIOT nodes, it is necessary to prefix the topic of each message with a device_id. For example: `device_id/root_group_id/schema_id/...`\
+Because one MQTT broker can have multiple RIOT nodes, it is necessary to prefix the topic of each message with a device_id. For example: `device_id/namespace_id/schema_id/...`\
 Less trivial is how `commit` can be exposed to MQTT. But here are some ideas:
 
 - Extend the topic of the path that needs to be committed with a `commit` prefix.
-For example: `commit/device_id/root_group_id/schema_id/...`
-- Have a dedicated `commit` topic, which can be set to a specific path, which then will be committed. For example: `Publish commit -> /device_id/root_group_id/schema_id/...`
+For example: `commit/device_id/namespace_id/schema_id/...`
+- Have a dedicated `commit` topic, which can be set to a specific path, which then will be committed. For example: `Publish commit -> /device_id/namespace_id/schema_id/...`
 - Don't implement the `commit` concept at all, but rather commit every `set` message and allow to send values to whole groups / schemas with the complete group / schema or parts of it. For example in the CBOR or JSON format. This way it still is possible to change multiple values at once.
 
 <center>

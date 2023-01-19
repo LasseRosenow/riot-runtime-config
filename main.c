@@ -31,7 +31,7 @@ static const shell_command_t shell_commands[] = {
 int rgb_led_instance_0_commit_cb(const registry_path_t path, const void *context)
 {
     (void)context;
-    printf("RGB instance commit_cb was executed: %d", *path.root_group_id);
+    printf("RGB instance commit_cb was executed: %d", *path.namespace_id);
     if (path.schema_id) {
         printf("/%d", *path.schema_id);
     }

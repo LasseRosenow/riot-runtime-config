@@ -51,13 +51,13 @@ static void _print_registry_value(const registry_value_t *value)
     }
 }
 
-static registry_root_group_t *_root_group_lookup(const registry_root_group_id_t root_group_id)
+static registry_namespace_t *_namespace_lookup(const registry_namespace_id_t namespace_id)
 {
-    switch (root_group_id) {
+    switch (namespace_id) {
     case REGISTRY_ROOT_GROUP_SYS:
-        return &registry_root_group_sys;
+        return &registry_namespace_sys;
     case REGISTRY_ROOT_GROUP_APP:
-        return &registry_root_group_app;
+        return &registry_namespace_app;
     }
 
     return NULL;
@@ -101,7 +101,7 @@ static int _registry_path_from_string_path(const char *string_path, registry_pat
     else {
         for (size_t i = 0; i < *path_items_buf_len; i++) {
             switch (i) {
-            case 0: registry_path->root_group_id = (registry_root_group_id_t *)&path_items_buf[i];
+            case 0: registry_path->namespace_id = (registry_namespace_id_t *)&path_items_buf[i];
                 break;
             case 1: registry_path->schema_id = &path_items_buf[i]; break;
             case 2: registry_path->instance_id = &path_items_buf[i]; break;
@@ -121,11 +121,11 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
     (void)value;
     (void)context;
 
-    registry_root_group_t *root_group = _root_group_lookup(*path.root_group_id);
+    registry_namespace_t *namespace = _namespace_lookup(*path.namespace_id);
 
     size_t path_len = path.path_len;
 
-    if (path.root_group_id != NULL) {
+    if (path.namespace_id != NULL) {
         path_len++;
     }
 
@@ -143,7 +143,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
         if (instance == NULL) {
             if (schema == NULL) {
                 /* Root Group */
-                printf("%d %s\n", *path.root_group_id, root_group->name);
+                printf("%d %s\n", *path.namespace_id, namespace->name);
             }
             else {
                 /* Schema */
@@ -168,7 +168,7 @@ int registry_cli_cmd(int argc, char **argv)
     size_t path_items_buf_len = REGISTRY_MAX_DIR_DEPTH + 3;
     registry_path_item_t path_items_buf[path_items_buf_len];
     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
-    // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+    // but somehow its not initializing namespace with NULL?? (makes no sense:( ... )))
     registry_path_t path = _REGISTRY_PATH_0();
 
     if (argc == 1) {

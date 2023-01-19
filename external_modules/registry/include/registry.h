@@ -263,22 +263,22 @@ typedef enum {
 typedef enum {
     REGISTRY_ROOT_GROUP_SYS,
     REGISTRY_ROOT_GROUP_APP,
-} registry_root_group_id_t;
+} registry_namespace_id_t;
 
 typedef struct {
-    registry_root_group_id_t id;    /**< Integer representing the root configuration group */
-    char *name;                     /**< String describing the root configuration group */
-    char *description;              /**< String describing the root configuration group with more details */
+    registry_namespace_id_t id;    /**< Integer representing the configuration namespace */
+    char *name;                     /**< String describing the configuration namespace */
+    char *description;              /**< String describing the configuration namespace with more details */
     clist_node_t schemas;           /**< Linked list of schemas @ref registry_schema_t */
-} registry_root_group_t;
+} registry_namespace_t;
 
-extern registry_root_group_t registry_root_group_sys;
-extern registry_root_group_t registry_root_group_app;
+extern registry_namespace_t registry_namespace_sys;
+extern registry_namespace_t registry_namespace_app;
 
 typedef uint32_t registry_path_item_t;
 
 typedef struct {
-    registry_root_group_id_t *root_group_id;
+    registry_namespace_id_t *namespace_id;
     registry_path_item_t *schema_id;
     registry_path_item_t *instance_id;
     registry_path_item_t *path;
@@ -290,43 +290,43 @@ typedef struct {
 
 #define _REGISTRY_PATH_0() \
     (registry_path_t) { \
-        .root_group_id = NULL, \
+        .namespace_id = NULL, \
         .schema_id = NULL, \
         .instance_id = NULL, \
         .path = NULL, \
         .path_len = 0, \
     }
 
-#define _REGISTRY_PATH_1(_root_group_id) \
+#define _REGISTRY_PATH_1(_namespace_id) \
     (registry_path_t) { \
-        .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
+        .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
         .schema_id = NULL, \
         .instance_id = NULL, \
         .path = NULL, \
         .path_len = 0, \
     }
 
-#define _REGISTRY_PATH_2(_root_group_id, _schema_id) \
+#define _REGISTRY_PATH_2(_namespace_id, _schema_id) \
     (registry_path_t) { \
-        .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
+        .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
         .schema_id = (registry_path_item_t[]) { _schema_id }, \
         .instance_id = NULL, \
         .path = NULL, \
         .path_len = 0, \
     }
 
-#define _REGISTRY_PATH_3(_root_group_id, _schema_id, _instance_id) \
+#define _REGISTRY_PATH_3(_namespace_id, _schema_id, _instance_id) \
     (registry_path_t) { \
-        .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
+        .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
         .schema_id = (registry_path_item_t[]) { _schema_id }, \
         .instance_id = (registry_path_item_t[]) { _instance_id }, \
         .path = NULL, \
         .path_len = 0, \
     }
 
-#define _REGISTRY_PATH_4_AND_MORE(_root_group_id, _schema_id, _instance_id, ...) \
+#define _REGISTRY_PATH_4_AND_MORE(_namespace_id, _schema_id, _instance_id, ...) \
     (registry_path_t) { \
-        .root_group_id = (registry_root_group_id_t[]) { _root_group_id }, \
+        .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
         .schema_id = (registry_path_item_t[]) { _schema_id }, \
         .instance_id = (registry_path_item_t[]) { _instance_id }, \
         .path = (registry_path_item_t[]) { __VA_ARGS__ }, \
@@ -530,10 +530,10 @@ void registry_init(void);
 /**
  * @brief Registers a new sys schema for a configuration group.
  *
- * @param[in] root_group_id ID of the root_group.
+ * @param[in] namespace_id ID of the namespace.
  * @param[in] schema Pointer to the schema structure.
  */
-int registry_register_schema(const registry_root_group_id_t root_group_id,
+int registry_register_schema(const registry_namespace_id_t namespace_id,
                              const registry_schema_t *schema);
 
 /**
@@ -561,11 +561,11 @@ void registry_register_store_dst(const registry_store_instance_t *dst);
 /**
  * @brief Adds a new instance of a schema.
  *
- * @param[in] root_group_id ID of the root_group.
+ * @param[in] namespace_id ID of the namespace.
  * @param[in] schema_id ID of the schema.
  * @param[in] instance Pointer to instance structure.
  */
-int registry_register_schema_instance(const registry_root_group_id_t root_group_id,
+int registry_register_schema_instance(const registry_namespace_id_t namespace_id,
                                       const registry_path_item_t schema_id,
                                       const registry_instance_t *instance);
 

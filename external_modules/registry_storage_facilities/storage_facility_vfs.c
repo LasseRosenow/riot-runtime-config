@@ -130,8 +130,8 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
 
     sprintf(string_path, "%s", mount->mount_point);
 
-    if (path.root_group_id != NULL) {
-        _string_path_append_item(string_path, *path.root_group_id);
+    if (path.namespace_id != NULL) {
+        _string_path_append_item(string_path, *path.namespace_id);
     }
 
     if (path.schema_id != NULL) {
@@ -225,12 +225,12 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
                                 else {
                                     /* convert int path to registry_path_t */
                                     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
-                                    // but somehow its not initializing root group with NULL?? (makes no sense:( ... )))
+                                    // but somehow its not initializing namespace with NULL?? (makes no sense:( ... )))
                                     registry_path_t path = _REGISTRY_PATH_0();
                                     for (size_t i = 0; i < path_items_len; i++) {
                                         switch (i) {
-                                        case 0: path.root_group_id =
-                                            (registry_root_group_id_t *)&path_items[i];
+                                        case 0: path.namespace_id =
+                                            (registry_namespace_id_t *)&path_items[i];
                                             break;
                                         case 1: path.schema_id = &path_items[i]; break;
                                         case 2: path.instance_id = &path_items[i]; break;
@@ -324,7 +324,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
 
     sprintf(string_path, "%s", mount->mount_point);
 
-    _string_path_append_item(string_path, *path.root_group_id);
+    _string_path_append_item(string_path, *path.namespace_id);
     int res = vfs_mkdir(string_path, 0);
 
     if (res < 0 && res != -EEXIST) {

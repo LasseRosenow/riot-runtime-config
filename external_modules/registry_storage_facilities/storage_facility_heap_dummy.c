@@ -20,7 +20,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
    `dummy_store_storage_t` struct).
  */
 typedef struct {
-    registry_root_group_id_t root_group_id;
+    registry_namespace_id_t namespace_id;
     registry_path_item_t schema_id;
     registry_path_item_t instance_id;
     registry_path_item_t path[REGISTRY_MAX_DIR_DEPTH];
@@ -52,7 +52,7 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
     for (size_t i = 0; i < DUMMY_STORE_CAPACITY; i++) {
         if (dummy_store[i].path_len > 0) {
             new_path = (registry_path_t) {
-                .root_group_id = &dummy_store[i].root_group_id,
+                .namespace_id = &dummy_store[i].namespace_id,
                 .schema_id = &dummy_store[i].schema_id,
                 .instance_id = &dummy_store[i].instance_id,
                 .path = dummy_store[i].path,
@@ -114,7 +114,7 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
         return -1;
     }
 
-    dummy_store[free_slot].root_group_id = *path.root_group_id;
+    dummy_store[free_slot].namespace_id = *path.namespace_id;
     dummy_store[free_slot].schema_id = *path.schema_id;
     dummy_store[free_slot].instance_id = *path.instance_id;
     memcpy(dummy_store[free_slot].path, path.path, path.path_len * sizeof(int));
