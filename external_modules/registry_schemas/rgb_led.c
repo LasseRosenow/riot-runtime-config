@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2023 HAW Hamburg
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @defgroup    sys_registry_cli RIOT Registry Schemas: RGB_LED
+ * @ingroup     sys
+ * @brief       RIOT Registry RGB_LED Schema representing the basic structure of an RGB LED
+ * @{
+ *
+ * @file
+ *
+ * @author      Lasse Rosenow <lasse.rosenow@haw-hamburg.de>
+ */
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -52,3 +71,5 @@ static void mapping(const registry_path_item_t param_id, const registry_instance
         break;
     }
 }
+
+/** @} */

@@ -30,9 +30,6 @@ USEMODULE += embunit
 
 # File systems
 USEMODULE += littlefs2
-# USEMODULE += spiffs
-# USEMODULE += fatfs_vfs
-# USEMODULE += fatfs_vfs_format
 USEMODULE += mtd
 USEMODULE += vfs
 
@@ -57,13 +54,7 @@ USEMODULE += registry_schemas
 USEMODULE += registry_storage_facilities
 USEMODULE += registry_cli
 USEMODULE += registry_tests
-#USEMODULE += registry_coap
-#USEMODULE += lwm2m_objects
-#USEMODULE += lwm2m_objects_abstract
 EXTERNAL_MODULE_DIRS += external_modules
-
-# Enable lwM2M objects
-CFLAGS += -DCONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420=1
 
 
 
@@ -74,21 +65,6 @@ CFLAGS += -DCONFIG_LWM2M_OBJECTS_ENABLE_OBJECT_3420=1
 # USEMODULE += ws281x_esp32
 # CFLAGS += '-DWS281X_PARAM_PIN=GPIO_PIN(0, 5)'
 # CFLAGS += '-DWS281X_PARAM_NUMOF=1'
-
-
-
-
-# LwM2M config
-CFLAGS += -DCONFIG_LWM2M_WITH_LOGS=1
-# Specific the server URI  address (NOTE: Domain names not supported yet)
-ifndef CONFIG_LWM2M_SERVER_URI
-  CFLAGS += -DCONFIG_LWM2M_SERVER_URI='"coap://[fe80::845c:97ff:feec:c1c6]:5683"'
-endif
-ifndef CONFIG_LWM2M_DEVICE_NAME
-  CFLAGS += -DCONFIG_LWM2M_DEVICE_NAME='"riot-device"'
-endif
-
-
 
 
 

@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2023 HAW Hamburg
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @defgroup    sys_registry RIOT Registry
+ * @ingroup     sys
+ * @brief       RIOT Registry module for handling runtime configurations
+ * @{
+ *
+ * @file
+ *
+ * @author      Leandro Lanzieri <leandro.lanzieri@haw-hamburg.de>
+ * @author      Lasse Rosenow <lasse.rosenow@haw-hamburg.de>
+ */
+
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
@@ -10,6 +30,7 @@
 #include <kernel_defines.h>
 
 #include "registry.h"
+#include "registry_conversion.h"
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64) || defined(CONFIG_REGISTRY_USE_UINT64)
 #include <fmt.h>

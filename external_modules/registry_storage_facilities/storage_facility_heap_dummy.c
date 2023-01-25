@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2023 HAW Hamburg
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @defgroup    sys_registry_cli RIOT Registry Storage Facilities: Heap Dummy
+ * @ingroup     sys
+ * @brief       RIOT Registry Heap Dummy Storage Facility, only uses the heap for testing.
+ * @{
+ *
+ * @file
+ *
+ * @author      Lasse Rosenow <lasse.rosenow@haw-hamburg.de>
+ */
+
 #include "registry_storage_facilities.h"
 
 #include <string.h>
@@ -124,3 +143,5 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
     dummy_store[free_slot].buf_len = value.buf_len;
     return 0;
 }
+
+/** @} */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 HAW Hamburg
+ * Copyright (C) 2023 HAW Hamburg
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -10,63 +10,16 @@
  * @defgroup    sys_registry RIOT Registry
  * @ingroup     sys
  * @brief       RIOT Registry module for handling runtime configurations
- *
- * ## About
- *
- * The RIOT Registry is a module for interacting with persistent key-value
- * configurations. It forms part of the Runtime Configuration System for RIOT
- * nodes.
- *
- * ## Architecture
- *
- * The Registry interacts with other RIOT modules via
- * @ref registry_schema_t "Registry Schemas", and with non-volatile devices
- * via @ref sys_registry_store "Storage Facilities". This way the functionality
- * of the RIOT Registry is independent of the functionality of the module and
- * storage devices.
- *
- * ![RIOT Registry architecture](riot-registry-architecture.svg)
- *
- * ### Registry Schemas
- *
- * @ref registry_schema_t "Registry Schemas" (RS) represent Configuration
- * Groups in the RIOT Registry. A RIOT module is required to implement and
- * register a RS in order to expose its configurations in the Registry.
- *
- * A RS is defined by a @ref registry_schema_t::name "name" and a series of
- * schemas for interacting with the configuration parametes of the
- * configuration group. The schemas are:
- *
- * - @ref registry_schema_t::get "get"
- * - @ref registry_schema_t::set "set"
- * - @ref registry_schema_t::commit "commit"
- *
- * It is responsibility of the module to implement these schemas and perform
- * all necessary checks before applying values to the configuration parameters.
- *
- * ### Storage Facilities
- *
- * @ref sys_registry_store "Storage Facilities" (SF) implement the
- * @ref registry_store_t_t "storage interface" to allow the RIOT Registry to
- * load, search and store configuration parameters.
- *
- * ## RIOT Registry usage flow
- * - 1 The RIOT registry is initialized with @ref registry_init().
- * - 2 Modules declare and register RHs for configuration groups by calling
- *     @ref registry_register_schema().
- * - 3 SFs are registered as sources and/or destinations of configurations by
- *     calling registry_<storage-name>_src() and registry_<storage-name>_dst().
- *
  * @{
+ *
  * @file
  *
  * @author      Leandro Lanzieri <leandro.lanzieri@haw-hamburg.de>
- *
- * @}
+ * @author      Lasse Rosenow <lasse.rosenow@haw-hamburg.de>
  */
 
-#ifndef REGISTRY_REGISTRY_H
-#define REGISTRY_REGISTRY_H
+#ifndef REGISTRY_H
+#define REGISTRY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -645,73 +598,6 @@ int registry_get_float64(const registry_path_t path, const double **buf);
 int registry_commit(const registry_path_t path);
 
 /**
- * @brief Convenience function to parse a configuration parameter value from
- * a string. The type of the parameter must be known and must not be `bytes`.
- * To parse the string to bytes @ref registry_bytes_from_str() function must be
- * used.
- *
- * @param[in] src Pointer of the input value
- * @param[out] dest Pointer to the output buffer
- * @param[in] dest_len Length of @p dest
- * @param[in] dest_type Type of the output value
- * @return 0 on success, non-zero on failure
- */
-int registry_convert_str_to_value(const char *src, void *dest, const size_t dest_len,
-                                  const registry_type_t dest_type);
-
-/**
- * @brief Convenience function to parse a configuration parameter value from
- * another value. The type of the parameter must be known.
- *
- * @param[in] src Pointer of the input value
- * @param[out] dest Pointer to the output buffer
- * @param[in] dest_len Length of @p dest
- * @param[in] dest_type Type of the output value
- * @return 0 on success, non-zero on failure
- */
-int registry_convert_value_to_value(const registry_value_t *src, void *dest,
-                                    const size_t dest_len, const registry_type_t dest_type);
-
-/**
- * @brief Convenience function to parse a configuration parameter value of
- * `bytes` type from a string.
- *
- * @param[in] src Pointer of the string containing the value
- * @param[out] dest Pointer to store the parsed value
- * @param[in out] len Length of the output buffer
- * @return 0 on success, non-zero on failure
- */
-int registry_convert_str_to_bytes(const char *src, void *dest, size_t *len);
-
-/**
- * @brief Convenience function to transform a configuration parameter value into
- * a string, when the parameter is not of `bytes` type, in this case
- * @ref registry_str_from_bytes() should be used. This is used for example to
- * implement the `get` or `export` functions.
- *
- * @param[in] src Pointer to the value to be converted
- * @param[out] dest Buffer to store the output string
- * @param[in] dest_len Length of @p buf
- * @return Pointer to the output string
- */
-char *registry_convert_value_to_str(const registry_value_t *src, char *dest,
-                                    const size_t dest_len);
-
-/**
- * @brief Convenience function to transform a configuration parameter value of
- * `bytes` type into a string. This is used for example to implement the `get`
- * or `export` schemas.
- *
- * @param[in] src Pointer to the value to be converted
- * @param[in] src_len Length of @p vp
- * @param[out] dest Buffer to store the output string
- * @param[in out] dest_len Length of @p buf
- * @return Pointer to the output string
- */
-char *registry_convert_bytes_to_str(const void *src, const size_t src_len, char *dest,
-                                    size_t *dest_len);
-
-/**
  * @brief Load all configuration parameters that are included in the path from the registered storage
  * facility.
  *
@@ -753,4 +639,5 @@ int registry_export(int (*export_func)(const registry_path_t path,
 }
 #endif
 
-#endif /* REGISTRY_REGISTRY_H */
+/** @} */
+#endif /* REGISTRY_H */

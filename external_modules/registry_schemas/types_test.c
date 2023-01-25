@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2023 HAW Hamburg
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @defgroup    sys_registry_cli RIOT Registry Schemas: Types Test
+ * @ingroup     sys
+ * @brief       RIOT Registry Types Test Schema, used for testing all the types of the RIOT Registry
+ * @{
+ *
+ * @file
+ *
+ * @author      Lasse Rosenow <lasse.rosenow@haw-hamburg.de>
+ */
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -141,3 +160,5 @@ static void mapping(const registry_path_item_t param_id, const registry_instance
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
     }
 }
+
+/** @} */
