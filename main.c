@@ -146,29 +146,36 @@ registry_store_instance_t vfs_instance_2 = {
 
 int main(void)
 {
+    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
+
     if (IS_USED(MODULE_LITTLEFS2)) {
         fs_desc.dev = MTD_0;
     }
 
     /* init registry */
     registry_init();
+
+    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
+
     registry_schemas_init();
+
+    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     /* register store source and destination */
     registry_register_store_src(&vfs_instance_1);
     registry_register_store_dst(&vfs_instance_2);
 
+    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
+
     /* add schema instances */
     registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
                                       &rgb_led_instance_0);
-    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
-                                      &rgb_led_instance_1);
-    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
-                                      &rgb_led_instance_2);
+    // registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+    //                                   &rgb_led_instance_1);
+    // registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+    //                                   &rgb_led_instance_2);
 
-    /* for the thread running the shell */
-    // registry_coap_cli_init();
-    // registry_lwm2m_cli_init();
+    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     // registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
 
