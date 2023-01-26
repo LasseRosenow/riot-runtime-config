@@ -20,9 +20,7 @@
 static msg_t _shell_queue[SHELL_QUEUE_SIZE];
 
 static const shell_command_t shell_commands[] = {
-    //{ "registry_coap", "Registry CoAP cli", registry_coap_cli_cmd },
     { "registry", "Registry cli", registry_cli_cmd },
-    // { "registry_lwm2m", "Registry LwM2M cli", registry_lwm2m_cli_cmd },
     { NULL, NULL, NULL }
 };
 
@@ -144,52 +142,29 @@ registry_store_instance_t vfs_instance_2 = {
     .data = &_vfs_mount,
 };
 
-int main(void)
+int demo_app(void)
 {
-    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
-    if (IS_USED(MODULE_LITTLEFS2)) {
-        fs_desc.dev = MTD_0;
-    }
-
     /* init registry */
     registry_init();
 
-    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
+    /* init schemas */
     registry_schemas_init();
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_0);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_1);
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
+                                      &rgb_led_instance_2);
 
-    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
-    /* register store source and destination */
+    /* init stores */
+    if (IS_USED(MODULE_LITTLEFS2)) {
+        fs_desc.dev = MTD_0;
+    }
     registry_register_store_src(&vfs_instance_1);
     registry_register_store_dst(&vfs_instance_2);
 
-    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
-    /* add schema instances */
-    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
-                                      &rgb_led_instance_0);
-    // registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
-    //                                   &rgb_led_instance_1);
-    // registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
-    //                                   &rgb_led_instance_2);
-
-    printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
-    // registry_get_bool(REGISTRY_PATH_SYS(REGISTRY_SCHEMA_RGB_LED, 0, REGISTRY_SCHEMA_RGB_LED_BLUE));
-
-    // registry_save();
-    // vfs_format(&_vfs_mount);
-    // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
+    /* load old store data into registry */
     registry_load(_REGISTRY_PATH_0());
-
-    // printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
-
-    /* test registry */
-    registry_tests_run();
-
 
     /* DEMO START */
     // int retval;
@@ -215,9 +190,22 @@ int main(void)
     // ws281x_write(&dev);
     // DEMO END
 
+    /* Init CLI */
     msg_init_queue(_shell_queue, SHELL_QUEUE_SIZE);
     char line_buf[SHELL_DEFAULT_BUFSIZE];
 
     shell_run(shell_commands, line_buf, SHELL_DEFAULT_BUFSIZE);
+    return 0;
+}
+
+int main(void)
+{
+    /* test registry */
+    // registry_api_tests_run();
+    registry_stack_tests_run();
+
+    /* run demo app */
+    // demo_app();
+
     return 0;
 }

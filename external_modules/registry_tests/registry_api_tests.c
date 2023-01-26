@@ -33,7 +33,7 @@
 #define FLOAT_MAX_CHAR_COUNT ((FLT_MAX_10_EXP + 1) + 1 + 1 + 6)     // (FLT_MAX_10_EXP + 1) + sign + dot + 6 decimal places
 #define DOUBLE_MAX_CHAR_COUNT ((DBL_MAX_10_EXP + 1) + 1 + 1 + 6)    // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
 
-int test_instance_0_commit_cb(const registry_path_t path, const void *context)
+static int test_instance_0_commit_cb(const registry_path_t path, const void *context)
 {
     (void)context;
     printf("Test instance commit_cb was executed: %d", *path.namespace_id);
@@ -47,7 +47,7 @@ int test_instance_0_commit_cb(const registry_path_t path, const void *context)
     return 0;
 }
 
-registry_schema_types_test_t test_instance_1_data = {
+static registry_schema_types_test_t test_instance_1_data = {
     .string = "hallo",
     .boolean = true,
     .u8 = 9,
@@ -70,7 +70,7 @@ registry_schema_types_test_t test_instance_1_data = {
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 };
 
-registry_instance_t test_instance_1 = {
+static registry_instance_t test_instance_1 = {
     .name = "test-1",
     .data = &test_instance_1_data,
     .commit_cb = &test_instance_0_commit_cb,
@@ -379,7 +379,7 @@ static void tests_registry_all_max_values(void)
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 }
 
-Test *tests_registry(void)
+static Test *tests_registry(void)
 {
     (void)tests_registry_register_schema;
     (void)tests_registry_all_min_values;
@@ -396,7 +396,7 @@ Test *tests_registry(void)
     return (Test *)&registry_tests;
 }
 
-int registry_tests_run(void)
+int registry_api_tests_run(void)
 {
     TESTS_START();
     TESTS_RUN(tests_registry());
