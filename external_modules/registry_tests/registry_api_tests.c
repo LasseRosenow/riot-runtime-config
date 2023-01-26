@@ -92,7 +92,7 @@ static void test_registry_teardown(void)
 
 static void tests_registry_register_schema(void)
 {
-    // test if schema_types_test got registered
+    /* test if schema_types_test got registered */
     clist_node_t *test_node = registry_schema_types_test.instances.next->next;
     registry_schema_types_test_t *test_instance = container_of(test_node,
                                                                registry_schema_types_test_t, node);

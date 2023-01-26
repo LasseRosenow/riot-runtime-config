@@ -49,7 +49,7 @@ static int _get_string_len(const registry_value_t *value)
     case REGISTRY_TYPE_UINT32: return snprintf(NULL, 0, "%d", *(uint32_t *)value->buf);
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64: return snprintf(NULL, 0, "%lld", *(uint64_t *)value->buf);
-#endif // CONFIG_REGISTRY_USE_UINT64
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
 
     case REGISTRY_TYPE_INT8: return snprintf(NULL, 0, "%d", *(int8_t *)value->buf);
     case REGISTRY_TYPE_INT16: return snprintf(NULL, 0, "%d", *(int16_t *)value->buf);
@@ -57,15 +57,15 @@ static int _get_string_len(const registry_value_t *value)
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64: return snprintf(NULL, 0, "%lld", *(int64_t *)value->buf);
-#endif // CONFIG_REGISTRY_USE_INT64
+#endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32: return snprintf(NULL, 0, "%f", *(float *)value->buf);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64: return snprintf(NULL, 0, "%f", *(double *)value->buf);
-#endif // CONFIG_REGISTRY_USE_FLOAT32
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
     }
 
     return 0;

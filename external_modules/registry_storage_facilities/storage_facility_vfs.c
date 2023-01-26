@@ -100,7 +100,6 @@ static int _format(vfs_mount_t *mount)
 
 static int _mount(vfs_mount_t *mount)
 {
-    //printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
     int res = vfs_mount(mount);
 
     if (res < 0) {
@@ -115,7 +114,6 @@ static int _mount(vfs_mount_t *mount)
             return -1;
         }
     }
-    //printf("PS - %s: %d\n", __FILE__, __LINE__); ps();
 
     return 0;
 }

@@ -94,7 +94,7 @@ static void _debug_print_value(const registry_value_t *value)
         case REGISTRY_TYPE_UINT32: DEBUG("uint32: %d", *(uint32_t *)value->buf); break;
     #if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
         case REGISTRY_TYPE_UINT64: DEBUG("uint64: %lld", *(uint64_t *)value->buf); break;
-    #endif // CONFIG_REGISTRY_USE_UINT64
+    #endif /* CONFIG_REGISTRY_USE_UINT64 */
 
         case REGISTRY_TYPE_INT8: DEBUG("int8: %d", *(int8_t *)value->buf); break;
         case REGISTRY_TYPE_INT16: DEBUG("int16: %d", *(int16_t *)value->buf); break;
@@ -102,15 +102,15 @@ static void _debug_print_value(const registry_value_t *value)
 
     #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
         case REGISTRY_TYPE_INT64: DEBUG("int64: %lld", *(int64_t *)value->buf); break;
-    #endif // CONFIG_REGISTRY_USE_INT64
+    #endif /* CONFIG_REGISTRY_USE_INT64 */
 
     #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
         case REGISTRY_TYPE_FLOAT32: DEBUG("f32: %f", *(float *)value->buf); break;
-    #endif // CONFIG_REGISTRY_USE_FLOAT32
+    #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
     #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
         case REGISTRY_TYPE_FLOAT64: DEBUG("f64: %f", *(double *)value->buf); break;
-    #endif // CONFIG_REGISTRY_USE_FLOAT32
+    #endif /* CONFIG_REGISTRY_USE_FLOAT32 */
         }
     }
 }
@@ -211,11 +211,11 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
             if (schema_item->id == path.path[path_index]) {
                 if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER &&
                     path_index == path.path_len - 1) {
-                    // if this is the last path segment and it is a parameter => return the parameter
+                    /* if this is the last path segment and it is a parameter => return the parameter */
                     return schema_item;
                 }
                 else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
-                    // if this is not the last path segment and its a group => update schemas and schemas_len values
+                    /* if this is not the last path segment and its a group => update schemas and schemas_len values */
                     schema_items = schema_item->value.group.items;
                     schema_items_len = schema_items->value.group.items_len;
                 }
@@ -227,7 +227,8 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
 }
 
 int registry_register_schema_instance(const registry_namespace_id_t namespace_id,
-                                      const registry_path_item_t schema_id, const registry_instance_t *instance)
+                                      const registry_path_item_t schema_id,
+                                      const registry_instance_t *instance)
 {
     assert(instance != NULL);
 
@@ -695,12 +696,12 @@ static int _registry_export_schema(int (*export_func)(const registry_path_t path
 }
 
 static int _registry_export_namespace(int (*export_func)(const registry_path_t path,
-                                                          const registry_schema_t *schema,
-                                                          const registry_instance_t *instance,
-                                                          const registry_schema_item_t *meta,
-                                                          const registry_value_t *value,
-                                                          const void *context),
-                                       const registry_path_t path, const int recursion_depth, const void *context)
+                                                         const registry_schema_t *schema,
+                                                         const registry_instance_t *instance,
+                                                         const registry_schema_item_t *meta,
+                                                         const registry_value_t *value,
+                                                         const void *context),
+                                      const registry_path_t path, const int recursion_depth, const void *context)
 {
     int rc = 0;
 
@@ -794,15 +795,15 @@ int registry_export(int (*export_func)(const registry_path_t path,
 
             /* export sys namespace */
             int _rc = _registry_export_namespace(export_func,
-                                                  REGISTRY_PATH_SYS(), new_recursion_depth,
-                                                  context);
+                                                 REGISTRY_PATH_SYS(), new_recursion_depth,
+                                                 context);
             if (!_rc) {
                 rc = _rc;
             }
 
             /* export app namespace */
             _rc = _registry_export_namespace(export_func,
-                                              REGISTRY_PATH_APP(), new_recursion_depth, context);
+                                             REGISTRY_PATH_APP(), new_recursion_depth, context);
             if (!_rc) {
                 rc = _rc;
             }

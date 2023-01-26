@@ -31,7 +31,7 @@ static void _print_registry_value(const registry_value_t *value)
     case REGISTRY_TYPE_UINT32: printf("uint32: %d", *(uint32_t *)value->buf); break;
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_UINT64)
     case REGISTRY_TYPE_UINT64: printf("uint64: %lld", *(uint64_t *)value->buf); break;
-#endif // CONFIG_REGISTRY_USE_UINT64
+#endif /* CONFIG_REGISTRY_USE_UINT64 */
 
     case REGISTRY_TYPE_INT8: printf("int8: %d", *(int8_t *)value->buf); break;
     case REGISTRY_TYPE_INT16: printf("int16: %d", *(int16_t *)value->buf); break;
@@ -39,15 +39,15 @@ static void _print_registry_value(const registry_value_t *value)
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_INT64)
     case REGISTRY_TYPE_INT64: printf("int64: %lld", *(int64_t *)value->buf); break;
-#endif // CONFIG_REGISTRY_USE_INT64
+#endif /* CONFIG_REGISTRY_USE_INT64 */
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT32)
     case REGISTRY_TYPE_FLOAT32: printf("f32: %f", *(float *)value->buf); break;
-#endif // CONFIG_REGISTRY_USE_FLOAT32
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
 
 #if IS_ACTIVE(CONFIG_REGISTRY_USE_FLOAT64)
     case REGISTRY_TYPE_FLOAT64: printf("f64: %f", *(double *)value->buf); break;
-#endif // CONFIG_REGISTRY_USE_FLOAT32
+#endif /* CONFIG_REGISTRY_USE_FLOAT32 */
     }
 }
 
@@ -90,8 +90,10 @@ static int _parse_string_path(const char *string_path, registry_path_item_t *buf
     return 0;
 }
 
-static int _registry_path_from_string_path(const char *string_path, registry_path_item_t *path_items_buf,
-                                           size_t *path_items_buf_len, registry_path_t *registry_path)
+static int _registry_path_from_string_path(const char *string_path,
+                                           registry_path_item_t *path_items_buf,
+                                           size_t *path_items_buf_len,
+                                           registry_path_t *registry_path)
 {
     int res = _parse_string_path(string_path, path_items_buf, path_items_buf_len);
 
@@ -105,7 +107,8 @@ static int _registry_path_from_string_path(const char *string_path, registry_pat
                 break;
             case 1: registry_path->schema_id = &path_items_buf[i]; break;
             case 2: registry_path->instance_id = &path_items_buf[i]; break;
-            case 3: registry_path->path = &path_items_buf[i]; registry_path->path_len++; break;     // Add path.path to correct position in int_path array
+            /* Add path.path to correct position in int_path array */
+            case 3: registry_path->path = &path_items_buf[i]; registry_path->path_len++; break;
             default: registry_path->path_len++; break;
             }
         }
@@ -177,7 +180,8 @@ int registry_cli_cmd(int argc, char **argv)
     }
 
     if (strcmp(argv[1], "get") == 0) {
-        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                            &path) < 0) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
@@ -196,7 +200,8 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "set") == 0) {
-        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                            &path) < 0) {
             printf("usage: %s %s <path> <value>\n", argv[0], argv[1]);
             return 1;
         }
@@ -205,7 +210,8 @@ int registry_cli_cmd(int argc, char **argv)
         return 0;
     }
     else if (strcmp(argv[1], "commit") == 0) {
-        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                            &path) < 0) {
             printf("usage: %s %s <path>\n", argv[0], argv[1]);
             return 1;
         }
@@ -216,7 +222,8 @@ int registry_cli_cmd(int argc, char **argv)
     else if (strcmp(argv[1], "export") == 0) {
         /* If the path is invalid, it can also just be non existent, so other arguments like -r need to be checked */
         bool invalid_path = false;
-        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+        if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                            &path) < 0) {
             invalid_path = true;
         }
         if (invalid_path && strcmp(argv[2], "-r") != 0) {
@@ -238,7 +245,8 @@ int registry_cli_cmd(int argc, char **argv)
     }
     else if (strcmp(argv[1], "load") == 0) {
         if (argc > 2) {
-            if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+            if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                                &path) < 0) {
                 printf("usage: %s %s [path]\n", argv[0], argv[1]);
                 return 1;
             }
@@ -254,7 +262,8 @@ int registry_cli_cmd(int argc, char **argv)
     }
     else if (strcmp(argv[1], "save") == 0) {
         if (argc > 2) {
-            if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len, &path) < 0) {
+            if (_registry_path_from_string_path(argv[2], path_items_buf, &path_items_buf_len,
+                                                &path) < 0) {
                 printf("usage: %s %s [path]\n", argv[0], argv[1]);
                 return 1;
             }
