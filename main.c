@@ -201,11 +201,11 @@ int demo_app(void)
 int main(void)
 {
     /* test registry */
-    // registry_api_tests_run();
-    registry_stack_tests_run();
+    registry_tests_api_run();
+    // registry_tests_stack_run();
 
     /* run demo app */
-    // demo_app();
+    demo_app();
 
     return 0;
 }

@@ -47,7 +47,7 @@ static int test_instance_0_commit_cb(const registry_path_t path, const void *con
     return 0;
 }
 
-static registry_schema_types_test_t test_instance_1_data = {
+static registry_schema_full_example_t test_instance_1_data = {
     .string = "hallo",
     .boolean = true,
     .u8 = 9,
@@ -83,7 +83,7 @@ static void test_registry_setup(void)
     registry_schemas_init();
 
     /* add schema instances */
-    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, REGISTRY_SCHEMA_TYPES_TEST,
+    registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, REGISTRY_SCHEMA_FULL_EXAMPLE,
                                       &test_instance_1);
 }
 
@@ -92,10 +92,11 @@ static void test_registry_teardown(void)
 
 static void tests_registry_register_schema(void)
 {
-    /* test if schema_types_test got registered */
-    clist_node_t *test_node = registry_schema_types_test.instances.next->next;
-    registry_schema_types_test_t *test_instance = container_of(test_node,
-                                                               registry_schema_types_test_t, node);
+    /* test if schema_full_example got registered */
+    clist_node_t *test_node = registry_schema_full_example.instances.next->next;
+    registry_schema_full_example_t *test_instance = container_of(test_node,
+                                                                 registry_schema_full_example_t,
+                                                                 node);
 
     TEST_ASSERT_EQUAL_INT((int)&test_instance_1, (int)test_instance);
 }
@@ -106,7 +107,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* string */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_STRING);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_STRING);
 
     registry_set_string(path, "");
 
@@ -119,7 +120,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* bool */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_BOOL);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_BOOL);
 
     registry_set_bool(path, false);
 
@@ -131,7 +132,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* u8 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U8);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U8);
 
     registry_set_uint8(path, 0);
 
@@ -143,7 +144,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* u16 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U16);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U16);
 
     registry_set_uint16(path, 0);
 
@@ -155,7 +156,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* u32 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U32);
 
     registry_set_uint32(path, 0);
 
@@ -168,7 +169,7 @@ static void tests_registry_all_min_values(void)
 
     /* u64 */
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U64);
     registry_set_uint64(path, 0);
     const uint64_t *output_u64;
     registry_get_uint64(path, &output_u64);
@@ -177,7 +178,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* i8 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I8);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I8);
     registry_set_int8(path, INT8_MIN);
     const int8_t *output_i8;
     registry_get_int8(path, &output_i8);
@@ -185,7 +186,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* i16 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I16);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I16);
     registry_set_int16(path, INT16_MIN);
     const int16_t *output_i16;
     registry_get_int16(path, &output_i16);
@@ -193,7 +194,7 @@ static void tests_registry_all_min_values(void)
 
 
     /* i32 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I32);
     registry_set_int32(path, INT32_MIN);
     const int32_t *output_i32;
     registry_get_int32(path, &output_i32);
@@ -202,7 +203,7 @@ static void tests_registry_all_min_values(void)
 
     /* i64 */
 #if defined(CONFIG_REGISTRY_USE_INT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I64);
     registry_set_int64(path, INT64_MIN);
     const int64_t *output_i64;
     registry_get_int64(path, &output_i64);
@@ -212,7 +213,7 @@ static void tests_registry_all_min_values(void)
 
     /* f32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_F32);
     registry_set_float32(path, -FLT_MAX);
     const float *output_f32;
     registry_get_float32(path, &output_f32);
@@ -226,7 +227,7 @@ static void tests_registry_all_min_values(void)
 
     /* f64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_F64);
     registry_set_float64(path, -DBL_MAX);
     const double *output_f64;
     registry_get_float64(path, &output_f64);
@@ -243,7 +244,7 @@ static void tests_registry_all_max_values(void)
     registry_path_t path;
 
     /* string */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_STRING);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_STRING);
     char input_string[50] = { 0 };
 
     for (size_t i = 0; i < 50 - 1; i++) {
@@ -260,7 +261,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* bool */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_BOOL);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_BOOL);
 
     registry_set_bool(path, true);
 
@@ -272,7 +273,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* u8 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U8);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U8);
 
     registry_set_uint8(path, UINT8_MAX);
 
@@ -284,7 +285,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* u16 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U16);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U16);
 
     registry_set_uint16(path, UINT16_MAX);
 
@@ -296,7 +297,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* u32 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U32);
 
     registry_set_uint32(path, UINT32_MAX);
 
@@ -309,7 +310,7 @@ static void tests_registry_all_max_values(void)
 
     /* u64 */
 #if defined(CONFIG_REGISTRY_USE_UINT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_U64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_U64);
     registry_set_uint64(path, UINT64_MAX);
     const uint64_t *output_u64;
     registry_get_uint64(path, &output_u64);
@@ -318,7 +319,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* i8 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I8);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I8);
     registry_set_int8(path, INT8_MAX);
     const int8_t *output_i8;
     registry_get_int8(path, &output_i8);
@@ -326,7 +327,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* i16 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I16);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I16);
     registry_set_int16(path, INT16_MAX);
     const int16_t *output_i16;
     registry_get_int16(path, &output_i16);
@@ -334,7 +335,7 @@ static void tests_registry_all_max_values(void)
 
 
     /* i32 */
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I32);
     registry_set_int32(path, INT32_MAX);
     const int32_t *output_i32;
     registry_get_int32(path, &output_i32);
@@ -343,7 +344,7 @@ static void tests_registry_all_max_values(void)
 
     /* i64 */
 #if defined(CONFIG_REGISTRY_USE_INT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_I64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_I64);
     registry_set_int64(path, INT64_MAX);
     const int64_t *output_i64;
     registry_get_int64(path, &output_i64);
@@ -353,7 +354,7 @@ static void tests_registry_all_max_values(void)
 
     /* f32 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT32)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F32);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_F32);
     registry_set_float32(path, FLT_MAX);
     const float *output_f32;
     registry_get_float32(path, &output_f32);
@@ -367,7 +368,7 @@ static void tests_registry_all_max_values(void)
 
     /* f64 */
 #if defined(CONFIG_REGISTRY_USE_FLOAT64)
-    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_TYPES_TEST, 0, REGISTRY_SCHEMA_TYPES_TEST_F64);
+    path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0, REGISTRY_SCHEMA_FULL_EXAMPLE_F64);
     registry_set_float64(path, DBL_MAX);
     const double *output_f64;
     registry_get_float64(path, &output_f64);
@@ -396,7 +397,7 @@ static Test *tests_registry(void)
     return (Test *)&registry_tests;
 }
 
-int registry_api_tests_run(void)
+int registry_tests_api_run(void)
 {
     TESTS_START();
     TESTS_RUN(tests_registry());

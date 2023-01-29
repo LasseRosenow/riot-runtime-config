@@ -26,8 +26,8 @@ extern "C" {
 
 #include "registry.h"
 
-int registry_api_tests_run(void);
-int registry_stack_tests_run(void);
+int registry_tests_api_run(void);
+int registry_tests_stack_run(void);
 
 /** @} */
 #endif /* REGISTRY_TESTS_H */
