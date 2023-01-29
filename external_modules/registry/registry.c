@@ -206,7 +206,7 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
 
     for (size_t path_index = 0; path_index < path.path_len; path_index++) {
         for (size_t i = 0; i < schema_items_len; i++) {
-            schema_item = &schema->items[i];
+            schema_item = &schema_items[i];
 
             if (schema_item->id == path.path[path_index]) {
                 if (schema_item->type == REGISTRY_SCHEMA_TYPE_PARAMETER &&
@@ -217,7 +217,8 @@ static registry_schema_item_t *_parameter_meta_lookup(const registry_path_t path
                 else if (schema_item->type == REGISTRY_SCHEMA_TYPE_GROUP) {
                     /* if this is not the last path segment and its a group => update schemas and schemas_len values */
                     schema_items = schema_item->value.group.items;
-                    schema_items_len = schema_items->value.group.items_len;
+                    schema_items_len = schema_item->value.group.items_len;
+                    break;
                 }
             }
         }
