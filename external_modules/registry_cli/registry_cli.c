@@ -64,7 +64,7 @@ static registry_namespace_t *_namespace_lookup(const registry_namespace_id_t nam
 }
 
 
-static int _parse_string_path(const char *string_path, registry_path_item_t *buf, size_t *buf_len)
+static int _parse_string_path(const char *string_path, registry_id_t *buf, size_t *buf_len)
 {
     size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -91,7 +91,7 @@ static int _parse_string_path(const char *string_path, registry_path_item_t *buf
 }
 
 static int _registry_path_from_string_path(const char *string_path,
-                                           registry_path_item_t *path_items_buf,
+                                           registry_id_t *path_items_buf,
                                            size_t *path_items_buf_len,
                                            registry_path_t *registry_path)
 {
@@ -169,7 +169,7 @@ static int _export_func(const registry_path_t path, const registry_schema_t *sch
 int registry_cli_cmd(int argc, char **argv)
 {
     size_t path_items_buf_len = REGISTRY_MAX_DIR_DEPTH + 3;
-    registry_path_item_t path_items_buf[path_items_buf_len];
+    registry_id_t path_items_buf[path_items_buf_len];
     // TODO: Why is REGISTRY_PATH() Not working? (It should resolve to _REGISTRY_PATH_0()
     // but somehow its not initializing namespace with NULL?? (makes no sense:( ... )))
     registry_path_t path = _REGISTRY_PATH_0();

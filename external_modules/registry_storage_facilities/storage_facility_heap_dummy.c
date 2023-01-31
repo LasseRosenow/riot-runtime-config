@@ -40,9 +40,9 @@ static int save(const registry_store_instance_t *store, const registry_path_t pa
  */
 typedef struct {
     registry_namespace_id_t namespace_id;
-    registry_path_item_t schema_id;
-    registry_path_item_t instance_id;
-    registry_path_item_t path[REGISTRY_MAX_DIR_DEPTH];
+    registry_id_t schema_id;
+    registry_id_t instance_id;
+    registry_id_t path[REGISTRY_MAX_DIR_DEPTH];
     size_t path_len;
     void *buf;
     size_t buf_len;

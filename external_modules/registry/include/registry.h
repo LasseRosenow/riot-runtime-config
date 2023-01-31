@@ -219,7 +219,7 @@ typedef enum {
 } registry_namespace_id_t;
 
 typedef struct {
-    registry_namespace_id_t id;    /**< Integer representing the configuration namespace */
+    registry_namespace_id_t id;     /**< Integer representing the configuration namespace */
     char *name;                     /**< String describing the configuration namespace */
     char *description;              /**< String describing the configuration namespace with more details */
     clist_node_t schemas;           /**< Linked list of schemas @ref registry_schema_t */
@@ -228,18 +228,18 @@ typedef struct {
 extern registry_namespace_t registry_namespace_sys;
 extern registry_namespace_t registry_namespace_app;
 
-typedef uint32_t registry_path_item_t;
+typedef uint32_t registry_id_t;
 
 typedef struct {
     registry_namespace_id_t *namespace_id;
-    registry_path_item_t *schema_id;
-    registry_path_item_t *instance_id;
-    registry_path_item_t *path;
+    registry_id_t *schema_id;
+    registry_id_t *instance_id;
+    registry_id_t *path;
     size_t path_len;
 } registry_path_t;
 
-#define _REGISTRY_PATH_NUMARGS(...)  (sizeof((registry_path_item_t[]){ __VA_ARGS__ }) / \
-                                      sizeof(registry_path_item_t))
+#define _REGISTRY_PATH_NUMARGS(...)  (sizeof((registry_id_t[]){ __VA_ARGS__ }) / \
+                                      sizeof(registry_id_t))
 
 #define _REGISTRY_PATH_0() \
     (registry_path_t) { \
@@ -262,7 +262,7 @@ typedef struct {
 #define _REGISTRY_PATH_2(_namespace_id, _schema_id) \
     (registry_path_t) { \
         .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
-        .schema_id = (registry_path_item_t[]) { _schema_id }, \
+        .schema_id = (registry_id_t[]) { _schema_id }, \
         .instance_id = NULL, \
         .path = NULL, \
         .path_len = 0, \
@@ -271,8 +271,8 @@ typedef struct {
 #define _REGISTRY_PATH_3(_namespace_id, _schema_id, _instance_id) \
     (registry_path_t) { \
         .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
-        .schema_id = (registry_path_item_t[]) { _schema_id }, \
-        .instance_id = (registry_path_item_t[]) { _instance_id }, \
+        .schema_id = (registry_id_t[]) { _schema_id }, \
+        .instance_id = (registry_id_t[]) { _instance_id }, \
         .path = NULL, \
         .path_len = 0, \
     }
@@ -280,9 +280,9 @@ typedef struct {
 #define _REGISTRY_PATH_4_AND_MORE(_namespace_id, _schema_id, _instance_id, ...) \
     (registry_path_t) { \
         .namespace_id = (registry_namespace_id_t[]) { _namespace_id }, \
-        .schema_id = (registry_path_item_t[]) { _schema_id }, \
-        .instance_id = (registry_path_item_t[]) { _instance_id }, \
-        .path = (registry_path_item_t[]) { __VA_ARGS__ }, \
+        .schema_id = (registry_id_t[]) { _schema_id }, \
+        .instance_id = (registry_id_t[]) { _instance_id }, \
+        .path = (registry_id_t[]) { __VA_ARGS__ }, \
         .path_len = _REGISTRY_PATH_NUMARGS(__VA_ARGS__), \
     }
 
@@ -344,7 +344,7 @@ typedef enum {
 } registry_schema_type_t;
 
 struct _registry_schema_item_t {
-    registry_path_item_t id;                    /**< Integer representing the path id of the schema item */
+    registry_id_t id;                           /**< Integer representing the path id of the schema item */
     char *name;                                 /**< String describing the schema item */
     char *description;                          /**< String describing the schema item with more details */
     registry_schema_type_t type;                /**< Type of the schema item (group or parameter) */
@@ -456,7 +456,7 @@ typedef struct {
  */
 typedef struct {
     clist_node_t node;              /**< Linked list node */
-    registry_path_item_t id;        /**< Integer representing the configuration group */
+    registry_id_t id;               /**< Integer representing the configuration group */
     char *name;                     /**< String describing the configuration group */
     char *description;              /**< String describing the configuration group with more details */
     registry_schema_item_t *items;  /**< Array representing all the configuration parameters that belong to this group */
@@ -471,7 +471,7 @@ typedef struct {
      * @param[in] val Pointer to buffer containing the new value
      * @param[in] val_len Pointer to length of the buffer to store the current value
      */
-    void (*mapping)(const registry_path_item_t param_id, const registry_instance_t *instance, void **val,
+    void (*mapping)(const registry_id_t param_id, const registry_instance_t *instance, void **val,
                     size_t *val_len);
 } registry_schema_t;
 
@@ -519,7 +519,7 @@ void registry_register_store_dst(const registry_store_instance_t *dst);
  * @param[in] instance Pointer to instance structure.
  */
 int registry_register_schema_instance(const registry_namespace_id_t namespace_id,
-                                      const registry_path_item_t schema_id,
+                                      const registry_id_t schema_id,
                                       const registry_instance_t *instance);
 
 /**

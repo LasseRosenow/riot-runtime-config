@@ -41,7 +41,7 @@ registry_store_t registry_store_vfs = {
     .save = save,
 };
 
-static void _string_path_append_item(char *dest, registry_path_item_t number)
+static void _string_path_append_item(char *dest, registry_id_t number)
 {
     int size = snprintf(NULL, 0, "/%d", number);
 
@@ -52,7 +52,7 @@ static void _string_path_append_item(char *dest, registry_path_item_t number)
     strcat(dest, buf);
 }
 
-static int _parse_string_path(char *path, registry_path_item_t *buf, size_t *buf_len)
+static int _parse_string_path(char *path, registry_id_t *buf, size_t *buf_len)
 {
     size_t buf_index = 0;
     char curr_path_segment[REGISTRY_MAX_DIR_NAME_LEN] = { 0 };
@@ -232,7 +232,7 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
 
                                 /* try to convert string path to registry int path */
                                 size_t path_items_len = REGISTRY_MAX_DIR_DEPTH + 3;
-                                registry_path_item_t path_items[path_items_len];
+                                registry_id_t path_items[path_items_len];
                                 if (_parse_string_path(string_path + strlen(mount->mount_point),
                                                        path_items,
                                                        &path_items_len) < 0) {

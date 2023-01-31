@@ -26,7 +26,7 @@
 #include "registry.h"
 #include "registry_schemas.h"
 
-static void mapping(const registry_path_item_t param_id, const registry_instance_t *instance,
+static void mapping(const registry_id_t param_id, const registry_instance_t *instance,
                     void **val,
                     size_t *val_len);
 
@@ -86,7 +86,7 @@ REGISTRY_SCHEMA(
 
     );
 
-static void mapping(const registry_path_item_t param_id, const registry_instance_t *instance,
+static void mapping(const registry_id_t param_id, const registry_instance_t *instance,
                     void **val,
                     size_t *val_len)
 {

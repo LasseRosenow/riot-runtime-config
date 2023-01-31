@@ -69,7 +69,7 @@ typedef enum {
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_6,
 } registry_app_schema_stack_test_indices_t;
 
-static void mapping(const registry_path_item_t param_id, const registry_instance_t *instance,
+static void mapping(const registry_id_t param_id, const registry_instance_t *instance,
                     void **val,
                     size_t *val_len)
 {
@@ -254,29 +254,29 @@ static void setup(void)
     registry_register_store_dst(&vfs_instance_2);
 }
 
-static registry_path_item_t parameter_path_level_1[] = {
+static registry_id_t parameter_path_level_1[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_1,
 };
 
-static registry_path_item_t parameter_path_level_2[] = {
+static registry_id_t parameter_path_level_2[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_1,
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_2,
 };
 
-static registry_path_item_t parameter_path_level_3[] = {
+static registry_id_t parameter_path_level_3[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_1,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_2,
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_3,
 };
 
-static registry_path_item_t parameter_path_level_4[] = {
+static registry_id_t parameter_path_level_4[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_1,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_2,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_3,
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_4,
 };
 
-static registry_path_item_t parameter_path_level_5[] = {
+static registry_id_t parameter_path_level_5[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_1,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_2,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_3,
@@ -284,7 +284,7 @@ static registry_path_item_t parameter_path_level_5[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_PARAMETER_LEVEL_5,
 };
 
-static registry_path_item_t parameter_path_level_6[] = {
+static registry_id_t parameter_path_level_6[] = {
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_1,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_2,
     REGISTRY_APP_SCHEMA_STACK_TEST_GROUP_LEVEL_3,
@@ -295,8 +295,8 @@ static registry_path_item_t parameter_path_level_6[] = {
 
 static registry_path_t path = {
     .namespace_id = (registry_namespace_id_t[]) { REGISTRY_ROOT_GROUP_APP },
-    .schema_id = (registry_path_item_t[]) { REGISTRY_APP_SCHEMA_STACK_TEST },
-    .instance_id = (registry_path_item_t[]) { 0 },
+    .schema_id = (registry_id_t[]) { REGISTRY_APP_SCHEMA_STACK_TEST },
+    .instance_id = (registry_id_t[]) { 0 },
     .path = parameter_path_level_1,
     .path_len = ARRAY_SIZE(parameter_path_level_1),
 };
