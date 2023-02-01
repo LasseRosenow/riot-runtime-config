@@ -27,23 +27,60 @@
 #include "assert.h"
 #include "registry.h"
 #include "registry_schemas.h"
+#include "registry_storage_facilities.h"
+#include "vfs.h"
+#include "board.h"
+#include "mtd.h"
 
 #include "registry_tests.h"
 
 #define FLOAT_MAX_CHAR_COUNT ((FLT_MAX_10_EXP + 1) + 1 + 1 + 6)     // (FLT_MAX_10_EXP + 1) + sign + dot + 6 decimal places
 #define DOUBLE_MAX_CHAR_COUNT ((DBL_MAX_10_EXP + 1) + 1 + 1 + 6)    // (DBL_MAX_10_EXP + 1) + sign + dot + 6 decimal places
 
+// Littlefs2
+#if IS_USED(MODULE_LITTLEFS2)
+#include "fs/littlefs2_fs.h"
+#define FS_DRIVER littlefs2_file_system
+static littlefs2_desc_t fs_desc = {
+    .lock = MUTEX_INIT,
+};
+#elif IS_USED(MODULE_FATFS_VFS)
+#include "fs/fatfs.h"
+#define FS_DRIVER fatfs_file_system
+static fatfs_desc_t fs_desc;
+#endif
+
+
+
+static vfs_mount_t _vfs_mount = {
+    .fs = &FS_DRIVER,
+    .mount_point = "/sda",
+    .private_data = &fs_desc,
+};
+
+static registry_storage_facility_instance_t vfs_instance_1 = {
+    .itf = &registry_storage_facility_vfs,
+    .data = &_vfs_mount,
+};
+
+static registry_storage_facility_instance_t vfs_instance_2 = {
+    .itf = &registry_storage_facility_vfs,
+    .data = &_vfs_mount,
+};
+
+static bool commit_success = false;
+
 static int test_instance_0_commit_cb(const registry_path_t path, const void *context)
 {
+    (void)path;
     (void)context;
-    printf("Test instance commit_cb was executed: %d", *path.namespace_id);
-    if (path.schema_id) {
-        printf("/%d", *path.schema_id);
+
+    if (*path.namespace_id == REGISTRY_ROOT_GROUP_SYS &&
+        *path.schema_id == REGISTRY_SCHEMA_FULL_EXAMPLE &&
+        *path.instance_id == 0) {
+        commit_success = true;
     }
-    if (path.instance_id) {
-        printf("/%d", *path.instance_id);
-    }
-    printf("\n");
+
     return 0;
 }
 
@@ -85,6 +122,13 @@ static void test_registry_setup(void)
     /* add schema instances */
     registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, REGISTRY_SCHEMA_FULL_EXAMPLE,
                                       &test_instance_1);
+
+    /* init storage_facilities */
+    if (IS_USED(MODULE_LITTLEFS2)) {
+        fs_desc.dev = MTD_0;
+    }
+    registry_register_storage_facility_src(&vfs_instance_1);
+    registry_register_storage_facility_dst(&vfs_instance_2);
 }
 
 static void test_registry_teardown(void)
@@ -380,6 +424,70 @@ static void tests_registry_all_max_values(void)
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
 }
 
+
+static void tests_registry_commit(void)
+{
+    registry_path_t path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0);
+
+    registry_commit(path);
+
+    TEST_ASSERT_EQUAL_INT(true, commit_success);
+}
+
+bool export_success = false;
+
+static int _export_func(const registry_path_t path, const registry_schema_t *schema,
+                        const registry_instance_t *instance, const registry_schema_item_t *meta,
+                        const registry_value_t *value, const void *context)
+{
+    (void)path;
+    (void)schema;
+    (void)instance;
+    (void)meta;
+    (void)value;
+    (void)context;
+
+    if (*path.namespace_id == REGISTRY_ROOT_GROUP_SYS &&
+        *path.schema_id == REGISTRY_SCHEMA_FULL_EXAMPLE &&
+        *path.instance_id == 0 &&
+        path.path[0] == REGISTRY_SCHEMA_FULL_EXAMPLE_STRING) {
+        export_success = true;
+    }
+
+    return 0;
+}
+
+static void tests_registry_export(void)
+{
+    registry_path_t path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0,
+                                             REGISTRY_SCHEMA_FULL_EXAMPLE_STRING);
+
+    registry_export(_export_func, path, 0, NULL);
+
+    TEST_ASSERT_EQUAL_INT(true, export_success);
+}
+
+static void tests_registry_save_load(void)
+{
+    registry_path_t path = REGISTRY_PATH_SYS(REGISTRY_SCHEMA_FULL_EXAMPLE, 0,
+                                             REGISTRY_SCHEMA_FULL_EXAMPLE_U8);
+    uint8_t old_value = 5;
+
+    registry_set_uint8(path, old_value);
+
+    registry_save(_REGISTRY_PATH_0());
+
+    registry_set_uint8(path, 10);
+
+    registry_load(_REGISTRY_PATH_0());
+
+    const uint8_t *new_value;
+
+    registry_get_uint8(path, &new_value);
+
+    TEST_ASSERT_EQUAL_INT(old_value, *new_value);
+}
+
 static Test *tests_registry(void)
 {
     (void)tests_registry_register_schema;
@@ -390,6 +498,9 @@ static Test *tests_registry(void)
         new_TestFixture(tests_registry_register_schema),
         new_TestFixture(tests_registry_all_min_values),
         new_TestFixture(tests_registry_all_max_values),
+        new_TestFixture(tests_registry_commit),
+        new_TestFixture(tests_registry_export),
+        new_TestFixture(tests_registry_save_load),
     };
 
     EMB_UNIT_TESTCALLER(registry_tests, test_registry_setup, test_registry_teardown, fixtures);

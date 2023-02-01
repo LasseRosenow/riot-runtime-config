@@ -132,12 +132,12 @@ static vfs_mount_t _vfs_mount = {
     .private_data = &fs_desc,
 };
 
-registry_storage_facility_instance_t vfs_instance_1 = {
+static registry_storage_facility_instance_t vfs_instance_1 = {
     .itf = &registry_storage_facility_vfs,
     .data = &_vfs_mount,
 };
 
-registry_storage_facility_instance_t vfs_instance_2 = {
+static registry_storage_facility_instance_t vfs_instance_2 = {
     .itf = &registry_storage_facility_vfs,
     .data = &_vfs_mount,
 };
