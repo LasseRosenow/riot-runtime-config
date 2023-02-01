@@ -25,6 +25,8 @@
 #include <kernel_defines.h>
 #include "errno.h"
 
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_STORAGE_FACILITY_HEAP_DUMMY) || IS_ACTIVE(DOXYGEN)
+
 #define DUMMY_STORE_CAPACITY 100
 
 /* The storage_facility argument is the descriptor of the storage facility */
@@ -143,5 +145,7 @@ static int save(const registry_storage_facility_instance_t *instance, const regi
     dummy_storage_facility[free_slot].buf_len = value.buf_len;
     return 0;
 }
+
+#endif
 
 /** @} */

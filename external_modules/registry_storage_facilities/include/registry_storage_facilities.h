@@ -27,10 +27,14 @@ extern "C" {
 #include "registry.h"
 
 /* heap dummy */
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_STORAGE_FACILITY_HEAP_DUMMY) || IS_ACTIVE(DOXYGEN)
 extern registry_storage_facility_t registry_storage_facility_heap_dummy;
+#endif
 
 /* vfs */
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_STORAGE_FACILITY_VFS) || IS_ACTIVE(DOXYGEN)
 extern registry_storage_facility_t registry_storage_facility_vfs;
+#endif
 
 /** @} */
 #endif /* REGISTRY_STORAGE_FACILITIES_H */

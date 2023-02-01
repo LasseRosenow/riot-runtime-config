@@ -31,6 +31,8 @@
 #include "debug.h"
 #include "ps.h"
 
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_STORAGE_FACILITY_VFS) || IS_ACTIVE(DOXYGEN)
+
 static int load(const registry_storage_facility_instance_t *instance, const registry_path_t path,
                 const load_cb_t cb, const void *cb_arg);
 static int save(const registry_storage_facility_instance_t *instance, const registry_path_t path,
@@ -392,5 +394,7 @@ static int save(const registry_storage_facility_instance_t *instance, const regi
 
     return 0;
 }
+
+#endif
 
 /** @} */

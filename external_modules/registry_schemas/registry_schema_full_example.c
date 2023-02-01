@@ -26,6 +26,8 @@
 #include "registry.h"
 #include "registry_schemas.h"
 
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_SCHEMA_FULL_EXAMPLE) || IS_ACTIVE(DOXYGEN)
+
 static void mapping(const registry_id_t param_id, const registry_instance_t *instance,
                     void **val,
                     size_t *val_len);
@@ -162,5 +164,7 @@ static void mapping(const registry_id_t param_id, const registry_instance_t *ins
 #endif /* CONFIG_REGISTRY_USE_FLOAT64 */
     }
 }
+
+#endif
 
 /** @} */

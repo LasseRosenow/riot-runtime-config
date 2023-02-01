@@ -22,13 +22,13 @@
 
 void registry_schemas_init(void)
 {
-    if (IS_ACTIVE(CONFIG_REGISTRY_ENABLE_SCHEMA_FULL_EXAMPLE)) {
-        registry_register_schema(REGISTRY_ROOT_GROUP_SYS, &registry_schema_full_example);
-    }
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_SCHEMA_FULL_EXAMPLE) || IS_ACTIVE(DOXYGEN)
+    registry_register_schema(REGISTRY_ROOT_GROUP_SYS, &registry_schema_full_example);
+#endif
 
-    if (IS_ACTIVE(CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED)) {
-        registry_register_schema(REGISTRY_ROOT_GROUP_SYS, &registry_schema_rgb_led);
-    }
+#if IS_ACTIVE(CONFIG_REGISTRY_ENABLE_SCHEMA_RGB_LED) || IS_ACTIVE(DOXYGEN)
+    registry_register_schema(REGISTRY_ROOT_GROUP_SYS, &registry_schema_rgb_led);
+#endif
 }
 
 /** @} */
