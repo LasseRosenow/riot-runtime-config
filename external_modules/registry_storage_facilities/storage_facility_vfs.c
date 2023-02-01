@@ -9,7 +9,7 @@
 /**
  * @defgroup    sys_registry_cli RIOT Registry Storage Facilities: VFS
  * @ingroup     sys
- * @brief       RIOT Registry VFS Storage Facility allows using the RIOT VFS module as a RIOT Registry data store.
+ * @brief       RIOT Registry VFS Storage Facility allows using the RIOT VFS module as a RIOT Registry data storage facility.
  * @{
  *
  * @file
@@ -31,12 +31,12 @@
 #include "debug.h"
 #include "ps.h"
 
-static int load(const registry_store_instance_t *store, const registry_path_t path,
+static int load(const registry_storage_facility_instance_t *instance, const registry_path_t path,
                 const load_cb_t cb, const void *cb_arg);
-static int save(const registry_store_instance_t *store, const registry_path_t path,
+static int save(const registry_storage_facility_instance_t *instance, const registry_path_t path,
                 const registry_value_t value);
 
-registry_store_t registry_store_vfs = {
+registry_storage_facility_t registry_storage_facility_vfs = {
     .load = load,
     .save = save,
 };
@@ -130,14 +130,13 @@ static int _umount(vfs_mount_t *mount)
     return 0;
 }
 
-static int load(const registry_store_instance_t *store, const registry_path_t path,
+static int load(const registry_storage_facility_instance_t *instance, const registry_path_t path,
                 const load_cb_t cb, const void *cb_arg)
 {
     (void)cb;
     (void)cb_arg;
-    (void)store;
 
-    vfs_mount_t *mount = store->data;
+    vfs_mount_t *mount = instance->data;
 
     /* mount */
     _mount(mount);
@@ -325,13 +324,13 @@ static int load(const registry_store_instance_t *store, const registry_path_t pa
     return 0;
 }
 
-static int save(const registry_store_instance_t *store, const registry_path_t path,
+static int save(const registry_storage_facility_instance_t *instance, const registry_path_t path,
                 const registry_value_t value)
 {
     (void)path;
     (void)value;
 
-    vfs_mount_t *mount = store->data;
+    vfs_mount_t *mount = instance->data;
 
     /* mount */
     _mount(mount);

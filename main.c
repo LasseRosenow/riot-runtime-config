@@ -132,13 +132,13 @@ static vfs_mount_t _vfs_mount = {
     .private_data = &fs_desc,
 };
 
-registry_store_instance_t vfs_instance_1 = {
-    .itf = &registry_store_vfs,
+registry_storage_facility_instance_t vfs_instance_1 = {
+    .itf = &registry_storage_facility_vfs,
     .data = &_vfs_mount,
 };
 
-registry_store_instance_t vfs_instance_2 = {
-    .itf = &registry_store_vfs,
+registry_storage_facility_instance_t vfs_instance_2 = {
+    .itf = &registry_storage_facility_vfs,
     .data = &_vfs_mount,
 };
 
@@ -156,14 +156,14 @@ int demo_app(void)
     registry_register_schema_instance(REGISTRY_ROOT_GROUP_SYS, registry_schema_rgb_led.id,
                                       &rgb_led_instance_2);
 
-    /* init stores */
+    /* init storage_facilities */
     if (IS_USED(MODULE_LITTLEFS2)) {
         fs_desc.dev = MTD_0;
     }
-    registry_register_store_src(&vfs_instance_1);
-    registry_register_store_dst(&vfs_instance_2);
+    registry_register_storage_facility_src(&vfs_instance_1);
+    registry_register_storage_facility_dst(&vfs_instance_2);
 
-    /* load old store data into registry */
+    /* load old storage_facility data into registry */
     registry_load(_REGISTRY_PATH_0());
 
     /* DEMO START */

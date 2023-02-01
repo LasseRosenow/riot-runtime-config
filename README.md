@@ -74,7 +74,7 @@ The `APP` configuration namespace must not be used by RIOT itself, but only by t
 `IEEE802154_TX_POWER` in an *IEEE802.15.4 Radio* configuration group.
 Within RIOT, each configuration schema contains one configuration group. And each configuration group can contain multiple sub configuration groups.
 
-- __Storage Facility__: A descriptor that acts as an interface between the RIOT Registry and a non-volatile storage device. It provides a common interface to `load` and `store` key-value data from storage devices that might have different data representations.
+- __Storage Facility__: A descriptor that acts as an interface between the RIOT Registry and a non-volatile storage device. It provides a common interface to `load` and `save` key-value data from storage devices that might have different data representations.
 
 # 1. Introduction
 
@@ -91,7 +91,7 @@ The proposed RCS architecture, as shown in Figure 01, is formed by one or more
 [RIOT Registry](#3-the-riot-registry).
 
 The RIOT Registry acts as a common interface to access Runtime Configurations and
-store them in non-volatile devices.
+save them in non-volatile devices.
 
 All runtime configuration can be accessed either from the RIOT Application or
 the interfaces exposed by the Configuration Managers, via the RIOT Registry.
@@ -116,7 +116,7 @@ The RIOT Registry is a module for interacting with __persistent key-value config
 
 The RIOT Registry interacts with RIOT modules via
 [Configuration Schemas](#31-Registry-schemas), and with non-volatile storage
-devices via [Storage Facilities](#32-Storage-facilities). This way the
+devices via [Storage Facilities](#32-storage-facilities). This way the
 functionality of the RIOT Registry is independent of the functionality of the module or storage device.
 
 Figure 02 shows an example of two configuration schemas `(My app, LED Strip)` The application `My app` uses the custom `My app` CS to expose custom configuration parameters to the RIOT Registry and the drivers `WS2812, SK6812 and UCS1903` contain instances of the `LED Strip` CS to expose common LED Strip configuration parameters. Also, there are two Storage Facilities available: EEPROM and FAT.
@@ -134,13 +134,13 @@ The API of the RIOT Registry allows to:
 - Get or set configuration parameters for a given configuration schema instance.
 - Commit changes (transactionally apply configurations).
 - Export configuration parameters (e.g copy to a buffer, print, etc).
-- Load and store configuration parameters from and to a persistent storage device.
+- Load and save configuration parameters from and to a persistent storage device.
 
 Any mechanism of security (access control, encryption of configurations) is NOT
 directly in the scope of the Registry but in the Configuration Managers and the
 specific implementation of the CS and SF.
 
-See [3.3 RIOT Registry Usage Flow](#33-RIOT-Registry-Usage-Flow) for more
+See [3.3 RIOT Registry Usage Flow](#33-riot-registry-usage-flow) for more
 information.
 
 ## 3.1. Configuration Schemas
@@ -166,16 +166,16 @@ An instance of a CS, which contains the actual data values. It can be added to a
 
 ## 3.2. Storage Facilities
 
-Storage facilities MUST implement the __storage interface__ to allow the RIOT Registry to load, search and store configuration parameters. From the point of view of the RIOT Registry all parameters are key/value pairs with certain types, it is the responsibility of the SF to transform those into a proper format to store them. (E.g. lines separated by `\n` character in a file or encoded in cbor etc.).
+Storage facilities MUST implement the __storage interface__ to allow the RIOT Registry to load, search and save configuration parameters. From the point of view of the RIOT Registry all parameters are key/value pairs with certain types, it is the responsibility of the SF to transform those into a proper format to save them. (E.g. lines separated by `\n` character in a file or encoded in cbor etc.).
 
 The interface of a SF is defined with a descriptor that has the following attributes:
 
-- `load`: Executes a callback function for every configuration parameter stored in the storage.
-- `store`: Stores one configuration parameter in the storage.
+- `load`: Executes a callback function for every configuration parameter saved in the storage.
+- `save`: Stores one configuration parameter in the storage.
 
-Any kind of storage encryption mechanism is not in the scope of this document, and up to the implementation of `load` and `store` or intrinsic encryption functionalities in the storage.
+Any kind of storage encryption mechanism is not in the scope of this document, and up to the implementation of `load` and `save` or intrinsic encryption functionalities in the storage.
 
-A minimal RIOT Registry setup requires at least one source SF from which configurations are loaded and exactly one SF destination to which configurations are stored. Having multiple SF sources can be useful when it's required to migrate the data between storage facilities (e.g to migrate all configurations from SF A to B, register B as source and destination and add A as a source).
+A minimal RIOT Registry setup requires at least one source SF from which configurations are loaded and exactly one SF destination to which configurations are saved. Having multiple SF sources can be useful when it's required to migrate the data between storage facilities (e.g to migrate all configurations from SF A to B, register B as source and destination and add A as a source).
 
 A conceptual example of a SF can be found in the [Appendix](#Appendix).
 
@@ -239,13 +239,13 @@ Figure 07 - Behavioral flow of the "export" API
 
 At any time, the application or a configuration manager can *load* all configurations from all SF sources (`registry_load` function) or *store* them in the SF destination (`registry_save` function).
 
-As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_save` will call `registry_export` on all CS with the SF *store* handler as callback.
+As one could expect, `registry_load` will call the SF `load` handler with `registry_set_value` as callback. In the a similar way, `registry_save` will call `registry_export` on all CS with the SF handler as callback.
 
 Figure 08 shows the above described processes.
 
-![Figure 08](./assets/behavioral_flow_store.svg "Behavioral flow of the store_load and store_save calls")
+![Figure 08](./assets/behavioral_flow_store.svg "Behavioral flow of the load and save calls")
 <p align="center">
-Figure 08 - Behavioral flow of the store_load and store_save calls
+Figure 08 - Behavioral flow of the load and save calls
 </p>
 
 ### Add custom schema to the registry
@@ -285,8 +285,8 @@ int registry_save(const registry_path_t path);
 
 
 /* Store */
-void registry_register_store_src(const registry_store_instance_t *src);
-void registry_register_store_dst(const registry_store_instance_t *dst);
+void registry_register_storage_facility_src(const registry_storage_facility_instance_t *src);
+void registry_register_storage_facility_dst(const registry_storage_facility_instance_t *dst);
 
 
 /* Schemas */

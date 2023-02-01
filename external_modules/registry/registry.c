@@ -44,8 +44,8 @@ registry_namespace_t registry_namespace_app = {
     .schemas = { .next = NULL },
 };
 
-static const registry_store_instance_t *store_dst;
-static clist_node_t store_srcs;
+static const registry_storage_facility_instance_t *storage_facility_dst;
+static clist_node_t storage_facility_srcs;
 
 static void _debug_print_path(const registry_path_t path)
 {
@@ -177,7 +177,7 @@ static registry_instance_t *_instance_lookup(const registry_schema_t *schema, co
 
 void registry_init(void)
 {
-    store_srcs.next = NULL;
+    storage_facility_srcs.next = NULL;
 }
 
 int registry_register_schema(const registry_namespace_id_t namespace_id,
@@ -992,7 +992,7 @@ static void _registry_load_cb(const registry_path_t path, const registry_value_t
     (void)cb_arg;
 
     if (ENABLE_DEBUG) {
-        DEBUG("[registry_store] Loading: ");
+        DEBUG("[registry_storage_facility] Loading: ");
         _debug_print_path(path);
         DEBUG(" = ");
         _debug_print_value(&value);
@@ -1002,37 +1002,38 @@ static void _registry_load_cb(const registry_path_t path, const registry_value_t
     registry_set_value(path, value);
 }
 
-void registry_register_store_src(const registry_store_instance_t *src)
+void registry_register_storage_facility_src(const registry_storage_facility_instance_t *src)
 {
     assert(src != NULL);
-    clist_rpush((clist_node_t *)&store_srcs, (clist_node_t *)&(src->node));
+    clist_rpush((clist_node_t *)&storage_facility_srcs, (clist_node_t *)&(src->node));
 }
 
-void registry_register_store_dst(const registry_store_instance_t *dst)
+void registry_register_storage_facility_dst(const registry_storage_facility_instance_t *dst)
 {
     assert(dst != NULL);
-    store_dst = dst;
+    storage_facility_dst = dst;
 }
 
 int registry_load(const registry_path_t path)
 {
-    clist_node_t *node = store_srcs.next;
+    clist_node_t *node = storage_facility_srcs.next;
 
     if (!node) {
         return -ENOENT;
     }
 
     do {
-        registry_store_instance_t *src;
-        src = container_of(node, registry_store_instance_t, node);
+        registry_storage_facility_instance_t *src;
+        src = container_of(node, registry_storage_facility_instance_t, node);
         src->itf->load(src, path, _registry_load_cb, NULL);
-    } while (node != store_srcs.next);
+    } while (node != storage_facility_srcs.next);
 
     return 0;
 }
 
-static void _registry_store_dup_check_cb(const registry_path_t path, const registry_value_t val,
-                                         const void *cb_arg)
+static void _registry_storage_facility_dup_check_cb(const registry_path_t path,
+                                                    const registry_value_t val,
+                                                    const void *cb_arg)
 {
     assert(cb_arg != NULL);
     registry_dup_check_arg_t *dup_arg = (registry_dup_check_arg_t *)cb_arg;
@@ -1065,17 +1066,17 @@ static int _registry_save_export_func(const registry_path_t path,
     (void)meta;
     (void)instance;
     (void)context;
-    (void)_registry_store_dup_check_cb;
+    (void)_registry_storage_facility_dup_check_cb;
 
     /* The registry also exports just the namespace or just a schema, but the storage facility is only interested in paths with values */
     if (value == NULL) {
         return 0;
     }
 
-    const registry_store_instance_t *dst = store_dst;
+    const registry_storage_facility_instance_t *dst = storage_facility_dst;
 
     if (ENABLE_DEBUG) {
-        DEBUG("[registry_store] Saving: ");
+        DEBUG("[registry_storage_facility] Saving: ");
         _debug_print_path(path);
         DEBUG(" = ");
         _debug_print_value(value);
@@ -1093,7 +1094,7 @@ static int _registry_save_export_func(const registry_path_t path,
     //     .is_dup = false,
     // };
 
-    // store_dst->itf->load(store_dst, _registry_store_dup_check_cb, &dup);
+    // storage_facility_dst->itf->load(storage_facility_dst, _registry_storage_facility_dup_check_cb, &dup);
 
     // if (dup.is_dup) {
     //     return -EEXIST;
@@ -1106,18 +1107,18 @@ int registry_save(const registry_path_t path)
 {
     int res;
 
-    if (!store_dst) {
+    if (!storage_facility_dst) {
         return -ENOENT;
     }
 
-    if (store_dst->itf->save_start) {
-        store_dst->itf->save_start(store_dst);
+    if (storage_facility_dst->itf->save_start) {
+        storage_facility_dst->itf->save_start(storage_facility_dst);
     }
 
     res = registry_export(_registry_save_export_func, path, 0, NULL);
 
-    if (store_dst->itf->save_end) {
-        store_dst->itf->save_end(store_dst);
+    if (storage_facility_dst->itf->save_end) {
+        storage_facility_dst->itf->save_end(storage_facility_dst);
     }
 
     return res;
